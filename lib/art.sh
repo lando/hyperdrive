@@ -55,12 +55,13 @@ EOF
   cat << "EOF"
 
   1. git
-  2. node
-  3. yarn
-  4. docker
-  5. lando
-  6. ssh keys
-  7. vim or atom
+  2. curl
+  3. node
+  4. yarn
+  5. docker
+  6. lando
+  7. ssh keys
+  9. vim or atom or https://www.youtube.com/watch?v=UsjoFZEwAyI
 
 EOF
   echo -ne "\033[39m"

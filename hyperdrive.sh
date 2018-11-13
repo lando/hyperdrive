@@ -12,6 +12,7 @@ OPTION_GITCONFIG=${HYPERDRIVE_YES:-false}
 OPTION_SSHKEYS=${HYPERDRIVE_YES:-false}
 
 # SET VERSION RECS
+CURL_VERSION="7.5"
 GIT_VERSION="2."
 NODE_VERSION="10."
 YARN_VERSION="1.12."
@@ -185,6 +186,10 @@ progress_bar 1 "Determining operating system" "$OS_STATUS"
 scan_dependency "pkgmgr" "$PKGMGR_SCAN" "\033[91mnone\033[39m"
 progress_bar 1 "Determining package manager" "$PKGMGR_STATUS"
 
+# CURL
+scan_dependency "curl" "curl --version" "$NI" "install curl" "$CURL_VERSION"
+progress_bar 1 "Determining curl version" "$CURL_STATUS"
+
 # GIT
 scan_dependency "git" "git --version" "$NI" "install git" "$GIT_VERSION"
 progress_bar 1 "Determining git version" "$GIT_STATUS"
@@ -225,7 +230,7 @@ echo -e ""
 
 # UX things
 progress_bar 2 "Computing results matrix"
-DEPS=("os" "pkgmgr" "git" "gitname" "gitemail" "node" "yarn" "docker" "lando" "sshkey")
+DEPS=("os" "pkgmgr" "curl" "git" "gitname" "gitemail" "node" "yarn" "docker" "lando" "sshkey")
 print_results "${DEPS[@]}"
 
 # Describe to the user what is going to happen and ask for their permission

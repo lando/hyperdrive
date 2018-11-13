@@ -12,16 +12,20 @@ install_debian() {
 
   # Install git if needed
   if [[ $GIT_INSTALLED == "false" ]]; then
+    clean_apt
     sudo apt -y update
-    sudo apt -y install \
-      curl \
-      git-core
+    sudo apt -y install git-core
+  fi
+
+    # Install curl if needed
+  if [[ $CURL_INSTALLED == "false" ]]; then
+    clean_apt
+    sudo apt -y update
+    sudo apt -y install curl
   fi
 
   # Install node if needed
   if [[ $NODE_INSTALLED == "false" ]]; then
-    sudo apt -y update
-    sudo apt -y install curl
     clean_apt
     curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash
     sudo apt install -y nodejs
@@ -29,8 +33,6 @@ install_debian() {
 
   # Install yarn if needed
   if [[ $YARN_INSTALLED == "false" ]]; then
-    sudo apt -y update
-    sudo apt -y install curl
     clean_apt
     curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
@@ -96,8 +98,6 @@ install_debian() {
 
   # Install lando if needed
   if [[ $LANDO_INSTALLED == "false" ]]; then
-    sudo apt -y update
-    sudo apt -y install curl
     clean_apt
     # @TODO: eventually use the "stable" line when it it available
     # see: https://github.com/lando/lando/issues/810

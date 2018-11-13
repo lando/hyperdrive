@@ -7,8 +7,14 @@ HOMEBREW_PREFIX="/usr/local"
 
   # Install Homebrew
   if [[ $PKGMGR_INSTALLED == "false" ]]; then
-    # NOTE: can we assume ruby and curl here?
+    # @NOTE: can we assume ruby and curl here?
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  fi
+
+  # Install curl
+  # @NOTE: as per above, i **THINKG** curl just ships with macOS so its unlikely we need this
+  if [[ $CURL_INSTALLED == "false" ]]; then
+    brew install curl
   fi
 
   # Ensure writability of our homebrew things
