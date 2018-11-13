@@ -22,7 +22,7 @@ progress_bar() {
   local SECS=0
   local FRACTION=0
   local FB=2588
-  local START=$(date +%s%N)
+  local START=$(date +%s)
 
   trap "echo -e $( tput cnorm ); trap - SIGINT; return" SIGINT
   echo -ne "$( tput civis )\r$( tput el )$MESSAGE "
@@ -52,11 +52,11 @@ progress_bar() {
     SECS=$( bc -l <<< $TIME | awk '{ printf "%d", $0 }' )
 
     # take into account loop execution time
-    local END=$( date +%s%N )
+    local END=$( date +%s )
     local DELTA=$( bc -l <<< "$INT - ( $END - $START )/1000000000" \
       | awk '{ if ( $0 > 0 ) printf "%f", $0; else print "0" }' )
     sleep $DELTA
-    START=$( date +%s%N )
+    START=$( date +%s )
   done
   echo -ne "\033[39m"
   echo -ne "$FINISHED_MESSAGE"
