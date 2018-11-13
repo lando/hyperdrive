@@ -1,2 +1,6 @@
 #!/bin/bash
-echo "Not implemented yet!"
+
+# Install debian related packages
+install_darwin() {
+  echo "Not implemented yet!"
+}
