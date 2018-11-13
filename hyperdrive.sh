@@ -59,7 +59,7 @@ case $OS in
     ;;
   darwin)
     PKGMGR="brew"
-    PKGMGR_SCAN="brew --version 2>/dev/null | sed 2d"
+    PKGMGR_SCAN="brew --version"
     ;;
 esac
 
