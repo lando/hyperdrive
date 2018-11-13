@@ -2,7 +2,7 @@
 
 # A nice pink hyperdrive
 print_hyperdrive() {
-  echo -ne "\033[95m"
+  echo -ne "\033[35m"
   cat << "EOF"
   _    _                          _      _
  | |  | |                        | |    (_)
@@ -50,7 +50,7 @@ print_interactive() {
 A helper script to get you from a vanilla machine to a minimal Lando-based
 dev environment in less than 12 par-steps. Generally this includes:
 EOF
-  echo -ne "\033[96m"
+  echo -ne "\033[36m"
   cat << "EOF"
 
   1. git

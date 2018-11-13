@@ -8,7 +8,7 @@
 # scan_dependency
 #
 print_results() {
-  RESULTS="\033[95mTHING|VERSION/STATUS|RECOMMENDED ACTION\033[39m\n"
+  RESULTS="\033[35mTHING|VERSION/STATUS|RECOMMENDED ACTION\033[39m\n"
   DEPS="$1"
 
   # Augment the results with our deps

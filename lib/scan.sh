@@ -25,6 +25,6 @@ scan_dependency() {
   export ${INSTALLED_KEY}=false
 
   # Change the defaults if we need to
-  $SCANNER &>/dev/null && export ${STATUS_KEY}="\033[92m$($SCANNER | cut -c1-32)\033[39m" && export ${INSTALLED_KEY}=true
-  ($SCANNER 2>/dev/null | grep "$DEPENDENCY_VERSION" &>/dev/null) || export ${ACTION_KEY}="\033[93m$ACTION_MESSAGE\033[39m"
+  $SCANNER &>/dev/null && export ${STATUS_KEY}="\033[32m$($SCANNER | cut -c1-32)\033[39m" && export ${INSTALLED_KEY}=true
+  ($SCANNER 2>/dev/null | grep "$DEPENDENCY_VERSION" &>/dev/null) || export ${ACTION_KEY}="\033[33m$ACTION_MESSAGE\033[39m"
 }
