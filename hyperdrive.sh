@@ -112,15 +112,26 @@ while (( "$#" )); do
       ;;
 
     # Help option handling
-    -h)
+    -h|--help)
       shift
       OPTION_HELP=true
       print_usage
       exit 1
       ;;
 
+    # Help option handling
+    -v|--version)
+      shift
+      if [ ! -z "$HYPERDRIVE_VERSION" ]; then
+        echo -e "$HYPERDRIVE_VERSION"
+      else
+        echo "$(git describe --tags --always --abbrev=1)"
+      fi
+      exit 0
+      ;;
+
     # Autoyes option handling
-    -y)
+    -y|--yes)
       shift
       OPTION_AUTOYES=true
       OPTION_GITCONFIG=true

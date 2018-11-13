@@ -22,8 +22,9 @@ print_usage() {
 Usage: ./hyperdrive.sh [-yh] [--name name] [--email email]
 
 Options:
-  -y                        Auto confirm all yes/no prompts
-  -h                        Show this help dialog
+  -h, --help                Show this help dialog
+  -v, --version             Show the version
+  -y, --yes                 Auto confirm all yes/no prompts
 
   --name                    My name eg "Jean Luc Picard"
   --email                   My email eg kirk@starfleet.mil
