@@ -21,11 +21,10 @@ LANDO_VERSION="3.0.0-rc."
 # Some other helpful vars
 NI="\e[91mnot installed\e[39m"
 
-# ASSUME macoS
-: ${OS:=darwin}
-
 # OTHERWISE LINUX THINGS
-if [ -f /etc/os-release ]; then
+if [[ $OSTYPE == "darwin"* ]]; then
+  OS="darwin"
+elif [ -f /etc/os-release ]; then
   source /etc/os-release
   OS="$ID_LIKE"
   OS="$ID"

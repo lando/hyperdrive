@@ -4,6 +4,6 @@
 error() {
   MESSAGE=${1:-Something bad happened!}
   CODE=${2:-1}
-  echo -e "\e[91m$MESSAGE\e[39m"
+  echo -e "\033[1;31m$MESSAGE\033[0m"
   exit $CODE
 }
