@@ -17,11 +17,14 @@ scan_dependency() {
   # Set the defaults
   # NOTE: we need to use export here because of the dynamic varibale names and
   # we need global scope
-  export ${DEPENDENCY^^}_STATUS="${3:-\033[91mnot installed\033[39m}"
-  export ${DEPENDENCY^^}_ACTION="do nothing"
-  export ${DEPENDENCY^^}_INSTALLED=false
+  STATUS_KEY="$(echo "$DEPENDENCY" | tr [a-z] [A-Z])_STATUS"
+  ACTION_KEY="$(echo "$DEPENDENCY" | tr [a-z] [A-Z])_ACTION"
+  INSTALLED_KEY="$(echo "$DEPENDENCY" | tr [a-z] [A-Z])_INSTALLED"
+  export ${STATUS_KEY}="${3:-\033[91mnot installed\033[39m}"
+  export ${ACTION_KEY}="do nothing"
+  export ${INSTALLED_KEY}=false
 
   # Change the defaults if we need to
-  $SCANNER &>/dev/null && export ${DEPENDENCY^^}_STATUS="\033[92m$($SCANNER | cut -c1-32)\033[39m" && export ${DEPENDENCY^^}_INSTALLED=true
-  ($SCANNER 2>/dev/null | grep "$DEPENDENCY_VERSION" &>/dev/null) || export ${DEPENDENCY^^}_ACTION="\033[93m$ACTION_MESSAGE\033[39m"
+  $SCANNER &>/dev/null && export ${STATUS_KEY}="\033[92m$($SCANNER | cut -c1-32)\033[39m" && export ${INSTALLED_KEY}=true
+  ($SCANNER 2>/dev/null | grep "$DEPENDENCY_VERSION" &>/dev/null) || export ${ACTION_KEY}="\033[93m$ACTION_MESSAGE\033[39m"
 }

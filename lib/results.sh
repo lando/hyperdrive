@@ -13,9 +13,9 @@ print_results() {
 
   # Augment the results with our deps
   for DEP in ${DEPS[@]}; do
-    STATUS_KEY=${DEP^^}_STATUS
+    STATUS_KEY="$(echo "$DEP" | tr [a-z] [A-Z])_STATUS"
+    ACTION_KEY="$(echo "$DEP" | tr [a-z] [A-Z])_ACTION"
     STATUS="$(echo ${!STATUS_KEY})"
-    ACTION_KEY=${DEP^^}_ACTION
     ACTION="$(echo ${!ACTION_KEY})"
     RESULTS+="$DEP|$STATUS|$ACTION\n"
   done

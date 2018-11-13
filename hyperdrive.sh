@@ -166,27 +166,44 @@ echo -e ""
 
 # Scan all our dependencies
 # NOTE: scan_dependency exports STATUS and ACTION mesages as envvars eg GIT_STATUS/GIT_ACTION
+# OS
 scan_dependency "os" "echo $OS" "\033[91mnot supported\033[39m"
-scan_dependency "pkgmgr" "$PKGMGR_SCAN" "\033[91mnone\033[39m"
-scan_dependency "git" "git --version" "$NI" "install git" "$GIT_VERSION"
-scan_dependency "gitname" "git config --get user.name" "\033[91mnot set\033[39m" "run 'git config --global user.name \"My Name\""
-scan_dependency "gitemail" "git config --get user.email" "\033[91mnot set\033[39m" "run 'git config --global user.email me@somewhere.com"
-scan_dependency "node" "node -v" "$NI" "install latest node ${NODE_VERSION}x.x" "$NODE_VERSION"
-scan_dependency "yarn" "yarn -v" "$NI" "install latest yarn ${YARN_VERSION}x" "$YARN_VERSION"
-scan_dependency "docker" "docker --version" "$NI" "install latest docker ${DOCKER_VERSION}x" "$DOCKER_VERSION"
-scan_dependency "lando" "lando version" "$NI" "install latest lando ${LANDO_VERSION}x"
-scan_dependency "sshkey" "ssh-keygen -l -f $HOME/.ssh/id_rsa.pub" "\033[91mno ticket!\033[39m" "run 'ssh-keygen'"
-
-# Show fancy things are happening
 progress_bar 1 "Determining operating system" "$OS_STATUS"
+
+# PACKAGE MANAGER
+scan_dependency "pkgmgr" "$PKGMGR_SCAN" "\033[91mnone\033[39m"
 progress_bar 1 "Determining package manager" "$PKGMGR_STATUS"
+
+# GIT
+scan_dependency "git" "git --version" "$NI" "install git" "$GIT_VERSION"
 progress_bar 1 "Determining git version" "$GIT_STATUS"
+
+# GIT NAME
+scan_dependency "gitname" "git config --get user.name" "\033[91mnot set\033[39m" "run 'git config --global user.name \"My Name\""
 progress_bar 1 "Checking for git config user name" "$GITNAME_STATUS"
+
+# GIT EMAIL
+scan_dependency "gitemail" "git config --get user.email" "\033[91mnot set\033[39m" "run 'git config --global user.email me@somewhere.com"
 progress_bar 1 "Checking for git config user email" "$GITEMAIL_STATUS"
+
+# NODE
+scan_dependency "node" "node -v" "$NI" "install latest node ${NODE_VERSION}x.x" "$NODE_VERSION"
 progress_bar 1 "Determining node version" "$NODE_STATUS"
+
+# YARN
+scan_dependency "yarn" "yarn -v" "$NI" "install latest yarn ${YARN_VERSION}x" "$YARN_VERSION"
 progress_bar 1 "Determining yarn version" "$YARN_STATUS"
+
+# DOCKER
+scan_dependency "docker" "docker --version" "$NI" "install latest docker ${DOCKER_VERSION}x" "$DOCKER_VERSION"
 progress_bar 1 "Determining docker version" "$DOCKER_STATUS"
+
+# LANDO
+scan_dependency "lando" "lando version" "$NI" "install latest lando ${LANDO_VERSION}x"
 progress_bar 1 "Determining lando version" "$LANDO_STATUS"
+
+# SSHKEY
+scan_dependency "sshkey" "ssh-keygen -l -f $HOME/.ssh/id_rsa.pub" "\033[91mno ticket!\033[39m" "run 'ssh-keygen'"
 progress_bar 1 "Checking for ssh public key" "$SSHKEY_STATUS"
 
 # Tabulating results
