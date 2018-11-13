@@ -219,7 +219,7 @@ print_results "${DEPS[@]}"
 
 # Describe to the user what is going to happen and ask for their permission
 # to proceed
-echo -e "\033[95mNOW I WANT TO ASK YOU A BUNCH OF QUESTIONS AND I WANT TO HAVE THEM ANSWERED IMMEDIATELY!\033[39m\n"
+echo -e "\033[35mNOW I WANT TO ASK YOU A BUNCH OF QUESTIONS AND I WANT TO HAVE THEM ANSWERED IMMEDIATELY!\033[39m\n"
 
 # Show confirm message if we aren't in autoyes
 if [[ $OPTION_AUTOYES == "false" ]]; then
@@ -260,7 +260,7 @@ esac
 install_posix
 
 # WEDUNIT
-echo -e "\033[92mInstallation complete. You have made it into hyperspace!\033[39m"
+echo -e "\033[32mInstallation complete. You have made it into hyperspace!\033[39m"
 echo -e "Run ./hyperdrive.sh again if you want to verify installation success."
 
 # Docker notez

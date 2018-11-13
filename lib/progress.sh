@@ -15,7 +15,7 @@ progress_bar() {
   local DURATION=$1
   local MESSAGE="${2:-Doing task}"
   local MESSAGE_LENGTH=${#MESSAGE}
-  local FINISHED_MESSAGE="${3:-\033[92mdone!\033[39m}"
+  local FINISHED_MESSAGE="${3:-\033[32mdone!\033[39m}"
   local INT=0.25
   local TIME=0
   local CURLEN=0
@@ -43,7 +43,7 @@ progress_bar() {
 
     # percentage progress
     local PROGRESS=$( bc -l <<< "( 100 * $TIME ) / ($DURATION-$INT)" | awk '{ printf "%.0f", $0 }' )
-    echo -ne "\033[95m$( tput sc )\033[39m"
+    echo -ne "\033[35m$( tput sc )\033[39m"
     echo -ne "\r$( tput cuf $(( WIDTH + MESSAGE_LENGTH - 5 )) )"
     echo -ne " $PROGRESS%"
     echo -ne "$( tput rc )"
