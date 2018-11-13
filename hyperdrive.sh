@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Fail if running as root
-if [[ $USER == "root" ]]; then
-  echo "This script CANNOT be run as root!"
-  exit 1
-fi
-
 # Set defaults options
 OPTION_HELP=${HYPERDRIVE_HELP:-false}
 OPTION_AUTOYES=${HYPERDRIVE_YES:-false}
@@ -20,7 +14,7 @@ OPTION_SSHKEYS=${HYPERDRIVE_YES:-false}
 # SET VERSION RECS
 GIT_VERSION="2."
 NODE_VERSION="10."
-YARN_VERSION="1.21."
+YARN_VERSION="1.12."
 DOCKER_VERSION="18."
 LANDO_VERSION="3.0.0-rc."
 
@@ -49,17 +43,6 @@ else
   OS="whoknows"
 fi
 
-# Fail here on unsupported OSz
-# Do stuff on each distro
-case $OS in
-  darwin|debian|ubuntu|elementary)
-    ;;
-  *)
-    echo "This operating system is not currently supported!"
-    exit 2
-    ;;
-esac
-
 # Determine the package manager
 PKGMGR="none"
 case $OS in
@@ -67,7 +50,7 @@ case $OS in
     PKGMGR="pacman"
     PKGMGR_SCAN="echo pacman"
     ;;
-  debian|ubuntu|elementary)
+  debian|ubuntu|elementary|mint)
     PKGMGR="aptitude"
     PKGMGR_SCAN="echo aptitude"
     ;;
@@ -87,6 +70,21 @@ if [ -z "$HYPERDRIVE_VERSION" ]; then
     source $LIB
   done
 fi
+
+# Fail if running as root
+if [[ $USER == "root" ]]; then
+  error "This script CANNOT be run as root!" 1
+fi
+
+# Fail here on unsupported OSz
+# Do stuff on each distro
+case $OS in
+  darwin|debian|ubuntu|elementary|mint)
+    ;;
+  *)
+    error "This operating system is not currently supported!" 2
+    ;;
+esac
 
 # PARSE THE ARGZZ AND OPTZ
 while (( "$#" )); do
@@ -138,8 +136,7 @@ while (( "$#" )); do
 
     # Unsupported options handling
     -*|--*=)
-      echo "Error: Unsupported flag $1" >&2
-      exit 1
+      error "Error: Unsupported flag $1" 3 >&2
       ;;
 
     # Arg handling?
@@ -150,15 +147,14 @@ while (( "$#" )); do
 done
 
 # Show header if we aren't in autoyes
-if [ "$OPTION_AUTOYES" == "false" ]; then
+if [[ $OPTION_AUTOYES == "false" ]]; then
   print_interactive
   # Pause until we confirm the voyage
   read -n 1 -r -s -p "Otherwise PRESS ENTER so we can analyze your navicomputer" KEY
   if [[ $KEY = "" ]]; then
     echo ""
   else
-    echo -e "\n\e[91mABORTED!\e[39m"
-    exit 666
+    error "\nHyperspace jump aborted!" 3720
   fi
 fi
 
@@ -176,11 +172,11 @@ scan_dependency "pkgmgr" "$PKGMGR_SCAN" "\e[91mnone\e[39m"
 scan_dependency "git" "git --version" "$NI" "install git" "$GIT_VERSION"
 scan_dependency "gitname" "git config --get user.name" "\e[91mnot set\e[39m" "run 'git config --global user.name \"My Name\""
 scan_dependency "gitemail" "git config --get user.email" "\e[91mnot set\e[39m" "run 'git config --global user.email me@somewhere.com"
-scan_dependency "node" "node -v" "$NI" "install latest node ${NODE_VERSION}.x" "$NODE_VERSION"
+scan_dependency "node" "node -v" "$NI" "install latest node ${NODE_VERSION}x.x" "$NODE_VERSION"
 scan_dependency "yarn" "yarn -v" "$NI" "install latest yarn ${YARN_VERSION}x" "$YARN_VERSION"
 scan_dependency "docker" "docker --version" "$NI" "install latest docker ${DOCKER_VERSION}x" "$DOCKER_VERSION"
-scan_dependency "lando" "lando --version" "$NI" "install latest lando ${LANDO_VERSION}x"
-scan_dependency "sshkey" "ssh-keygen -l -f ~/.ssh/id_rsa.pub" "\e[91mno ticket!\e[39m" "run 'ssh-keygen'"
+scan_dependency "lando" "lando version" "$NI" "install latest lando ${LANDO_VERSION}x"
+scan_dependency "sshkey" "ssh-keygen -l -f $HOME/.ssh/id_rsa.pub" "\e[91mno ticket!\e[39m" "run 'ssh-keygen'"
 
 # Show fancy things are happening
 progress_bar 1 "Determining operating system" "$OS_STATUS"
@@ -208,23 +204,52 @@ print_results "${DEPS[@]}"
 # Describe to the user what is going to happen and ask for their permission
 # to proceed
 echo -e "\e[95mNOW I WANT TO ASK YOU A BUNCH OF QUESTIONS AND I WANT TO HAVE THEM ANSWERED IMMEDIATELY!\e[39m\n"
-echo -e "Do you wish for this script to take the recommended actions marked above?"
 
-# Do stuff on each distro
+# Show confirm message if we aren't in autoyes
+if [[ $OPTION_AUTOYES == "false" ]]; then
+  read -r -p "Do you wish for this script to take the recommended actions marked above? [Y/n]" CONFIRM
+  case $CONFIRM in
+    [yY][eE][sS]|[yY])
+      ;;
+    [nN][oO]|[nN])
+      error "I see :(" 4
+      ;;
+    *)
+      error "Invalid response..." 5
+      ;;
+  esac
+fi
+
+# Attempt to get email, address and editor if needed
+if [[ $OPTION_NAME == "none" && $GITNAME_INSTALLED == "false" ]]; then
+  read -r -p "What is your name? " OPTION_NAME
+fi
+if [[ $OPTION_EMAIL == "none" && $GITEMAIL_INSTALLED == "false" ]]; then
+  read -r -p "What is your email? " OPTION_EMAIL
+fi
+
+# @TODO: add in editor stuff
+
+# Do distro specific stuff
 case $OS in
   debian|ubuntu|elementary)
-    #sudo apt-get update -y --force-yes \
-    #  && sudo apt-get upgrade -y --force-yes \
-    #  && sudo apt-get -y --force-yes install \
-    #    git-core \
-    #    curl
+    install_debian
     ;;
   darwin)
-    echo "Not implemented yet!"
+    install_darwin
     ;;
 esac
 
+# Do stuff that should be the same across POSIX
+install_posix
 
+# WEDUNIT
+echo -e "\e[92mInstallation complete. You have made it into hyperspace!\e[39m"
+echo -e "Run ./hyperdrive.sh again if you want to verify installation success."
 
+# Docker notez
+if [[ $DOCKER_INSTALLED == "false" && $OS != "darwin" ]]; then
+  echo -e "\n\e[5;93mNote that you need to logout and login to be able to use Docker correctly!!!\e[25;39m\n"
+fi
 
 exit 0
