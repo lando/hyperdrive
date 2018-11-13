@@ -199,7 +199,7 @@ scan_dependency "docker" "docker --version" "$NI" "install latest docker ${DOCKE
 progress_bar 1 "Determining docker version" "$DOCKER_STATUS"
 
 # LANDO
-scan_dependency "lando" "lando version" "$NI" "install latest lando ${LANDO_VERSION}x"
+scan_dependency "lando" "lando version" "$NI" "install latest lando ${LANDO_VERSION}x" "$LANDO_VERSION"
 progress_bar 1 "Determining lando version" "$LANDO_STATUS"
 
 # SSHKEY
@@ -228,7 +228,7 @@ if [[ $OPTION_AUTOYES == "false" ]]; then
     [yY][eE][sS]|[yY])
       ;;
     [nN][oO]|[nN])
-      error "I see :(" 4
+      error "So be it!" 0
       ;;
     *)
       error "Invalid response..." 5

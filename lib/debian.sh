@@ -101,7 +101,8 @@ install_debian() {
     clean_apt
     # @TODO: eventually use the "stable" line when it it available
     # see: https://github.com/lando/lando/issues/810
-    curl -fsSL -o /tmp/lando.deb https://github.com/lando/lando/releases/download/v3.0.0-rc.1/lando-v3.0.0-rc.1.deb
+    echo -e "Downloading Lando"
+    curl -f#SL -o /tmp/lando.deb https://github.com/lando/lando/releases/download/v3.0.0-rc.1/lando-v3.0.0-rc.1.deb
     sudo dpkg -i /tmp/lando.deb
     rm -f /tmp/lando.deb
   fi
