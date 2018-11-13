@@ -2,7 +2,7 @@
 
 # A nice pink hyperdrive
 print_hyperdrive() {
-  echo -ne "\e[95m"
+  echo -ne "\033[95m"
   cat << "EOF"
   _    _                          _      _
  | |  | |                        | |    (_)
@@ -13,7 +13,7 @@ print_hyperdrive() {
           __/ | |
          |___/|_|
 EOF
-  echo -ne "\e[39m"
+  echo -ne "\033[39m"
 }
 
 # Usage for the hyperdrive
@@ -50,7 +50,7 @@ print_interactive() {
 A helper script to get you from a vanilla machine to a minimal Lando-based
 dev environment in less than 12 par-steps. Generally this includes:
 EOF
-  echo -ne "\e[96m"
+  echo -ne "\033[96m"
   cat << "EOF"
 
   1. git
@@ -62,7 +62,7 @@ EOF
   7. vim or atom
 
 EOF
-  echo -ne "\e[39m"
+  echo -ne "\033[39m"
   cat << "EOF"
 Please run `./hyperdrive.sh -h` if you are interested in pre-programming your
 hyperdrive for autopilot (eg running this non-interactively).

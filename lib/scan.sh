@@ -17,11 +17,11 @@ scan_dependency() {
   # Set the defaults
   # NOTE: we need to use export here because of the dynamic varibale names and
   # we need global scope
-  export ${DEPENDENCY^^}_STATUS="${3:-\e[91mnot installed\e[39m}"
+  export ${DEPENDENCY^^}_STATUS="${3:-\033[91mnot installed\033[39m}"
   export ${DEPENDENCY^^}_ACTION="do nothing"
   export ${DEPENDENCY^^}_INSTALLED=false
 
   # Change the defaults if we need to
-  $SCANNER &>/dev/null && export ${DEPENDENCY^^}_STATUS="\e[92m$($SCANNER | cut -c1-32)\e[39m" && export ${DEPENDENCY^^}_INSTALLED=true
-  ($SCANNER 2>/dev/null | grep "$DEPENDENCY_VERSION" &>/dev/null) || export ${DEPENDENCY^^}_ACTION="\e[93m$ACTION_MESSAGE\e[39m"
+  $SCANNER &>/dev/null && export ${DEPENDENCY^^}_STATUS="\033[92m$($SCANNER | cut -c1-32)\033[39m" && export ${DEPENDENCY^^}_INSTALLED=true
+  ($SCANNER 2>/dev/null | grep "$DEPENDENCY_VERSION" &>/dev/null) || export ${DEPENDENCY^^}_ACTION="\033[93m$ACTION_MESSAGE\033[39m"
 }

@@ -19,7 +19,7 @@ DOCKER_VERSION="18."
 LANDO_VERSION="3.0.0-rc."
 
 # Some other helpful vars
-NI="\e[91mnot installed\e[39m"
+NI="\033[91mnot installed\033[39m"
 
 # OTHERWISE LINUX THINGS
 if [[ $OSTYPE == "darwin"* ]]; then
@@ -166,16 +166,16 @@ echo -e ""
 
 # Scan all our dependencies
 # NOTE: scan_dependency exports STATUS and ACTION mesages as envvars eg GIT_STATUS/GIT_ACTION
-scan_dependency "os" "echo $OS" "\e[91mnot supported\e[39m"
-scan_dependency "pkgmgr" "$PKGMGR_SCAN" "\e[91mnone\e[39m"
+scan_dependency "os" "echo $OS" "\033[91mnot supported\033[39m"
+scan_dependency "pkgmgr" "$PKGMGR_SCAN" "\033[91mnone\033[39m"
 scan_dependency "git" "git --version" "$NI" "install git" "$GIT_VERSION"
-scan_dependency "gitname" "git config --get user.name" "\e[91mnot set\e[39m" "run 'git config --global user.name \"My Name\""
-scan_dependency "gitemail" "git config --get user.email" "\e[91mnot set\e[39m" "run 'git config --global user.email me@somewhere.com"
+scan_dependency "gitname" "git config --get user.name" "\033[91mnot set\033[39m" "run 'git config --global user.name \"My Name\""
+scan_dependency "gitemail" "git config --get user.email" "\033[91mnot set\033[39m" "run 'git config --global user.email me@somewhere.com"
 scan_dependency "node" "node -v" "$NI" "install latest node ${NODE_VERSION}x.x" "$NODE_VERSION"
 scan_dependency "yarn" "yarn -v" "$NI" "install latest yarn ${YARN_VERSION}x" "$YARN_VERSION"
 scan_dependency "docker" "docker --version" "$NI" "install latest docker ${DOCKER_VERSION}x" "$DOCKER_VERSION"
 scan_dependency "lando" "lando version" "$NI" "install latest lando ${LANDO_VERSION}x"
-scan_dependency "sshkey" "ssh-keygen -l -f $HOME/.ssh/id_rsa.pub" "\e[91mno ticket!\e[39m" "run 'ssh-keygen'"
+scan_dependency "sshkey" "ssh-keygen -l -f $HOME/.ssh/id_rsa.pub" "\033[91mno ticket!\033[39m" "run 'ssh-keygen'"
 
 # Show fancy things are happening
 progress_bar 1 "Determining operating system" "$OS_STATUS"
@@ -202,7 +202,7 @@ print_results "${DEPS[@]}"
 
 # Describe to the user what is going to happen and ask for their permission
 # to proceed
-echo -e "\e[95mNOW I WANT TO ASK YOU A BUNCH OF QUESTIONS AND I WANT TO HAVE THEM ANSWERED IMMEDIATELY!\e[39m\n"
+echo -e "\033[95mNOW I WANT TO ASK YOU A BUNCH OF QUESTIONS AND I WANT TO HAVE THEM ANSWERED IMMEDIATELY!\033[39m\n"
 
 # Show confirm message if we aren't in autoyes
 if [[ $OPTION_AUTOYES == "false" ]]; then
@@ -243,12 +243,12 @@ esac
 install_posix
 
 # WEDUNIT
-echo -e "\e[92mInstallation complete. You have made it into hyperspace!\e[39m"
+echo -e "\033[92mInstallation complete. You have made it into hyperspace!\033[39m"
 echo -e "Run ./hyperdrive.sh again if you want to verify installation success."
 
 # Docker notez
 if [[ $DOCKER_INSTALLED == "false" && $OS != "darwin" ]]; then
-  echo -e "\n\e[5;93mNote that you need to logout and login to be able to use Docker correctly!!!\e[25;39m\n"
+  echo -e "\n\033[5;93mNote that you need to logout and login to be able to use Docker correctly!!!\033[25;39m\n"
 fi
 
 exit 0
