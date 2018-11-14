@@ -26,6 +26,7 @@ install_debian() {
 
   # Install node if needed
   if [[ $NODE_INSTALLED == "false" ]]; then
+    sudo apt-get purge --auto-remove nodejs || true
     clean_apt
     curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash
     sudo apt install -y nodejs
@@ -94,7 +95,9 @@ install_debian() {
     # Set docker user and enable
     sudo groupadd docker || true
     sudo usermod -aG docker $USER || true
-    sudo systemctl enable docker
+    if [ -x "$(command -v systemctl)" ]; then
+      sudo systemctl enable docker
+    fi
   fi
 
   # Install lando if needed
