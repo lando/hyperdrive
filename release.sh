@@ -19,9 +19,11 @@ echo -e ""
 
 # Var our commands
 README_UPDATE=(sed -i "s/$OLD_VERSION/$NEW_VERSION/g" ./README.md)
-GIT_COMMIT=(git add --all \&\& git commit -m "\"$GIT_MESSAGE\"")
+GIT_ADD=(git add --all)
+GIT_COMMIT=(git commit -m "\"$GIT_MESSAGE\"")
 GIT_TAG=(git tag -a "$NEW_VERSION" -m "\"$ANNOTATION\"")
-GIT_PUSH=(git push origin master "&&" git push origin master "$NEW_VERSION")
+GIT_PUSH_BRANCH=(git push origin master)
+GIT_PUSH_TAG=(git push origin master "$NEW_VERSION")
 
 # Describe to the user what is going to happen and ask for their permission
 # to proceedets make a note to review this in our retro or whatever we do
@@ -30,9 +32,11 @@ echo -e "\033[35mPlease verify these are the release commands you are looking fo
 # Print the commands
 echo -e "\033[32m"
 printf '%s ' "${README_UPDATE[@]}" && echo -e ""
+printf '%s ' "${GIT_ADD[@]}" && echo -e ""
 printf '%s ' "${GIT_COMMIT[@]}" && echo -e ""
 printf '%s ' "${GIT_TAG[@]}" && echo -e ""
-printf '%s ' "${GIT_PUSH[@]}" && echo -e ""
+printf '%s ' "${GIT_PUSH_BRANCH[@]}" && echo -e ""
+printf '%s ' "${GIT_PUSH_TAG[@]}" && echo -e ""
 echo -e "\033[39m"
 
 # Show confirm message if we aren't in autoyes
