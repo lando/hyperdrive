@@ -22,9 +22,9 @@ scan_dependency() {
   INSTALLED_KEY="$(echo "$DEPENDENCY" | tr [a-z] [A-Z])_INSTALLED"
   export ${STATUS_KEY}="${3:-\033[91mnot installed\033[39m}"
   export ${ACTION_KEY}="do nothing"
-  export ${INSTALLED_KEY}=true
+  export ${INSTALLED_KEY}=false
 
   # Change the defaults if we need to
-  $SCANNER &>/dev/null && export ${STATUS_KEY}="\033[32m$($SCANNER | sed -n 1p | cut -c1-32)\033[39m" || export ${INSTALLED_KEY}=false
+  $SCANNER &>/dev/null && export ${STATUS_KEY}="\033[32m$($SCANNER | sed -n 1p | cut -c1-32)\033[39m" && export ${INSTALLED_KEY}=true
   ($SCANNER 2>/dev/null | grep "$DEPENDENCY_VERSION" &>/dev/null) || export ${ACTION_KEY}="\033[33m$ACTION_MESSAGE\033[39m" && export ${INSTALLED_KEY}=false
 }
