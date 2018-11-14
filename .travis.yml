@@ -5,15 +5,10 @@ matrix:
       osx_image: xcode10.1
     - os: osx
       osx_image: xcode9.2
-    - os: osx
-      osx_image: xcode8
     - os: linux
       dist: xenial
     - os: linux
       dist: trusty
-      sudo: required
-    - os: linux
-      dist: precise
       sudo: required
 install: ./build.sh
 before_script:
@@ -21,6 +16,8 @@ before_script:
 script:
   - ./bin/hyperdrive -y --name="Obi-Wan Kenobi" --email hermit@tatooine.org
   - # @TODO: Ideally we should get Leia in here for the tests but lets slum it for now
+  - # Print out and see if we are up to date
+  - ./bin/hyperdrive -y
 deploy:
   provider: releases
   api_key:
