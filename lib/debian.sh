@@ -26,7 +26,6 @@ install_debian() {
 
   # Install node if needed
   if [[ $NODE_INSTALLED == "false" ]]; then
-    sudo apt-get purge --auto-remove nodejs || true
     clean_apt
     curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash
     sudo apt install -y nodejs

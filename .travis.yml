@@ -14,6 +14,8 @@ matrix:
       sudo: required
 install: ./build.sh
 before_script:
+  - sudo apt-get purge --auto-remove nodejs || true
+  - sudo rm -f $(which node) || true
   - ./bin/hyperdrive --version
 script:
   - ./bin/hyperdrive -y --name="Obi-Wan Kenobi" --email hermit@tatooine.org
