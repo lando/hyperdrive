@@ -19,14 +19,14 @@ install: ./build.sh
 before_script:
   - ./hyperdrive --version
 script:
-  - ./hyperdrive -y --name="Obi-Wan Kenobi" --email "hermit@tatooine.org"
+  - ./hyperdrive -y --name="Obi-Wan Kenobi" --email hermit@tatooine.org
   - # @TODO: Ideally we should get Leia in here for the tests but lets slum it for now
-# deploy:
-#   - provider: releases
-#     api_key:
-#       secure: UXDea6KLTOOiUaUfhYqE7stUY74VE2gOdi3No5NscD0Lg3xB/EMf1wzpVe2nuTpjn1CbDBsGXXHqRRpy2IZj6qp21D39+Wygznv9PpSGPgTAB2ZHRYhpux1Qf/HxD8R/NhvISNMXukNLyd66OyiJlz5RWoLWQvLIiJgT1Uczc3Sj8iOJOmYaxQZku/3/q/LmjKKHVJ9vq7ail4l4SoNmLqh6sdDt9utJtavWHMa0hN5kF+CwoV5Vk/z2RFzYNInGwlJggwV7Y/Kf3TmOQv0CiKgxdEQqR8LfTDGIvkxFwpPSf7JnQYnsZWcOWW08oousN7tjc1L1ow2dzPnT2zRYNyx73FwkjWtZ7SLQCkU95pq6FgSy31+w6iWU6Rvwd9mgdX4sfxgdwxLwiF38Rki5TxXtMRGWW1qYRYvnCcc7gpPUPFv0PzsQYZiFSGxMF3uKdKxmKzYd+tfCMvE5YhfkDtCM+LeJBlSL5hZspMUezXEFtiKSv7fDmBKtGGFUsEruNqMphKEbH1kY1UT9SXUu+uxWN40ciJTXfQXJAGMSh34WkZFAgEP/r61+SZDlpuyYPQ8l8fOOcX2uaJYD0LJBSERVmVAX00SNxWSVdTTGibadRXWWuJ4gd4PGCXUhSJI9r1QLfMLyZtt5P3i9SUL2X4cO9isKysBjOq/5DZXjqq0=
-#     file: bin/hyperdrive
-#     skip_cleanup: true
-#     on:
-#       repo: lando/hyperdrive
-#       tags: true
+deploy:
+  provider: releases
+  api_key:
+    secure: dExeDy5NPX7YAD1oKjGvscToiFTosKzqYQRkSq4zf0NKirWr/Vkt+Ke20hwMT4PXcdCxpWzPxeAUzMWzNh4ExqvD1797yI046K32e6F6ayZlYbyYct25Quj7E3OKDMac5sPUT7MOGZ0RD13vuDZUVL9c5v/rmyAhdoYcJw+LJNKq83I/pI2+5Wz9saISVgcPzGVRvh/knJRFbdJdPpwzNySf7hvIA7V8f3V2nlXO6QAgBV/wlYZ/lbwpvH6TeXAGC9cUZgTjQ0FblBha3s+34mJh7oFVtd/gFkOmdVt4jrN5EwGvaQYlpHBDDKDZzbLWrIbZisSgBx+AauJyoxa8LKlE9F8gk3oLr9ZBjX/aQ7K1J8EDw3RbYSJRIb1EuOivhwdL8/3tijzbxLG9aLeA5pL6iR5M6GPMz3luRHTzv+IBRV39poDWbnVCSD+Qp+vEPKk+9YP8X+0BBF78FPyd1UIQyiRpJ9AqL4kEhf7SZy6byBNFkMP2orSsCKtKiJQMbmVUm2khsWnWMZxcgBTgWUEaY4ZcIWxzBLRV8TJt9bTuwNtN8cP9M1SUbcDyFqgL2guZ24FEDgOCWdRq/376dpNgrSc/n5T4hr2v+NzMvUA94XFda/CBpRaESWpV5kE2OqNGp4yn7xTzboVgZjcW73gVBqlauEcRqRPLmyb56yI=
+  file: bin/hyperspace
+  skip_cleanup: true
+  on:
+    repo: lando/hyperdrive
+    tags: true
