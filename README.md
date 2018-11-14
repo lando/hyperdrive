@@ -5,17 +5,16 @@ Hyperdrive
 
 A helper script to get you from a vanilla machine to a minimal Lando-based dev environment in less than 12 par-steps. Generally this includes:
 
-  1. git
-  2. curl
-  3. node
-  4. yarn
-  5. docker
-  6. lando
-  7. ssh keys
-  9. vim or atom or [none](https://www.youtube.com/watch?v=UsjoFZEwAyI)
+  #### 1. git
+  #### 2. curl
+  #### 3. node
+  #### 4. yarn
+  #### 5. docker
+  #### 6. lando
+  #### 7. ssh keys
+  #### 9. vim or atom or [none](https://www.youtube.com/watch?v=UsjoFZEwAyI)
 
-**NOTE: Hyperdrive is only currently available for macOS 10.11+ and _recent-ish_ Debian flavored linux distributions. If you are using something else and interested in adding support please [open a feature request](https://github.com/lando/hyperdrive/issues/new?template=feature_request.md)
-
+**NOTE:** Hyperdrive is only currently available for macOS 10.11+ and _recent-ish_ Debian flavored linux distributions. If you are using something else and interested in adding support please [open a feature request](https://github.com/lando/hyperdrive/issues/new?template=feature_request.md)
 
 Installation
 ------------
@@ -33,7 +32,8 @@ You can also download the script to your `$PATH` and then pass in options to mak
 ```bash
 curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.3.0/hyperdrive > /usr/local/bin/hyperdrive \
   && chmod +x /usr/local/bin/hyperdrive
-
+```
+```bash
 hyperdrive -h
   _    _                          _      _
  | |  | |                        | |    (_)
@@ -94,4 +94,4 @@ git clone https://github.com/lando/hyperdrive.git
 Other Resources
 ---------------
 
-*[Mountain climbing advice](https://www.youtube.com/watch?v=tkBVDh7my9Q)
+* [Mountain climbing advice](https://www.youtube.com/watch?v=tkBVDh7my9Q)
