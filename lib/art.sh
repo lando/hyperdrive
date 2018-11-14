@@ -37,7 +37,7 @@ Examples:
   ./hyperdrive.sh -h
 
   # Run non-interactively
-  ./hyperdrive.sh -y --name "Lando Calrissian" --email admin@thisfacility.com
+  ./hyperdrive.sh -y --name "Lando" --email admin@thisfacility.com
 
 EOF
 }

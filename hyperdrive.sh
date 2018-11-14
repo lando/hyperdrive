@@ -120,6 +120,8 @@ while (( "$#" )); do
     -h|--help)
       shift
       OPTION_HELP=true
+      print_hyperdrive
+      echo -e ""
       print_usage
       exit 1
       ;;
