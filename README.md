@@ -23,7 +23,7 @@ Installation
 The easiest way to kick in things into lightspeed is to run the latest release script directly from the internet
 
 ```bash
-curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.2.1/hyperdrive > /tmp/hyperdrive \
+curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.3.0/hyperdrive > /tmp/hyperdrive \
   && chmod +x /tmp/hyperdrive \
   && /tmp/hyperdrive
 ```
@@ -31,7 +31,7 @@ curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.2.1/hyperdrive
 You can also download the script to your `$PATH` and then pass in options to make it non-interactive
 
 ```bash
-curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.2.1/hyperdrive > /usr/local/bin/hyperdrive \
+curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.3.0/hyperdrive > /usr/local/bin/hyperdrive \
   && chmod +x /usr/local/bin/hyperdrive
 
 hyperdrive -h
@@ -88,8 +88,7 @@ git clone https://github.com/lando/hyperdrive.git
 # back to the repo
 #
 # Pass in the version you want to bump to with an optional tag annotation
-./release.sh v0.4.0 "Wretched hive of scum and villiany" --dry-run
-./release.sh v0.4.0 "Wretched hive of scum and villiany"
+./release.sh v4.4.4-alpha.12931 "Wretched hive of scum and villiany"
 ```
 
 Other Resources

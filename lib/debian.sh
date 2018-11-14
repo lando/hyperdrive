@@ -109,4 +109,7 @@ install_debian() {
     sudo dpkg -i /tmp/lando.deb
     rm -f /tmp/lando.deb
   fi
+
+  # Install vim
+  # git config --global core.editor "vim"
 }
