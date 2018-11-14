@@ -19,7 +19,8 @@ script:
   - ./bin/hyperdrive -y --name="Obi-Wan Kenobi" --email hermit@tatooine.org
   - # @TODO: Ideally we should get Leia in here for the tests but lets slum it for now
   - # Print out and see if we are up to date
-  - ./bin/hyperdrive -y
+  - # this may produce unexpected results for docker on macOS
+  - ./bin/hyperdrive -y --name="Obi-Wan Kenobi" --email hermit@tatooine.org
 deploy:
   provider: releases
   api_key:
