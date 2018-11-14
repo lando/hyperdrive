@@ -17,9 +17,9 @@ matrix:
       sudo: required
 install: ./build.sh
 before_script:
-  - ./hyperdrive --version
+  - ./bin/hyperdrive --version
 script:
-  - ./hyperdrive -y --name="Obi-Wan Kenobi" --email hermit@tatooine.org
+  - ./bin/hyperdrive -y --name="Obi-Wan Kenobi" --email hermit@tatooine.org
   - # @TODO: Ideally we should get Leia in here for the tests but lets slum it for now
 deploy:
   provider: releases
