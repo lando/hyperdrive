@@ -245,6 +245,7 @@ if [[ $OPTION_AUTOYES == "false" ]]; then
   read -r -p "Do you wish for this script to take the recommended actions marked above? [Y/n]" CONFIRM
   case $CONFIRM in
     [yY][eE][sS]|[yY])
+      echo
       ;;
     [nN][oO]|[nN])
       error "So be it!" 0

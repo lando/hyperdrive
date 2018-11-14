@@ -24,7 +24,16 @@ scan_dependency() {
   export ${ACTION_KEY}="do nothing"
   export ${INSTALLED_KEY}=false
 
-  # Change the defaults if we need to
+  # Determine what we have
   $SCANNER &>/dev/null && export ${STATUS_KEY}="\033[32m$($SCANNER | sed -n 1p | cut -c1-32)\033[39m" && export ${INSTALLED_KEY}=true
-  ($SCANNER 2>/dev/null | grep "$DEPENDENCY_VERSION" &>/dev/null) || export ${ACTION_KEY}="\033[33m$ACTION_MESSAGE\033[39m" && export ${INSTALLED_KEY}=false
+
+  # Determine whether what we have is good enough
+  if [ ! -z "$DEPENDENCY_VERSION" ]; then
+    $SCANNER 2>/dev/null | grep "$DEPENDENCY_VERSION" &>/dev/null || export ${INSTALLED_KEY}=false
+  fi
+
+  # Set the action that needs to be taken
+  if [[ "$(echo ${!INSTALLED_KEY})" == "false" ]]; then
+    export ${ACTION_KEY}="\033[33m$ACTION_MESSAGE\033[39m"
+  fi
 }
