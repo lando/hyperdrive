@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# @TODO: check for internet?
+
 # Set defaults options
 OPTION_HELP=${HYPERDRIVE_HELP:-false}
 OPTION_AUTOYES=${HYPERDRIVE_YES:-false}
