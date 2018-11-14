@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # @TODO: check for internet?
+# @TODO: check to update this script?
 
 # Set defaults options
 OPTION_HELP=${HYPERDRIVE_HELP:-false}
@@ -198,11 +199,13 @@ scan_dependency "git" "git --version" "$NI" "install git" "$GIT_VERSION"
 progress_bar 1 "Determining git version" "$GIT_STATUS"
 
 # GIT NAME
-scan_dependency "gitname" "git config --get user.name" "\033[91mnot set\033[39m" "run 'git config --global user.name \"My Name\""
+if [[ $OPTION_NAME == 'none' ]]; then HELPER_NAME="Joe Example"; else HELPER_NAME="$OPTION_NAME"; fi
+scan_dependency "gitname" "git config --get user.name" "\033[91mnot set\033[39m" "run 'git config --global user.name \"${HELPER_NAME}\"'"
 progress_bar 1 "Checking for git config user name" "$GITNAME_STATUS"
 
 # GIT EMAIL
-scan_dependency "gitemail" "git config --get user.email" "\033[91mnot set\033[39m" "run 'git config --global user.email me@somewhere.com"
+if [[ $OPTION_EMAIL == 'none' ]]; then HELPER_EMAIL="joe@example.org"; else HELPER_EMAIL="$OPTION_EMAIL"; fi
+scan_dependency "gitemail" "git config --get user.email" "\033[91mnot set\033[39m" "run 'git config --global user.email ${HELPER_EMAIL}'"
 progress_bar 1 "Checking for git config user email" "$GITEMAIL_STATUS"
 
 # NODE
