@@ -23,7 +23,7 @@ GIT_ADD=(git add --all)
 GIT_COMMIT=(git commit -m "\"$GIT_MESSAGE\"")
 GIT_TAG=(git tag -a "$NEW_VERSION" -m "\"$ANNOTATION\"")
 GIT_PUSH_BRANCH=(git push origin master)
-GIT_PUSH_TAG=(git push origin master "$NEW_VERSION")
+GIT_PUSH_TAG=(git push origin "$NEW_VERSION")
 
 # Describe to the user what is going to happen and ask for their permission
 # to proceedets make a note to review this in our retro or whatever we do
@@ -47,11 +47,13 @@ case $CONFIRM in
     echo -e "Updating Readme..."
     "${README_UPDATE[@]}"
     echo -e "Commiting the codes"
+    "${GIT_ADD[@]}"
     "${GIT_COMMIT[@]}"
     echo -e "Tagging the versions"
     "${GIT_TAG[@]}"
     echo -e "Cutting the $NEW_VERSION release"
-    "${GIT_PUSH[@]}"
+    "${GIT_PUSH_BRANCH[@]}"
+    "${GIT_PUSH_TAG[@]}"
     ;;
   [nN][oO]|[nN])
     error "So be it!" 0
