@@ -63,6 +63,7 @@ case $OS in
   darwin)
     PKGMGR="brew"
     PKGMGR_SCAN="brew --version"
+    PKGMGR_VERSION="1.8."
     ;;
 esac
 
@@ -185,7 +186,7 @@ scan_dependency "os" "echo $OS" "\033[91mnot supported\033[39m"
 progress_bar 1 "Determining operating system" "$OS_STATUS"
 
 # PACKAGE MANAGER
-scan_dependency "pkgmgr" "$PKGMGR_SCAN" "\033[91mnone\033[39m"
+scan_dependency "pkgmgr" "$PKGMGR_SCAN" "\033[91mnone\033[39m" "install $PKGMGR" "$PKGMGR_VERSION"
 progress_bar 1 "Determining package manager" "$PKGMGR_STATUS"
 
 # CURL
