@@ -12,7 +12,7 @@ echo -e "Kicking off a build..."
 echo -e "#!/bin/bash" > $OUTPUT
 echo -e "HYPERDRIVE_VERSION=$VERSION\n" >> $OUTPUT
 
-# Append our libraries to the top of things
+# Add our libraries to the top of things
 for LIB in ./lib/*.sh; do
   echo -e "Loading in $LIB"
   echo -e "$(tail -n +2 $LIB)" >> $OUTPUT

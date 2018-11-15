@@ -28,6 +28,7 @@ Options:
 
   --name                    My name eg "Jean Luc Picard"
   --email                   My email eg kirk@starfleet.mil
+  --editor                  Either vim|atom or none
 
 Examples:
   # Run bootscript interactively
@@ -37,7 +38,7 @@ Examples:
   ./hyperdrive.sh -h
 
   # Run non-interactively
-  ./hyperdrive.sh -y --name "Lando" --email admin@thisfacility.com
+  ./hyperdrive.sh -y --name "Lando" --email admin@thisfacility.com --editor vim
 
 EOF
 }

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Set minimum needed versions for update checks
+CURL_MIN_VERSION=7.40.0
+GIT_MIN_VERSION=2.7.0
+NODE_MIN_VERSION=10.13.0
+YARN_MIN_VERSION=1.12.0
+DOCKER_MIN_VERSION=18.0.0
+LANDO_MIN_VERSION=3.0.0-rc.1
+
+# Set max needed versions
+NODE_MAX_VERSION=10.99.99

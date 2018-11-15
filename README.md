@@ -66,6 +66,10 @@ Examples:
 
 ```
 
+@TODO: Envvars
+@TODO: VIM stuff
+@TODO: Setting min versions
+
 Development
 -----------
 
