@@ -48,6 +48,7 @@ install_posix() {
     if [ ! -z "$HYPERDRIVE_VERSION" ]; then
       git -C "$HOME/.hyperdrive" checkout $HYPERDRIVE_VERSION
     fi
+
     # Update submodules
     git -C "$HOME/.hyperdrive" submodule update --init --recursive --remote
 

@@ -1,1 +1,11 @@
+""
+"" Customisations
+""
+
+" Load our custom before vimrc
+if filereadable(expand("~/.vimrc.hyperdrive.before"))
+  source ~/.vimrc.hyperdrive.before
+endif
+
+" Leader
 let mapleader = ","
