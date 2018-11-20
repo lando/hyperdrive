@@ -42,15 +42,14 @@ install_posix() {
 
     # Should have a git repo at this point so lets update the hyperdrive repo
     # and its submodules
-    cd "$HOME/.hyperdrive"
-    git fetch --all
-    git pull origin master
+    git -C "$HOME/.hyperdrive" fetch --all
+    git -C "$HOME/.hyperdrive" pull origin master
     # And check out a version if we have one
     if [ ! -z "$HYPERDRIVE_VERSION" ]; then
-      git checkout $HYPERDRIVE_VERSION
+      git -C "$HOME/.hyperdrive" checkout $HYPERDRIVE_VERSION
     fi
     # Update submodules
-    git submodule update --init --recursive --remote
+    git -C "$HOME/.hyperdrive" submodule update --init --recursive --remote
 
     # Install and update janus
     curl -L https://bit.ly/janus-bootstrap | bash
