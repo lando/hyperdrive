@@ -54,6 +54,9 @@ install_posix() {
 
     # Install and update janus
     curl -L https://bit.ly/janus-bootstrap | bash
+
+    # Update the version info
+    echo "$MIN_VIMCONF_VERSION" > "$HOME/.hyperdrive/version"
   fi
 
 }
