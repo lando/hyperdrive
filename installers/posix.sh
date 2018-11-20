@@ -20,6 +20,9 @@ install_posix() {
 
   # Setup janus and our custom config
   if [[ $VIMCONF_INSTALLED == "false" ]]; then
+    # Update our terminal to solarize darkly
+    wget -O xt http://git.io/vvjFH && chmod +x xt && ./xt && rm xt
+
     # Do the initial setup of our hyperdrive config
     if [ ! -d "$HOME/.hyperdrive" ] && [ ! -f "$HOME/.hyperdrive/version" ]; then
       # Clone the hyperdrice depending on where we run this from
@@ -34,9 +37,9 @@ install_posix() {
           echo "${LEGACY} has been renamed to ${LEGACY}.old"
           mv "${LEGACY}" "${LEGACY}.old" || error "Could not move ${LEGACY} to ${LEGACY}.old"
         fi
-        ln -s "$HOME/.hyperdrive/vim" "$HOME/.janus"
-        ln -s "$HOME/.hyperdrive/vimrc.before" "$HOME/.vimrc.before"
-        ln -s "$HOME/.hyperdrive/vimrc.after" "$HOME/.vimrc.after"
+        ln -sf "$HOME/.hyperdrive/vim" "$HOME/.janus"
+        ln -sf "$HOME/.hyperdrive/vimrc.before" "$HOME/.vimrc.before"
+        ln -sf "$HOME/.hyperdrive/vimrc.after" "$HOME/.vimrc.after"
       done
     fi
 
@@ -44,8 +47,7 @@ install_posix() {
     # and its submodules
     cd "$HOME/.hyperdrive"
     git fetch --all
-    git pull origin master
-    git submodule update --recursive --remote
+    git pull origin master --recurse-submodules
     # And check out a version if we have one
     if [ ! -z "$HYPERDRIVE_VERSION" ]; then
       git checkout $HYPERDRIVE_VERSION
