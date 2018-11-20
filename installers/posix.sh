@@ -20,11 +20,12 @@ install_posix() {
 
   # Setup janus and our custom config
   if [[ $VIMCONF_INSTALLED == "false" ]]; then
-    # Update our terminal to solarize darkly
-    wget -O xt http://git.io/vvjFH && chmod +x xt && ./xt && rm xt
+    # Install and update janus
+    curl -L https://bit.ly/janus-bootstrap | bash
 
     # Do the initial setup of our hyperdrive config
     if [ ! -d "$HOME/.hyperdrive" ] && [ ! -f "$HOME/.hyperdrive/version" ]; then
+
       # Clone the hyperdrice depending on where we run this from
       if [ ! -z "$HYPERDRIVE_VERSION" ]; then
         git clone https://github.com/lando/hyperdrive.git "$HOME/.hyperdrive"
@@ -52,9 +53,6 @@ install_posix() {
     if [ ! -z "$HYPERDRIVE_VERSION" ]; then
       git checkout $HYPERDRIVE_VERSION
     fi
-
-    # Update janus
-    curl -L https://bit.ly/janus-bootstrap | bash
   fi
 
 }
