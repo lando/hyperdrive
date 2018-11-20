@@ -47,7 +47,6 @@ HOMEBREW_PREFIX="/usr/local"
     # export CPPFLAGS="-I/usr/local/opt/node@10/include"
 
     # Install node
-    NODE_MAJOR_VERSION="$(echo $NODE_VERSION | cut -c1-2)"
     brew unlink node &>/dev/null || true
     brew install "node@$NODE_MAJOR_VERSION"
     brew link --overwrite --force "node@$NODE_MAJOR_VERSION"

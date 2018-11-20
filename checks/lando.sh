@@ -15,10 +15,10 @@ check_lando() {
     LANDO_STATUS=$(status_good "$LANDO_VERSION")
     semverGTE $LANDO_VERSION $LANDO_MIN_VERSION || LANDO_INSTALLED=false
     semverGTE $LANDO_VERSION $LANDO_MIN_VERSION || LANDO_STATUS=$(status_warn "$LANDO_VERSION")
-    semverGTE $LANDO_VERSION $LANDO_MIN_VERSION || LANDO_ACTION=$(status_warn "upgrade to lando $LANDO_MIN_VERSION")
+    semverGTE $LANDO_VERSION $LANDO_MIN_VERSION || LANDO_ACTION=$(status_warn "upgrade lando")
   # Otherwise set the uninstalled status
   else
     LANDO_STATUS=$(status_bad "not installed")
-    LANDO_ACTION=$(status_warn "install lando $LANDO_MIN_VERSION")
+    LANDO_ACTION=$(status_warn "install lando")
   fi
 }

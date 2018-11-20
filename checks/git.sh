@@ -15,10 +15,10 @@ check_git() {
     GIT_STATUS=$(status_good "$GIT_VERSION")
     semverGTE $GIT_VERSION $GIT_MIN_VERSION || GIT_INSTALLED=false
     semverGTE $GIT_VERSION $GIT_MIN_VERSION || GIT_STATUS=$(status_warn "$GIT_VERSION")
-    semverGTE $GIT_VERSION $GIT_MIN_VERSION || GIT_ACTION=$(status_warn "upgrade to git $GIT_MIN_VERSION")
+    semverGTE $GIT_VERSION $GIT_MIN_VERSION || GIT_ACTION=$(status_warn "upgrade git")
   # Otherwise set the uninstalled status
   else
     GIT_STATUS=$(status_bad "not installed")
-    GIT_ACTION=$(status_warn "install git $GIT_MIN_VERSION")
+    GIT_ACTION=$(status_warn "install git")
   fi
 }

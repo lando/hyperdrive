@@ -28,7 +28,7 @@ Options:
 
   --name                    My name eg "Jean Luc Picard"
   --email                   My email eg kirk@starfleet.mil
-  --editor                  Either vim|atom or none
+  --vim                     Also check for and install vim
 
 Examples:
   # Run bootscript interactively

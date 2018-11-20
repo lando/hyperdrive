@@ -8,11 +8,7 @@ OPTION_HELP=${HYPERDRIVE_HELP:-false}
 OPTION_AUTOYES=${HYPERDRIVE_YES:-false}
 OPTION_NAME=${HYPERDRIVE_NAME:-none}
 OPTION_EMAIL=${HYPERDRIVE_EMAIL:-none}
-OPTION_EDITOR=${HYPERDRIVE_EDITOR:-none}
-
-# Set implied options
-OPTION_GITCONFIG=${HYPERDRIVE_YES:-false}
-OPTION_SSHKEYS=${HYPERDRIVE_YES:-false}
+OPTION_VIM=${HYPERDRIVE_VIM:-false}
 
 # Source all our things if they exist and we arent in a prod build
 if [ -z "$HYPERDRIVE_VERSION" ]; then
@@ -48,7 +44,6 @@ esac
 # PARSE THE ARGZZ AND OPTZ
 while (( "$#" )); do
   case "$1" in
-    # Name option handling
     --name|--name=*)
       if [ "${1##--name=}" != "$1" ]; then
         OPTION_NAME="${1##--name=}"
@@ -58,7 +53,6 @@ while (( "$#" )); do
         shift 2
       fi
       ;;
-    # Email option handling
     --email|--email=*)
       if [ "${1##--email=}" != "$1" ]; then
         OPTION_EMAIL="${1##--email=}"
@@ -68,7 +62,6 @@ while (( "$#" )); do
         shift 2
       fi
       ;;
-    # Help option handling
     -h|--help)
       shift
       OPTION_HELP=true
@@ -87,12 +80,15 @@ while (( "$#" )); do
       fi
       exit 0
       ;;
+    # Vim option handling
+    --vim)
+      shift
+      OPTION_VIM=true
+      ;;
     # Autoyes option handling
     -y|--yes)
       shift
       OPTION_AUTOYES=true
-      OPTION_GITCONFIG=true
-      OPTION_SSHKEYS=true
       ;;
     # Special opt handling?
     --)
@@ -194,6 +190,14 @@ progress_bar 1 "Determining lando version" "$LANDO_STATUS"
 check_sshkey
 progress_bar 1 "Checking for ssh public key" "$SSHKEY_STATUS"
 
+# VIM
+if [[ $OPTION_VIM == "true" ]]; then
+  check_vim
+  progress_bar 1 "Checking for vim version" "$VIM_STATUS"
+  check_vimconf
+  progress_bar 1 "Checking for vim config version" "$VIMCONF_STATUS"
+fi
+
 # Tabulating results
 # NOTE: this doesn't actually do anythign but it really adds to the ms-dos bootup experience
 progress_bar 3 "Reticulating"
@@ -201,14 +205,19 @@ echo -e ""
 
 # UX things
 progress_bar 2 "Computing results matrix"
-# NOTE: docs for below
+
+# Define our core dependencies
 DEPS=("os" "pkgmgr" "curl" "git" "gitname" "gitemail" "node" "yarn" "docker" "lando" "sshkey")
-# print_results expects that at least DEP_INSTALLED and DEP_STATUS exist, optionally DEP_VERSION or DEP_ACTION
+# Add in VIM if its been specified
+if [[ $OPTION_VIM == "true" ]]; then
+  DEPS+=('vim vimconf')
+fi
+
+# Print the things
 print_results "${DEPS[@]}"
 
 # Describe to the user what is going to happen and ask for their permission to proceed
 echo -e "\033[35mNOW I WANT TO ASK YOU A BUNCH OF QUESTIONS AND I WANT TO HAVE THEM ANSWERED IMMEDIATELY!\033[39m\n"
-
 # Show confirm message if we aren't in autoyes
 if [[ $OPTION_AUTOYES == "false" ]]; then
   read -r -p "Do you wish for this script to take the recommended actions marked above? [Y/n]" CONFIRM
@@ -232,8 +241,6 @@ fi
 if [[ $OPTION_EMAIL == "none" && $GITEMAIL_INSTALLED == "false" ]]; then
   read -r -p "What is your email? " OPTION_EMAIL
 fi
-
-# @TODO: add in editor stuff
 
 # Do distro specific stuff
 case $OS in

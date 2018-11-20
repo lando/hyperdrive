@@ -15,10 +15,10 @@ check_curl() {
     CURL_STATUS=$(status_good "$CURL_VERSION")
     semverGTE $CURL_VERSION $CURL_MIN_VERSION || CURL_INSTALLED=false
     semverGTE $CURL_VERSION $CURL_MIN_VERSION || CURL_STATUS=$(status_warn "$CURL_VERSION")
-    semverGTE $CURL_VERSION $CURL_MIN_VERSION || CURL_ACTION=$(status_warn "upgrade to curl $CURL_MIN_VERSION")
+    semverGTE $CURL_VERSION $CURL_MIN_VERSION || CURL_ACTION=$(status_warn "upgrade curl")
   # Otherwise set the uninstalled status
   else
     CURL_STATUS=$(status_bad "not installed")
-    CURL_ACTION=$(status_warn "install curl $CURL_MIN_VERSION")
+    CURL_ACTION=$(status_warn "install curl")
   fi
 }

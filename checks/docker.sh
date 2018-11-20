@@ -15,10 +15,10 @@ check_docker() {
     DOCKER_STATUS=$(status_good "$DOCKER_VERSION")
     semverGTE $DOCKER_VERSION $DOCKER_MIN_VERSION || DOCKER_INSTALLED=false
     semverGTE $DOCKER_VERSION $DOCKER_MIN_VERSION || DOCKER_STATUS=$(status_warn "$DOCKER_VERSION")
-    semverGTE $DOCKER_VERSION $DOCKER_MIN_VERSION || DOCKER_ACTION=$(status_warn "upgrade to $DOCKER_MIN_VERSION")
+    semverGTE $DOCKER_VERSION $DOCKER_MIN_VERSION || DOCKER_ACTION=$(status_warn "upgrade docker")
   # Otherwise set the uninstalled status
   else
     DOCKER_STATUS=$(status_bad "not installed")
-    DOCKER_ACTION=$(status_warn "install docker $DOCKER_MIN_VERSION")
+    DOCKER_ACTION=$(status_warn "install docker")
   fi
 }
