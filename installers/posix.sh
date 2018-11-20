@@ -20,12 +20,8 @@ install_posix() {
 
   # Setup janus and our custom config
   if [[ $VIMCONF_INSTALLED == "false" ]]; then
-    # Install and update janus
-    curl -L https://bit.ly/janus-bootstrap | bash
-
     # Do the initial setup of our hyperdrive config
     if [ ! -d "$HOME/.hyperdrive" ] && [ ! -f "$HOME/.hyperdrive/version" ]; then
-
       # Clone the hyperdrice depending on where we run this from
       if [ ! -z "$HYPERDRIVE_VERSION" ]; then
         git clone https://github.com/lando/hyperdrive.git "$HOME/.hyperdrive"
@@ -48,11 +44,16 @@ install_posix() {
     # and its submodules
     cd "$HOME/.hyperdrive"
     git fetch --all
-    git pull origin master --recurse-submodules
+    git pull origin master
     # And check out a version if we have one
     if [ ! -z "$HYPERDRIVE_VERSION" ]; then
       git checkout $HYPERDRIVE_VERSION
     fi
+    # Update submodules
+    git submodule update --init --recursive --remote
+
+    # Install and update janus
+    curl -L https://bit.ly/janus-bootstrap | bash
   fi
 
 }
