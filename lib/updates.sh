@@ -121,24 +121,6 @@ semverGTE() {
   fi
 }
 
-update_check() {
-  STATUS_KEY="$(echo "$1" | tr [a-z] [A-Z])_STATUS"
-  INSTALLED_KEY="$(echo "$1" | tr [a-z] [A-Z])_INSTALLED"
-  UPDATE_ACTION_KEY="$(echo "$1" | tr [a-z] [A-Z])_UPDATE_ACTION"
-
-  # Check min version is satisfied
-  semverGTE $2 $3 || export ${INSTALLED_KEY}=false
-  semverGTE $2 $3 && export ${STATUS_KEY}=$(status_good $2) || export ${STATUS_KEY}=$(status_warn $2)
-  export ${UPDATE_ACTION_KEY}="upgrade"
-
-  # Check if max version is satisfied
-  if [ ! -z $4 ]; then
-    semverGTE $4 $2 || export ${INSTALLED_KEY}=false
-    semverGTE $4 $2 && export ${STATUS_KEY}=$(status_good $2) || export ${STATUS_KEY}=$(status_warn $2)
-    export ${UPDATE_ACTION_KEY}="downgrade"
-  fi
-}
-
 # if [ "___semver.sh" == "___`basename $0`" ]; then
 #
 # MAJOR=0
