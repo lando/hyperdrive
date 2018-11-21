@@ -29,7 +29,7 @@ install_vimconfig() {
   # Should have a git repo at this point so lets update the hyperdrive repo
   # and its submodules
   git -C "$HOME/.hyperdrive" fetch --all
-  git -C "$HOME/.hyperdrive" pull origin master
+  git -C "$HOME/.hyperdrive" pull --all
   # And check out the  tag if we have a version
   if [ ! -z "$HYPERDRIVE_VERSION" ]; then
     git -C "$HOME/.hyperdrive" checkout $HYPERDRIVE_VERSION
