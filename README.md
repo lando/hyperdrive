@@ -101,7 +101,7 @@ hyperdrive --vim
 
 Hyperdrive Vim is built on top of and extends [Janus](https://github.com/carlhuda/janus) which means it uses [Pathogen](https://github.com/tpope/vim-pathogen) for plugin management and sets `,` as the Leader Key. If you are unfamiliar with `vim` or `janus` we highly recommend you review [this](https://github.com/carlhuda/janus#intro-to-vim) before proceeding further.
 
-You can further extend it with your own `~/.hyperdrive.local` folder which should take this structure:
+You can further extend it with your own `~/.hyperdrive.local` folder which _minimally_ should take this structure:
 
 ```bash
 .
@@ -110,7 +110,7 @@ You can further extend it with your own `~/.hyperdrive.local` folder which shoul
 └── vimrc.before          Runs after the custom Janus vimrc.before
 ```
 
-And ideally lives in a `git` repository so you can do this magic:
+Ideally this lives in a `git` repository forked from `hyperdrive` itself. This model allows you to easily maintain your own customizations and contribute to `hyperdrive` simultaneously.
 
 ```bash
 git clone https://github.com/pirog/hyperdrive ~/.hyperdrive.local
