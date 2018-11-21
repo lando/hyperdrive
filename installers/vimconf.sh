@@ -2,6 +2,11 @@
 
 # Install janus
 install_vimconfig() {
+  # If this is running in CI we shoul unset HYPERDRIVE_VERSION so we can test the build
+  # script from locally cloned things
+  if [ ! -z "$HYPERDRIVE_VERSION" ] && [ ! -z "$CI" ]; then
+    unset HYPERDRIVE_VERSION
+  fi
   # Do the initial setup of our hyperdrive config
   if [ ! -d "$HOME/.hyperdrive" ] && [ ! -f "$HOME/.hyperdrive/version" ]; then
     # Clone the hyperdrice depending on where we run this from

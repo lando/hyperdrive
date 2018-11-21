@@ -18,7 +18,7 @@ before_script:
   - sudo rm -f $(which node) || true
   - ./bin/hyperdrive --version
 script:
-  - ./hyperdrive.sh -y --name="Obi-Wan Kenobi" --email hermit@tatooine.org --vim
+  - ./bin/hyperdrive -y --name="Obi-Wan Kenobi" --email hermit@tatooine.org --vim
   - # @TODO: Ideally we should get Leia in here for the tests but lets slum it for now
   - # Print out and see if we are up to date
   - # this may produce unexpected results for docker on macOS
