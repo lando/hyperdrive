@@ -71,5 +71,14 @@ HOMEBREW_PREFIX="/usr/local"
     rm -f /tmp/lando.dmg && rm -rf /tmp/lando
   fi
 
+  # Install vimconf deps
+  # we will handle the janus/vimconf setup in the posix script
+  if [[ $VIMCONF_INSTALLED == "false" ]]; then
+    ack --version &>/dev/null || brew install ack
+    ctags --version &>/dev/null || brew install ctags
+    ruby --version &>/dev/null || brew install ruby
+    rake --version &>/dev/null || sudo gem install rake
+  fi
+
 }
 
