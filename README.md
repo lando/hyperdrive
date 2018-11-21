@@ -1,7 +1,7 @@
 Hyperdrive
 ==========
 
-![screenshot](https://raw.githubusercontent.com/lando/hyperdrive/master/hyperdrive.gif)
+![Hyperdrive](https://raw.githubusercontent.com/lando/hyperdrive/master/hyperdrive.gif)
 
 A helper script to get you from a vanilla machine to a minimal Lando-based dev environment in less than 12 par-steps. Generally this includes:
 
@@ -44,7 +44,7 @@ hyperdrive -h
           __/ | |
          |___/|_|
 
-Usage: ./hyperdrive.sh [-yh] [--name name] [--email email]
+Usage: ./hyperdrive.sh [-yh] [--name name] [--email email] [--vim]
 
 Options:
   -h, --help                Show this help dialog
@@ -53,6 +53,7 @@ Options:
 
   --name                    My name eg "Jean Luc Picard"
   --email                   My email eg kirk@starfleet.mil
+  --vim                     Install vim with hyperdrive conf
 
 Examples:
   # Run bootscript interactively
@@ -61,9 +62,50 @@ Examples:
   # Show this usage dialog
   ./hyperdrive.sh -h
 
-  # Run non-interactively
-  ./hyperdrive.sh -y --name "Lando Calrissian" --email admin@thisfacility.com
+  # Run non-interactively with optional vim installation
+  ./hyperdrive.sh -y --name "Lando" --email admin@thisfacility.com --vim
 
+```
+
+Environment Variables
+---------------------
+
+The above CLI options are also available as environment variables. Take care to `export` the variables. You can ensure that they are set correctly by running `env`.
+
+```bash
+export HYPERDRIVE_HELP=false
+export HYPERDRIVE_YES=false
+export HYPERDRIVE_NAME=James T. Kirk
+export HYPERDRIVE_EMAIL=kirk@enterprise.mil
+export HYPERDRIVE_VIM=false
+```
+
+VIM
+---
+
+You can optionally install our `hyperdrive` version of the `vim` text editor by passing the `--vim` option into `hyperdrive`.
+
+```bash
+hyperdrive --vim
+```
+
+![Hyperdrive Vim](https://raw.githubusercontent.com/lando/hyperdrive/master/hypervim.png)
+
+Hyperdrive Vim is built on top of and extends [Janus](https://github.com/carlhuda/janus) which means it uses [Pathogen](https://github.com/tpope/vim-pathogen) for plugin management and sets `,` as the Leader Key. If you are unfamiliar with `vim` or `janus` we highly recommend you review [this](https://github.com/carlhuda/janus#intro-to-vim) before proceeding further.
+
+You can further extend it with your own `~/.hyperdrive.local` folder which should take this structure:
+
+```bash
+.
+├── vim                   Pathogen VIM plugins as git submodules
+├── vimrc.after           Runs after the custom Janus vimrc.after
+└── vimrc.before          Runs after the custom Janus vimrc.before
+```
+
+And ideally lives in a `git` repository so you can do this magic:
+
+```bash
+git clone https://github.com/pirog/hyperdrive ~/.hyperdrive.local
 ```
 
 Development
@@ -89,6 +131,28 @@ git clone https://github.com/lando/hyperdrive.git
 #
 # Pass in the version you want to bump to with an optional tag annotation
 ./release.sh v4.4.4-alpha.12931 "Wretched hive of scum and villiany"
+```
+
+Structure
+---------
+
+The project structure to hyperdrive makes it easy to work with and learn.
+
+```bash
+.
+├── CONTRIBUTING.md       Contributing docs
+├── LICENSE               License
+├── README.md             This README
+├── bin                   The location of ./build.sh artifacts eg hyperdrive
+├── checks                A standardized set of dependency check functions
+├── installers            Scripts to install things
+├── lib                   Helper functions loaded first and used everywhere else
+├── vim                   Git submodules for our VIM ~/.janus plugins (Pathogen)
+├── build.sh              Build script
+├── release.sh            Release script
+├── hyperdrive.sh         Main entrypoint logic
+├── vimrc.after           Custom Janus vimrc.after
+└── vimrc.before          Custom Janus vimrc.before
 ```
 
 Other Resources

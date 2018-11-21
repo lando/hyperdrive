@@ -27,7 +27,7 @@ install_debian() {
   # Install node if needed
   if [[ $NODE_INSTALLED == "false" ]]; then
     clean_apt
-    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash
+    curl -sL "https://deb.nodesource.com/setup_${NODE_MAJOR_VERSION}.x" | sudo -E bash
     sudo apt install -y nodejs
   fi
 
@@ -111,5 +111,22 @@ install_debian() {
   fi
 
   # Install vim
-  # git config --global core.editor "vim"
+  if [[ $VIM_INSTALLED == "false" ]]; then
+    git config --global core.editor "vim"
+    clean_apt
+    sudo apt -y update
+    sudo apt -y install vim
+  fi
+
+  # Install vimconf deps
+  # we will handle the janus/vimconf setup in the posix script
+  if [[ $VIMCONF_INSTALLED == "false" ]]; then
+    clean_apt
+    sudo apt -y update
+    ack --version &>/dev/null || sudo apt -y install ack || sudo apt -y install ack-grep
+    ctags --version &>/dev/null || sudo apt -y install ctags
+    ruby --version &>/dev/null || sudo apt -y install ruby
+    rake --version &>/dev/null || sudo apt -y install rake
+  fi
+
 }

@@ -4,7 +4,7 @@
 rm -rf ./bin/hyperdrive
 
 # Set some things
-VERSION=$(git describe --tags --always --abbrev=1)
+VERSION=$(git describe --tags --always --abbrev=0)
 OUTPUT="./bin/hyperdrive"
 
 # Set our headers
@@ -12,13 +12,25 @@ echo -e "Kicking off a build..."
 echo -e "#!/bin/bash" > $OUTPUT
 echo -e "HYPERDRIVE_VERSION=$VERSION\n" >> $OUTPUT
 
-# Append our libraries to the top of things
+# Add our libraries to the top of things
 for LIB in ./lib/*.sh; do
   echo -e "Loading in $LIB"
   echo -e "$(tail -n +2 $LIB)" >> $OUTPUT
 done
 
-# Add in the hyperdrive
+# Add our checks next
+for CHECK in ./checks/*.sh; do
+  echo -e "Loading in $CHECK"
+  echo -e "$(tail -n +2 $CHECK)" >> $OUTPUT
+done
+
+# Add our installers next
+for INSTALLER in ./installers/*.sh; do
+  echo -e "Loading in $INSTALLER"
+  echo -e "$(tail -n +2 $INSTALLER)" >> $OUTPUT
+done
+
+# Finally, add in the hyperdrive
 echo -e "Addiding in the core navicomputer"
 echo -e "$(tail -n +2 ./hyperdrive.sh)" >> $OUTPUT
 

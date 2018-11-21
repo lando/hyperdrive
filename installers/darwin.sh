@@ -47,7 +47,6 @@ HOMEBREW_PREFIX="/usr/local"
     # export CPPFLAGS="-I/usr/local/opt/node@10/include"
 
     # Install node
-    NODE_MAJOR_VERSION="$(echo $NODE_VERSION | cut -c1-2)"
     brew unlink node &>/dev/null || true
     brew install "node@$NODE_MAJOR_VERSION"
     brew link --overwrite --force "node@$NODE_MAJOR_VERSION"
@@ -70,6 +69,15 @@ HOMEBREW_PREFIX="/usr/local"
     sudo installer -pkg /tmp/lando/LandoInstaller.pkg -target /
     hdiutil detach -force /tmp/lando
     rm -f /tmp/lando.dmg && rm -rf /tmp/lando
+  fi
+
+  # Install vimconf deps
+  # we will handle the janus/vimconf setup in the posix script
+  if [[ $VIMCONF_INSTALLED == "false" ]]; then
+    ack --version &>/dev/null || brew install ack
+    ctags --version &>/dev/null || brew install ctags
+    ruby --version &>/dev/null || brew install ruby
+    rake --version &>/dev/null || sudo gem install rake
   fi
 
 }

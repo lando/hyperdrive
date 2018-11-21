@@ -64,14 +64,3 @@ case $CONFIRM in
 esac
 
 exit 0
-
-
-#git tag -a v0.0.1 -m "Initial release to test shit"
-
-#git push origin master && git push origin master v0.1.0
-
-
-echo "STUFF"
-# Build the recommendDRYed commands
-# GIT_COMMANDS=
-#sed -i 's/original/new/g' file.txt

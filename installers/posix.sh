@@ -17,4 +17,17 @@ install_posix() {
   if [[ $SSHKEY_INSTALLED == "false" ]]; then
     ssh-keygen -t rsa -N "" -C "$(git config --global --get user.email)" -f "$HOME/.ssh/id_rsa"
   fi
+
+  # Setup janus and our custom config
+  if [[ $VIMCONF_INSTALLED == "false" ]]; then
+    # Fix solarized terminal config if needed
+    fix_solarized
+    # Install custom vimconfig
+    install_vimconfig
+    # Install and update janus
+    curl -L https://bit.ly/janus-bootstrap | bash
+    # Update the version info
+    echo "$MIN_VIMCONF_VERSION" > "$HOME/.hyperdrive/version"
+  fi
+
 }

@@ -1,0 +1,54 @@
+
+" Basics
+set backspace=2   " Backspace deletes like most programs in insert mode
+set nobackup
+set nowritebackup
+set noswapfile    " http://robots.thoughtbot.com/post/18739402579/global-gitignore#comment-458413287
+set history=50
+set ruler         " show the cursor position all the time
+set showcmd       " display incomplete commands
+set incsearch     " do incremental searching
+set laststatus=2  " Always display the status line
+set autowrite     " Automatically :write before running commands
+let NERDTreeShowHidden=1
+
+" Automatically remove trailing whitespaces
+autocmd BufWritePre * :%s/\s\+$//e
+
+" Colorscheme
+syntax enable
+set background=dark
+let g:solarized_termcolors=16
+let g:solarized_termtrans=1
+colorscheme solarized
+
+" Softtabs, 2 spaces
+set tabstop=2
+set shiftwidth=2
+set shiftround
+set expandtab
+
+" Display extra whitespace
+set list listchars=tab:»·,trail:·,nbsp:·
+
+" Use one space, not two, after punctuation.
+set nojoinspaces
+
+" Make it obvious where 80 characters is and dont autowrap
+set wrap
+set linebreak
+set textwidth=0
+set wrapmargin=0
+set colorcolumn=80
+
+""
+"" Customizations
+""
+
+" Load our custom plugins
+execute pathogen#infect('~/.hyperdrive.local/vim{}')
+
+" Load our custom after vimrc
+if filereadable(expand("~/.hyperdrive.local/vimrc.after"))
+  source ~/.hyperdrive.local/vimrc.after
+endif

@@ -1,87 +1,38 @@
 #!/bin/bash
 
-# @TODO: check for internet?
-# @TODO: check to update this script?
+# @TODO: check for internet first?
+# @TODO: check if there is an update to this script?
 
 # Set defaults options
 OPTION_HELP=${HYPERDRIVE_HELP:-false}
 OPTION_AUTOYES=${HYPERDRIVE_YES:-false}
 OPTION_NAME=${HYPERDRIVE_NAME:-none}
 OPTION_EMAIL=${HYPERDRIVE_EMAIL:-none}
-OPTION_EDITOR=${HYPERDRIVE_EDITOR:-none}
+OPTION_VIM=${HYPERDRIVE_VIM:-false}
 
-# Set implied options
-OPTION_GITCONFIG=${HYPERDRIVE_YES:-false}
-OPTION_SSHKEYS=${HYPERDRIVE_YES:-false}
-
-# SET VERSION RECS
-CURL_VERSION="7."
-GIT_VERSION="2."
-NODE_VERSION="10."
-YARN_VERSION="1."
-DOCKER_VERSION="18."
-LANDO_VERSION="3.0.0-rc."
-
-# Some other helpful vars
-NI="\033[91mnot installed\033[39m"
-
-# OTHERWISE LINUX THINGS
-if [[ $OSTYPE == "darwin"* ]]; then
-  OS="darwin"
-elif [ -f /etc/os-release ]; then
-  source /etc/os-release
-  OS="$ID_LIKE"
-  OS="$ID"
-elif [ -f /etc/arch-release ]; then
-  OS="arch"
-elif [ -f /etc/debian_version ]; then
-  OS="debian"
-elif [ -f /etc/fedora-release ]; then
-  OS="fedora"
-elif [ -f /etc/gentoo-release ]; then
-  OS="gentoo"
-elif [ -f /etc/redhat-release ]; then
-  OS="redhat"
-else
-  OS="whoknows"
-fi
-
-# Determine the package manager
-PKGMGR="none"
-case $OS in
-  manjaro|arch)
-    PKGMGR="pacman"
-    PKGMGR_SCAN="echo pacman"
-    ;;
-  debian|ubuntu|elementary|mint)
-    PKGMGR="aptitude"
-    PKGMGR_SCAN="echo aptitude"
-    ;;
-  fedora|redhat)
-    PKGMGR="dnf"
-    PKGMGR_SCAN="echo dnf"
-    ;;
-  darwin)
-    PKGMGR="brew"
-    PKGMGR_SCAN="brew --version"
-    PKGMGR_VERSION="1.8."
-    ;;
-esac
-
-# Source all our libraries if the exist and we arent in a prod build
+# Source all our things if they exist and we arent in a prod build
 if [ -z "$HYPERDRIVE_VERSION" ]; then
+  # @NOTE: We load these first because these are used in everything else
   for LIB in ./lib/*.sh; do
     source $LIB
   done
+  for CHECK in ./checks/*.sh; do
+    source $CHECK
+  done
+    for INSTALLER in ./installers/*.sh; do
+    source $INSTALLER
+  done
 fi
+
+# Discover the OS
+discover_os
 
 # Fail if running as root
 if [[ $USER == "root" ]]; then
   error "This script CANNOT be run as root!" 1
 fi
 
-# Fail here on unsupported OSz
-# Do stuff on each distro
+# Fail on unsupported OSz
 case $OS in
   darwin|debian|ubuntu|elementary|mint)
     ;;
@@ -93,8 +44,6 @@ esac
 # PARSE THE ARGZZ AND OPTZ
 while (( "$#" )); do
   case "$1" in
-
-    # Name option handling
     --name|--name=*)
       if [ "${1##--name=}" != "$1" ]; then
         OPTION_NAME="${1##--name=}"
@@ -104,8 +53,6 @@ while (( "$#" )); do
         shift 2
       fi
       ;;
-
-    # Email option handling
     --email|--email=*)
       if [ "${1##--email=}" != "$1" ]; then
         OPTION_EMAIL="${1##--email=}"
@@ -115,8 +62,6 @@ while (( "$#" )); do
         shift 2
       fi
       ;;
-
-    # Help option handling
     -h|--help)
       shift
       OPTION_HELP=true
@@ -125,7 +70,6 @@ while (( "$#" )); do
       print_usage
       exit 1
       ;;
-
     # Help option handling
     -v|--version)
       shift
@@ -136,26 +80,25 @@ while (( "$#" )); do
       fi
       exit 0
       ;;
-
+    # Vim option handling
+    --vim)
+      shift
+      OPTION_VIM=true
+      ;;
     # Autoyes option handling
     -y|--yes)
       shift
       OPTION_AUTOYES=true
-      OPTION_GITCONFIG=true
-      OPTION_SSHKEYS=true
       ;;
-
     # Special opt handling?
     --)
       shift
       break
       ;;
-
     # Unsupported options handling
     -*|--*=)
       error "Error: Unsupported flag $1" 3 >&2
       ;;
-
     # Arg handling?
     *)
       shift
@@ -176,75 +119,105 @@ if [[ $OPTION_AUTOYES == "false" ]]; then
 fi
 
 # ITS A TRAP!
-trap 'ret=$?; test $ret -ne 0 && printf "FAILED WITH CODE $ret!\n\n" >&2; exit $ret' EXIT
-clear
 set -e
+trap 'ret=$?; test $ret -ne 0 && printf "FAILED WITH CODE $ret!\n\n" >&2; exit $ret' EXIT
+
+# GEt started
+clear
 print_hyperdrive
 echo -e ""
 
-# Scan all our dependencies
-# NOTE: scan_dependency exports STATUS and ACTION mesages as envvars eg GIT_STATUS/GIT_ACTION
+##
+# All the "check" functions should define at least the required variables below.
+# Scan ./checks/*.sh for some examples
+#
+# @export {Required Boolean} [DEP_INSTALLED=false]
+#   - Whether the dependency is already installed and doesnt need to be updated
+# @export {Required String} [DEP_STATUS=not installed]
+#   - A colored string containing that status of the dependency, usually a version or brief message
+# @export {String} DEP_VERSION
+#   - A string containing the detected version of the dependency
+# @export {String} [DEP_ACTION=do nothing]
+#   - The action hyperdrive should take to install the dependency
+#
+# @example
+# OS_INSTALLED=true
+# OS_STATUS=$(status_good "elementary")
+# OS_VERSION=Elementary OS
+# OS_ACTION=$(status_good "Rejoice!")
+
 # OS
-scan_dependency "os" "echo $OS" "\033[91mnot supported\033[39m"
+check_os
 progress_bar 1 "Determining operating system" "$OS_STATUS"
 
 # PACKAGE MANAGER
-scan_dependency "pkgmgr" "$PKGMGR_SCAN" "\033[91mnone\033[39m" "install $PKGMGR" "$PKGMGR_VERSION"
+check_pkgmgr
 progress_bar 1 "Determining package manager" "$PKGMGR_STATUS"
 
 # CURL
-scan_dependency "curl" "curl --version" "$NI" "install curl" "$CURL_VERSION"
+check_curl
 progress_bar 1 "Determining curl version" "$CURL_STATUS"
 
 # GIT
-scan_dependency "git" "git --version" "$NI" "install git" "$GIT_VERSION"
+check_git
 progress_bar 1 "Determining git version" "$GIT_STATUS"
 
 # GIT NAME
-if [[ $OPTION_NAME == 'none' ]]; then HELPER_NAME="Joe Example"; else HELPER_NAME="$OPTION_NAME"; fi
-scan_dependency "gitname" "git config --get user.name" "\033[91mnot set\033[39m" "run 'git config --global user.name \"${HELPER_NAME}\"'"
+check_gitname
 progress_bar 1 "Checking for git config user name" "$GITNAME_STATUS"
 
 # GIT EMAIL
-if [[ $OPTION_EMAIL == 'none' ]]; then HELPER_EMAIL="joe@example.org"; else HELPER_EMAIL="$OPTION_EMAIL"; fi
-scan_dependency "gitemail" "git config --get user.email" "\033[91mnot set\033[39m" "run 'git config --global user.email ${HELPER_EMAIL}'"
+check_gitemail
 progress_bar 1 "Checking for git config user email" "$GITEMAIL_STATUS"
 
 # NODE
-scan_dependency "node" "node -v" "$NI" "install latest node ${NODE_VERSION}x.x" "$NODE_VERSION"
+check_node
 progress_bar 1 "Determining node version" "$NODE_STATUS"
 
 # YARN
-scan_dependency "yarn" "yarn -v" "$NI" "install latest yarn ${YARN_VERSION}x" "$YARN_VERSION"
+check_yarn
 progress_bar 1 "Determining yarn version" "$YARN_STATUS"
 
 # DOCKER
-scan_dependency "docker" "docker --version" "$NI" "install latest docker ${DOCKER_VERSION}x" "$DOCKER_VERSION"
+check_docker
 progress_bar 1 "Determining docker version" "$DOCKER_STATUS"
 
 # LANDO
-scan_dependency "lando" "lando version" "$NI" "install latest lando ${LANDO_VERSION}x" "$LANDO_VERSION"
+check_lando
 progress_bar 1 "Determining lando version" "$LANDO_STATUS"
 
 # SSHKEY
-scan_dependency "sshkey" "ssh-keygen -l -f $HOME/.ssh/id_rsa.pub" "\033[91mno ticket!\033[39m" "run 'ssh-keygen'"
+check_sshkey
 progress_bar 1 "Checking for ssh public key" "$SSHKEY_STATUS"
 
+# VIM
+if [[ $OPTION_VIM == "true" ]]; then
+  check_vim
+  progress_bar 1 "Checking for vim version" "$VIM_STATUS"
+  check_vimconf
+  progress_bar 1 "Checking for vim config version" "$VIMCONF_STATUS"
+fi
+
 # Tabulating results
-# NOTE: this doesn't actually do anythign but it really adds to the
-# ms-dos bootup experience
+# NOTE: this doesn't actually do anythign but it really adds to the ms-dos bootup experience
 progress_bar 3 "Reticulating"
 echo -e ""
 
 # UX things
 progress_bar 2 "Computing results matrix"
+
+# Define our core dependencies
 DEPS=("os" "pkgmgr" "curl" "git" "gitname" "gitemail" "node" "yarn" "docker" "lando" "sshkey")
+# Add in VIM if its been specified
+if [[ $OPTION_VIM == "true" ]]; then
+  DEPS+=('vim vimconf')
+fi
+
+# Print the things
 print_results "${DEPS[@]}"
 
-# Describe to the user what is going to happen and ask for their permission
-# to proceed
+# Describe to the user what is going to happen and ask for their permission to proceed
 echo -e "\033[35mNOW I WANT TO ASK YOU A BUNCH OF QUESTIONS AND I WANT TO HAVE THEM ANSWERED IMMEDIATELY!\033[39m\n"
-
 # Show confirm message if we aren't in autoyes
 if [[ $OPTION_AUTOYES == "false" ]]; then
   read -r -p "Do you wish for this script to take the recommended actions marked above? [Y/n]" CONFIRM
@@ -269,8 +242,6 @@ if [[ $OPTION_EMAIL == "none" && $GITEMAIL_INSTALLED == "false" ]]; then
   read -r -p "What is your email? " OPTION_EMAIL
 fi
 
-# @TODO: add in editor stuff
-
 # Do distro specific stuff
 case $OS in
   debian|ubuntu|elementary)
@@ -286,7 +257,7 @@ install_posix
 
 # WEDUNIT
 echo -e "\033[32mInstallation complete. You have made it into hyperspace!\033[39m"
-echo -e "Run ./hyperdrive.sh again if you want to verify installation success."
+echo -e "Please run again if you want to verify installation success."
 
 # Docker notez
 if [[ $DOCKER_INSTALLED == "false" && $OS != "darwin" ]]; then
