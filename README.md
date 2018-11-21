@@ -108,13 +108,6 @@ And ideally lives in a `git` repository so you can do this magic:
 git clone https://github.com/pirog/hyperdrive ~/.hyperdrive.local
 ```
 
-Configuration
--------------
-
-You can configure
-You can
-
-
 Development
 -----------
 
