@@ -13,7 +13,7 @@ echo -e "#!/bin/bash" > $OUTPUT
 echo -e "HYPERDRIVE_VERSION=$VERSION\n" >> $OUTPUT
 
 # Add our libraries to the top of things
-for LIBS in ./lib/*.sh; do
+for LIB in ./lib/*.sh; do
   echo -e "Loading in $LIB"
   echo -e "$(tail -n +2 $LIB)" >> $OUTPUT
 done
