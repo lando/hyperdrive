@@ -18,6 +18,6 @@ check_gitemail() {
   # Otherwise set the uninstalled one
   else
     GITEMAIL_STATUS=$(status_bad "not set")
-    GITEMAIL_ACTION="git config --global user.email ${HELPER_EMAIL}"
+    GITEMAIL_ACTION=$(status_warn "git config --global user.email ${HELPER_EMAIL}")
   fi
 }

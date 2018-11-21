@@ -11,6 +11,6 @@ check_sshkey() {
   # Otherwise set the uninstalled status
   else
     SSHKEY_STATUS=$(status_bad "not set")
-    SSHKEY_ACTION="ssh-keygen"
+    SSHKEY_ACTION=$(status_warn "ssh-keygen")
   fi
 }

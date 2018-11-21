@@ -44,7 +44,7 @@ hyperdrive -h
           __/ | |
          |___/|_|
 
-Usage: ./hyperdrive.sh [-yh] [--name name] [--email email]
+Usage: ./hyperdrive.sh [-yh] [--name name] [--email email] [--vim]
 
 Options:
   -h, --help                Show this help dialog
@@ -53,6 +53,7 @@ Options:
 
   --name                    My name eg "Jean Luc Picard"
   --email                   My email eg kirk@starfleet.mil
+  --vim                     Also check for and install vim
 
 Examples:
   # Run bootscript interactively

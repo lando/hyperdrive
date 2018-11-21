@@ -19,7 +19,7 @@ EOF
 # Usage for the hyperdrive
 print_usage() {
   cat << "EOF"
-Usage: ./hyperdrive.sh [-yh] [--name name] [--email email]
+Usage: ./hyperdrive.sh [-yh] [--name name] [--email email] [--vim]
 
 Options:
   -h, --help                Show this help dialog

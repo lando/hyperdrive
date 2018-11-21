@@ -15,7 +15,7 @@ check_vimconf() {
   cat ~/.hyperdrive/version &>/dev/null && VIMCONF_INSTALLED=true || VIMCONF_INSTALLED=false
   # If installed make sure we have a supported version
   if [[ $VIMCONF_INSTALLED == "true" ]]; then
-    VIMCONF_VERSION=$(cat ~/.hyperdrive/version | cut -c 2-)
+    VIMCONF_VERSION=$(cat ~/.hyperdrive/version)
     VIMCONF_STATUS=$(status_good "$VIMCONF_VERSION")
     semverGTE $VIMCONF_VERSION $MIN_VIMCONF_VERSION || VIMCONF_INSTALLED=false
     semverGTE $VIMCONF_VERSION $MIN_VIMCONF_VERSION || VIMCONF_STATUS=$(status_warn "$VIMCONF_VERSION")
