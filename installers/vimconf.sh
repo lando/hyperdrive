@@ -2,6 +2,11 @@
 
 # Install janus
 install_vimconfig() {
+  # If this is running in CI we shoul unset HYPERDRIVE_VERSION so we can test the build
+  # script from locally cloned things
+  if [ ! -z "$HYPERDRIVE_VERSION" ] && [ ! -z "$CI" ]; then
+    unset HYPERDRIVE_VERSION
+  fi
   # Do the initial setup of our hyperdrive config
   if [ ! -d "$HOME/.hyperdrive" ] && [ ! -f "$HOME/.hyperdrive/version" ]; then
     # Clone the hyperdrice depending on where we run this from
@@ -25,7 +30,7 @@ install_vimconfig() {
   # and its submodules
   git -C "$HOME/.hyperdrive" fetch --all
   git -C "$HOME/.hyperdrive" pull origin master
-  # And check out a version if we have one
+  # And check out the  tag if we have a version
   if [ ! -z "$HYPERDRIVE_VERSION" ]; then
     git -C "$HOME/.hyperdrive" checkout $HYPERDRIVE_VERSION
   fi
