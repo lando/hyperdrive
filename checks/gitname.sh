@@ -18,6 +18,6 @@ check_gitname() {
   # Otherwise set the uninstalled one
   else
     GITNAME_STATUS=$(status_bad "not set")
-    GITNAME_ACTION=$(status_warn "git config --global user.name '${HELPER_NAME}')"
+    GITNAME_ACTION=$(status_warn "git config --global user.name '${HELPER_NAME}'")
   fi
 }

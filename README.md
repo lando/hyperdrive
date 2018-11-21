@@ -53,7 +53,7 @@ Options:
 
   --name                    My name eg "Jean Luc Picard"
   --email                   My email eg kirk@starfleet.mil
-  --vim                     Also check for and install vim
+  --vim                     Install vim with hyperdrive conf
 
 Examples:
   # Run bootscript interactively
@@ -62,8 +62,8 @@ Examples:
   # Show this usage dialog
   ./hyperdrive.sh -h
 
-  # Run non-interactively
-  ./hyperdrive.sh -y --name "Lando Calrissian" --email admin@thisfacility.com
+  # Run non-interactively with optional vim installation
+  ./hyperdrive.sh -y --name "Lando" --email admin@thisfacility.com --vim
 
 ```
 
