@@ -1,6 +1,7 @@
 " Basics
 let mapleader=","
 let g:disable_markdown_autostyle=1
+let g:lightline={'colorscheme': 'solarized'}
 
 ""
 "" Customisations
