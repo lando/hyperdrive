@@ -12,7 +12,7 @@ fi
 ##
 check_vimconf() {
   # Do the initial installed check
-  cat ~/.hyperdrive/version | cut -c 2- &>/dev/null && VIMCONF_INSTALLED=true || VIMCONF_INSTALLED=false
+  cat ~/.hyperdrive/version &>/dev/null && VIMCONF_INSTALLED=true || VIMCONF_INSTALLED=false
   # If installed make sure we have a supported version
   if [[ $VIMCONF_INSTALLED == "true" ]]; then
     VIMCONF_VERSION=$(cat ~/.hyperdrive/version | cut -c 2-)
