@@ -45,9 +45,6 @@ set colorcolumn=80
 "" Customizations
 ""
 
-" Load our custom plugins
-execute pathogen#infect('~/.hyperdrive.local/vim{}')
-
 " Load our custom after vimrc
 if !expand('<sfile>:p') == expand("~/.hyperdrive.local/vimrc.after")
   if filereadable(expand("~/.hyperdrive.local/vimrc.after"))

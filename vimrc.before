@@ -6,6 +6,9 @@ let g:disable_markdown_autostyle=1
 "" Customisations
 ""
 
+" Add our custom hyperdrive dir as a janus group
+call janus#add_group("vim", expand("~/.hyperdrive.local"))
+
 " Load our custom before vimrc
 if !expand('<sfile>:p') == expand("~/.hyperdrive.local/vimrc.before")
   if filereadable(expand("~/.hyperdrive.local/vimrc.before"))
