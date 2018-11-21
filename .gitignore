@@ -2,3 +2,4 @@ bin/hyperdrive
 bin/*.sh
 node_modules
 version
+README.md.bak

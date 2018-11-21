@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./lib/error.sh
+source ./lib/messages.sh
 
 # Error if no $1
 if [ -z "$1" ]; then
@@ -18,7 +18,7 @@ echo -e "About to bump from $OLD_VERSION to $NEW_VERSION with annotation: \"$ANN
 echo -e ""
 
 # Var our commands
-README_UPDATE=(sed -i "s/$OLD_VERSION/$NEW_VERSION/g" ./README.md)
+README_UPDATE=(sed -i.bak "s/$OLD_VERSION/$NEW_VERSION/" README.md)
 GIT_ADD=(git add --all)
 GIT_COMMIT=(git commit -m "\"$GIT_MESSAGE\"")
 GIT_TAG=(git tag -a "$NEW_VERSION" -m "\"$ANNOTATION\"")
@@ -46,6 +46,7 @@ case $CONFIRM in
     echo -e "Begining release cycle!"
     echo -e "Updating Readme..."
     "${README_UPDATE[@]}"
+    rm -f README.md.bak
     echo -e "Commiting the codes"
     "${GIT_ADD[@]}"
     "${GIT_COMMIT[@]}"
