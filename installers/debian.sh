@@ -123,7 +123,7 @@ install_debian() {
   if [[ $VIMCONF_INSTALLED == "false" ]]; then
     clean_apt
     sudo apt -y update
-    ack --version &>/dev/null || sudo apt -y install ack || sudo-apt -y install ack-grep
+    ack --version &>/dev/null || sudo apt -y install ack || sudo apt -y install ack-grep
     ctags --version &>/dev/null || sudo apt -y install ctags
     ruby --version &>/dev/null || sudo apt -y install ruby
     rake --version &>/dev/null || sudo apt -y install rake
