@@ -1,7 +1,7 @@
 Hyperdrive
 ==========
 
-![screenshot](https://raw.githubusercontent.com/lando/hyperdrive/master/hyperdrive.gif)
+![Hyperdrive](https://raw.githubusercontent.com/lando/hyperdrive/master/hyperdrive.gif)
 
 A helper script to get you from a vanilla machine to a minimal Lando-based dev environment in less than 12 par-steps. Generally this includes:
 
@@ -88,6 +88,8 @@ You can optionally install our `hyperdrive` version of the `vim` text editor by 
 ```bash
 hyperdrive --vim
 ```
+
+![Hyperdrive Vim](https://raw.githubusercontent.com/lando/hyperdrive/master/hypervim.png)
 
 Hyperdrive Vim is built on top of and extends [Janus](https://github.com/carlhuda/janus) which means it uses [Pathogen](https://github.com/tpope/vim-pathogen) for plugin management and sets `,` as the Leader Key. If you are unfamiliar with `vim` or `janus` we highly recommend you review [this](https://github.com/carlhuda/janus#intro-to-vim) before proceeding further.
 
