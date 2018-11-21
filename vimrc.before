@@ -1,11 +1,11 @@
+" Leader
+let mapleader = ","
+
 ""
 "" Customisations
 ""
 
 " Load our custom before vimrc
-if filereadable(expand("~/.vimrc.hyperdrive.before"))
-  source ~/.vimrc.hyperdrive.before
+if filereadable(expand("~/.hyperdrive.local/vimrc.before"))
+  source ~/.hyperdrive.local/vimrc.before
 endif
-
-" Leader
-let mapleader = ","

@@ -40,9 +40,9 @@ set colorcolumn=+1
 ""
 
 " Load our custom plugins
-execute pathogen#infect('~/.hyperdrive.local/{}')
+execute pathogen#infect('~/.hyperdrive.local/vim{}')
 
 " Load our custom after vimrc
-if filereadable(expand("~/.vimrc.hyperdrive.after"))
-  source ~/.vimrc.hyperdrive.after
+if filereadable(expand("~/.hyperdrive.local/vimrc.after"))
+  source ~/.hyperdrive.local/vimrc.after
 endif
