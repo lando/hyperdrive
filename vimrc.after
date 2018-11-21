@@ -49,6 +49,8 @@ set colorcolumn=80
 execute pathogen#infect('~/.hyperdrive.local/vim{}')
 
 " Load our custom after vimrc
-if filereadable(expand("~/.hyperdrive.local/vimrc.after"))
-  source ~/.hyperdrive.local/vimrc.after
+if !expand('<sfile>:p') == expand("~/.hyperdrive.local/vimrc.after")
+  if filereadable(expand("~/.hyperdrive.local/vimrc.after"))
+    source ~/.hyperdrive.local/vimrc.after
+  endif
 endif

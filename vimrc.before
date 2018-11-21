@@ -7,6 +7,8 @@ let g:disable_markdown_autostyle=1
 ""
 
 " Load our custom before vimrc
-if filereadable(expand("~/.hyperdrive.local/vimrc.before"))
-  source ~/.hyperdrive.local/vimrc.before
+if !expand('<sfile>:p') == expand("~/.hyperdrive.local/vimrc.before")
+  if filereadable(expand("~/.hyperdrive.local/vimrc.before"))
+    source ~/.hyperdrive.local/vimrc.before
+  endif
 endif
