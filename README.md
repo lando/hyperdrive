@@ -22,15 +22,23 @@ Installation
 The easiest way to kick in things into lightspeed is to run the latest release script directly from the internet
 
 ```bash
-curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.4.0/hyperdrive > /tmp/hyperdrive \
+curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.4.1/hyperdrive > /tmp/hyperdrive \
   && chmod +x /tmp/hyperdrive \
   && /tmp/hyperdrive
+```
+
+Or with options
+
+```bash
+curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.4.1/hyperdrive > /tmp/hyperdrive \
+  && chmod +x /tmp/hyperdrive \
+  && /tmp/hyperdrive --vim -y
 ```
 
 You can also download the script to your `$PATH` and then pass in options to make it non-interactive
 
 ```bash
-curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.4.0/hyperdrive > /usr/local/bin/hyperdrive \
+curl -Ls https://github.com/lando/hyperdrive/releases/download/v0.4.1/hyperdrive > /usr/local/bin/hyperdrive \
   && chmod +x /usr/local/bin/hyperdrive
 ```
 ```bash

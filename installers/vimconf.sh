@@ -31,7 +31,7 @@ install_vimconfig() {
   # Lets also make sure this doesnt run on CI because it will always fail
   # for travis pr builds
   if [ -z "$CI" ]; then
-    giv -C "$HOME/.hyperdrive" fetch --all
+    git -C "$HOME/.hyperdrive" fetch --all
     git -C "$HOME/.hyperdrive" pull --all
   fi
   # And check out the  tag if we have a version
