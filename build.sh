@@ -4,7 +4,7 @@
 rm -rf ./bin/hyperdrive
 
 # Set some things
-VERSION=$(git describe --tags --always --abbrev=1)
+VERSION=$(git describe --tags --always --abbrev=0)
 OUTPUT="./bin/hyperdrive"
 
 # Set our headers
