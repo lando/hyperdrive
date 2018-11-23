@@ -1,4 +1,11 @@
-v0.5.0 - [November 21, 2018](https://github.com/lando/hyperdrive/releases/tag/v0.5.0)
+v0.5.1 - [November 23, 2018](https://github.com/lando/hyperdrive/releases/tag/v0.5.1)
+----------------------------
+
+* Added `hyperdrive` ASCII art and some helpful bootup messages
+* Added message during boot to indicated if custom `vimrc` were loaded
+* Fixed bug where custom `.hyperdrive.local` `vimrc` were not loading correctly
+
+0.5.0 - [November 21, 2018](https://github.com/lando/hyperdrive/releases/tag/v0.5.0)
 ----------------------------
 
 * Fixed bug where forked hyperdrives put into `.hyperdrive.local` were inifinite looping `vimrc` sourcing

@@ -11,8 +11,9 @@ let g:lightline={'colorscheme': 'solarized'}
 call janus#add_group("vim", expand("~/.hyperdrive.local"))
 
 " Load our custom before vimrc
-if !expand('<sfile>:p') == expand("~/.hyperdrive.local/vimrc.before")
+if expand('<sfile>:p') != expand("~/.hyperdrive.local/vimrc.before")
   if filereadable(expand("~/.hyperdrive.local/vimrc.before"))
+    echo "Detected custom vimrc.before in ~/.hyperdrive.local, loading it..."
     source ~/.hyperdrive.local/vimrc.before
   endif
 endif
