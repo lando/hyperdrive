@@ -1,3 +1,9 @@
+v0.5.2 - [November 23, 2018](https://github.com/lando/hyperdrive/releases/tag/v0.5.2)
+----------------------------
+
+* Added `.git` so it is ignored by `NERDTree`
+* Improved boot art and config so it only shows up once
+
 v0.5.1 - [November 23, 2018](https://github.com/lando/hyperdrive/releases/tag/v0.5.1)
 ----------------------------
 

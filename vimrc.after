@@ -1,17 +1,18 @@
 " Art
-echo " "
-echo "  _    _                          _      _             "
-echo " | |  | |                        | |    (_)            "
-echo " | |__| |_   _ _ __   ___ _ __ __| |_ __ ___   _____   "
-echo " |  __  | | | | '_ \\ / _ \\ '__/ _` | '__| \\ \\ / / _ \\  "
-echo " | |  | | |_| | |_) |  __/ | | (_| | |  | |\\ V /  __/  "
-echo " |_|  |_|\\__, | .__/ \\___|_|  \\__,_|_|  |_| \\_/ \\___|  "
-echo "          __/ | |                                      "
-echo "         |___/|_|                                      "
-echo " ================================================ VIM "
-echo " "
-
-
+" Only show from core hyperdrive, not others
+if expand('<sfile>:p') != expand("~/.hyperdrive.local/vimrc.after")
+  echo " "
+  echo "  _    _                          _      _             "
+  echo " | |  | |                        | |    (_)            "
+  echo " | |__| |_   _ _ __   ___ _ __ __| |_ __ ___   _____   "
+  echo " |  __  | | | | '_ \\ / _ \\ '__/ _` | '__| \\ \\ / / _ \\  "
+  echo " | |  | | |_| | |_) |  __/ | | (_| | |  | |\\ V /  __/  "
+  echo " |_|  |_|\\__, | .__/ \\___|_|  \\__,_|_|  |_| \\_/ \\___|  "
+  echo "          __/ | |                                      "
+  echo "         |___/|_|                                      "
+  echo " ================================================ VIM "
+  echo " "
+endif
 
 " Basics
 set backspace=2   " Backspace deletes like most programs in insert mode
@@ -26,6 +27,7 @@ set laststatus=2  " Always display the status line
 set autowrite     " Automatically :write before running commands
 set noshowmode
 let NERDTreeShowHidden=1
+let g:NERDTreeIgnore=['^.git$']
 
 " Automatically remove trailing whitespaces
 autocmd BufWritePre * :%s/\s\+$//e
@@ -71,6 +73,9 @@ endif
 ""
 "" Reporting
 ""
-echo "Here is some helpful information about your Hyperdrive Vim config"
-version
-echo "Getting ready to launch you into hyperpace..."
+if expand('<sfile>:p') != expand("~/.hyperdrive.local/vimrc.after")
+  echo "Here is some helpful information about your Hyperdrive Vim config"
+  version
+  echo "Getting ready to launch you into hyperpace..."
+endif
+
