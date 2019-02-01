@@ -1,3 +1,8 @@
+v0.5.3
+------
+
+* Updated to use [Lando 3.0.0-rc.2](https://github.com/lando/lando/releases)
+
 v0.5.2
 ------
 
