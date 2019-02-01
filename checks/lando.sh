@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Min lando version
-LANDO_MIN_VERSION=3.0.0-rc.1
+LANDO_MIN_VERSION=3.0.0-rc.2
 
 ##
 # Sets variables containing the status of the lando dependency

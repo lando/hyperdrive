@@ -63,7 +63,7 @@ HOMEBREW_PREFIX="/usr/local"
     # @TODO: eventually use the "stable" line when it it available
     # see: https://github.com/lando/lando/issues/810
     echo -e "Downloading Lando"
-    curl -f#SL -o /tmp/lando.dmg https://github.com/lando/lando/releases/download/v3.0.0-rc.1/lando-v3.0.0-rc.1.dmg
+    curl -f#SL -o /tmp/lando.dmg https://github.com/lando/lando/releases/download/v3.0.0-rc.2/lando-v3.0.0-rc.2.dmg
     mkdir -p /tmp/lando
     hdiutil attach -mountpoint /tmp/lando /tmp/lando.dmg
     sudo installer -pkg /tmp/lando/LandoInstaller.pkg -target /
