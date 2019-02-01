@@ -1,5 +1,5 @@
-v0.5.3
-------
+v0.5.3 [September 1, 2019](https://github.com/lando/hyperdrive/releases/tag/v0.5.3)
+--------------------------
 
 * Updated to use [Lando 3.0.0-rc.2](https://github.com/lando/lando/releases)
 
