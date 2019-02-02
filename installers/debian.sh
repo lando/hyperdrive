@@ -103,7 +103,7 @@ install_debian() {
   if [[ $LANDO_INSTALLED == "false" ]]; then
     clean_apt
     echo -e "Downloading Lando"
-    curl -f#SL -o /tmp/lando.deb https://github.com/lando/lando/releases/download/v3.0.0-rc.2/lando-v3.0.0-rc.2.deb
+    curl -f#SL -o /tmp/lando.deb https://files.devwithlando.io/lando-stable.deb
     sudo dpkg -i /tmp/lando.deb
     rm -f /tmp/lando.deb
   fi
