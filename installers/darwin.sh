@@ -54,7 +54,7 @@ HOMEBREW_PREFIX="/usr/local"
 
   # Install yarn if needed
   if [[ $YARN_INSTALLED == "false" ]]; then
-    brew install yarn --without-node
+    brew install yarn --ignore-dependencies
   fi
 
   # Install lando if needed
