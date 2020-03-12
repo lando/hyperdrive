@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Min yarn version
-DOCKER_MIN_VERSION=18.0.0
+DOCKER_MIN_VERSION=19.0.0
 
 ##
 # Sets variables containing the status of the docker dependency

@@ -15,7 +15,14 @@ install_posix() {
 
   # Set the sshkey
   if [[ $SSHKEY_INSTALLED == "false" ]]; then
-    ssh-keygen -t rsa -N "" -C "$(git config --global --get user.email)" -f "$HOME/.ssh/id_rsa"
+    # Double check if the ssh-key needs to be installed, sometimes this will run because there
+    # is no public key but is a private key EG on travis
+    if [ ! -f "$HOME/.ssh/id_rsa" ]; then
+      ssh-keygen -t rsa -N "" -C "$(git config --global --get user.email)" -f "$HOME/.ssh/id_rsa"
+    fi
+    if [ ! -f "$HOME/.ssh/hyperdrive.lando.id_rsa" ]; then
+      ssh-keygen -t rsa -N "" -C "$(git config --global --get user.email)" -f "$HOME/.ssh/hyperdrive.lando.id_rsa"
+    fi
   fi
 
   # Setup janus and our custom config
