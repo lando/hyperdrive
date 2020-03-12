@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Min yarn version
-YARN_MIN_VERSION=1.12.0
+YARN_MIN_VERSION=1.13.0
 
 ##
 # Sets variables containing the status of the yarn dependency
