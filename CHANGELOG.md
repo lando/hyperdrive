@@ -1,6 +1,7 @@
 v0.6.0 [March 12, 2019](https://github.com/lando/hyperdrive/releases/tag/v0.6.0)
 -----------------------
 
+* Fixed bug causing a private key to be generated when it already existed
 * Updated min `docker` version to `19.0.0`
 * Updated min `lando` version to `3.0.0-rc.23`
 * Updated min `node` version to `12.16.0`
