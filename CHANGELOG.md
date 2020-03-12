@@ -1,3 +1,8 @@
+v0.5.5
+------
+* Updated Yarn install process to use `--ignore-dependencies` rather than `--without-node``
+
+
 v0.5.4 [February 3, 2019](https://github.com/lando/hyperdrive/releases/tag/v0.5.4)
 -------------------------
 
