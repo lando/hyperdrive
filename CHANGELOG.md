@@ -1,3 +1,8 @@
+v0.6.1 [March 12, 2019](https://github.com/lando/hyperdrive/releases/tag/v0.6.1)
+-----------------------
+
+* Fixed busted GitHub `releases` deploy script
+
 v0.6.0 [March 12, 2019](https://github.com/lando/hyperdrive/releases/tag/v0.6.0)
 -----------------------
 
