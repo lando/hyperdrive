@@ -79,6 +79,4 @@ HOMEBREW_PREFIX="/usr/local"
     ruby --version &>/dev/null || brew install ruby
     rake --version &>/dev/null || sudo gem install rake
   fi
-
 }
-
