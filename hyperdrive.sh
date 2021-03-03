@@ -220,7 +220,7 @@ print_results "${DEPS[@]}"
 echo -e "\033[35mNOW I WANT TO ASK YOU A BUNCH OF QUESTIONS AND I WANT TO HAVE THEM ANSWERED IMMEDIATELY!\033[39m\n"
 # Show confirm message if we aren't in autoyes
 if [[ $OPTION_AUTOYES == "false" ]]; then
-  read -r -p "Do you wish for this script to take the recommended actions marked above? [Y/n]" CONFIRM
+  read -r -p "Do you wish for this script to take the recommended actions marked above? [y/n]" CONFIRM
   case $CONFIRM in
     [yY][eE][sS]|[yY])
       echo
