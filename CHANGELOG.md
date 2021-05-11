@@ -1,3 +1,8 @@
+v0.6.2 [May 10, 2021]
+---------------------
+
+* Fixed default option when prompting to confirm for install
+
 v0.6.1 [March 12, 2019](https://github.com/lando/hyperdrive/releases/tag/v0.6.1)
 -----------------------
 
