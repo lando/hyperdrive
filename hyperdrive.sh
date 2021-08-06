@@ -225,6 +225,9 @@ if [[ $OPTION_AUTOYES == "false" ]]; then
     [yY][eE][sS]|[yY])
       echo
       ;;
+    "")
+      echo
+      ;;
     [nN][oO]|[nN])
       error "So be it!" 0
       ;;
