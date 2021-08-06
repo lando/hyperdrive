@@ -1,6 +1,0 @@
-[submodule "vim/Dockerfile"]
-	path = vim/Dockerfile
-	url = https://github.com/ekalinin/Dockerfile.vim.git
-[submodule "vim/ligthline.vim"]
-	path = vim/ligthline.vim
-	url = https://github.com/itchyny/lightline.vim

@@ -1,0 +1,7 @@
+{
+  "extends": "oclif",
+  "rules": {
+    "semi": ["error", "always"],
+    "semi-style": ["error", "last"]
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "name": "@lando/hyperdrive",
+  "description": "A cli utility for Lando dependency and package management.",
+  "version": "0.7.0",
+  "author": "Mike Pirog @pirog",
+  "bin": {
+    "hyperdrive": "./bin/run"
+  },
+  "bugs": "https://github.com/lando/hyperdrive/issues",
+  "dependencies": {
+    "@oclif/command": "^1",
+    "@oclif/config": "^1",
+    "@oclif/plugin-help": "^3"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1",
+    "@oclif/test": "^1",
+    "chai": "^4",
+    "eslint": "^5.13",
+    "eslint-config-oclif": "^3.1",
+    "globby": "^10",
+    "mocha": "^5",
+    "nyc": "^14"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json",
+    "/src"
+  ],
+  "homepage": "https://github.com/lando/hyperdrive",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "GPL-3.0",
+  "main": "src/index.js",
+  "oclif": {
+    "commands": "./src/commands",
+    "bin": "hyperdrive",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "lando/hyperdrive",
+  "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
+    "lint": "eslint .",
+    "prepack": "oclif-dev manifest && oclif-dev readme",
+    "test": "nyc mocha --forbid-only \"test/**/*.test.js\"",
+    "version": "oclif-dev readme && git add README.md"
+  }
+}
