@@ -13,7 +13,6 @@
     "@oclif/plugin-help": "^3"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "^1",
     "@oclif/test": "^1",
     "chai": "^4",
     "eslint": "^5.13",
@@ -23,16 +22,16 @@
     "nyc": "^14"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=14.0.0"
   },
   "files": [
     "/bin",
     "/npm-shrinkwrap.json",
-    "/oclif.manifest.json",
     "/src"
   ],
   "homepage": "https://github.com/lando/hyperdrive",
   "keywords": [
+    "lando",
     "oclif"
   ],
   "license": "GPL-3.0",
@@ -46,10 +45,7 @@
   },
   "repository": "lando/hyperdrive",
   "scripts": {
-    "postpack": "rm -f oclif.manifest.json",
     "lint": "eslint .",
-    "prepack": "oclif-dev manifest && oclif-dev readme",
-    "test": "nyc mocha --forbid-only \"test/**/*.test.js\"",
-    "version": "oclif-dev readme && git add README.md"
+    "test": "nyc mocha --forbid-only \"test/**/*.test.js\""
   }
 }

@@ -1,10 +1,10 @@
-v0.7.0-alpha.1 [August 6, 2021](https://github.com/lando/hyperdrive/releases/tag/v0.7.0-alpha.1)
----------------------
+v0.7.0-alpha.1
+--------------
 
 As of this release `hyperdrive` is expanding in scope to be a proper package and dependency management tool for `lando`. Check out the [README](https://github.com/lando/hyperdrive/blob/main/README.md) for details on `hyperdrives` new mission and purpose.
 
 * Expanded scope and clarified purpose of `hyperdrive`
-* Rebased in `oclif` framework
+* Rebased on `oclif` framework
 * Setup basic DevOps flow for future dev
 
 v0.6.2 [May 10, 2021](https://github.com/lando/hyperdrive/releases/tag/v0.6.2)
