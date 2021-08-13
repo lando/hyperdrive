@@ -45,13 +45,15 @@ jobs:
       - name: Package CLI
         shell: bash
         run: |
+          echo "$PATH"
           yarn build
           ls -lsa dist/@lando
       - name: Replace source CLI with packaged one
         shell: bash
         run: |
-          sudo mv ./dist/@lando/hyperdrive /usr/local/bin/hyperdrive
-          sudo chmod +x /usr/local/bin/hyperdrive
+          echo "$PATH"
+          mv ./dist/@lando/hyperdrive /usr/local/bin/hyperdrive
+          chmod +x /usr/local/bin/hyperdrive
       - name: Verify we can run the packaged CLI
         shell: bash
         run: |
