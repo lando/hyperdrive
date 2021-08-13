@@ -45,15 +45,19 @@ jobs:
       - name: Package CLI
         shell: bash
         run: |
-          echo "$PATH"
           yarn build
           ls -lsa dist/@lando
       - name: Replace source CLI with packaged one
         shell: bash
         run: |
-          echo "$PATH"
-          mv ./dist/@lando/hyperdrive /usr/local/bin/hyperdrive
-          chmod +x /usr/local/bin/hyperdrive
+          # Set os specific vars
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            mv ./dist/@lando/hyperdrive.exe /usr/bin/hyperdrive.exe
+            chmod +x /usr/local/bin/hyperdrive.exe
+          else
+            mv ./dist/@lando/hyperdrive /usr/local/bin/hyperdrive
+            chmod +x /usr/local/bin/hyperdrive
+          fi
       - name: Verify we can run the packaged CLI
         shell: bash
         run: |
