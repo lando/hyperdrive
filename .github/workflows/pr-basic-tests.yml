@@ -53,7 +53,7 @@ jobs:
           # Set os specific vars
           if [ "$RUNNER_OS" == "Windows" ]; then
             mv ./dist/@lando/hyperdrive.exe /usr/bin/hyperdrive.exe
-            chmod +x /usr/local/bin/hyperdrive.exe
+            chmod +x /usr/bin/hyperdrive.exe
           else
             mv ./dist/@lando/hyperdrive /usr/local/bin/hyperdrive
             chmod +x /usr/local/bin/hyperdrive
