@@ -5,7 +5,7 @@ Hyperdrive
 
 Hyperdrive is the `npm` of Lando. Its purpose is to consolidate dependency and plugin management logic that exists across the Lando ecosystem into a single library that can be invoked directly through `require` or via the `hyperdrive` cli. With Hyperdrive you should be able to:
 
-* Install, remove and correctly configure Lando dependencies like Docker
+* Install remove and correctly configure Lando dependencies like Docker
 * Install and remove Lando components like the Lando Desktop, Lando CLI and Lando Server
 * Install and remove core, contrib and third-part Lando plugins
 

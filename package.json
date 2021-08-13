@@ -13,26 +13,29 @@
     "@oclif/plugin-help": "^3"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "^1",
     "@oclif/test": "^1",
     "chai": "^4",
+    "command-line-test": "^1.0.10",
     "eslint": "^5.13",
     "eslint-config-oclif": "^3.1",
     "globby": "^10",
+    "leia-parser": "^0.4.0",
     "mocha": "^5",
-    "nyc": "^14"
+    "nyc": "^14",
+    "pkg": "^5.3.1",
+    "rimraf": "^3.0.2"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=14.0.0"
   },
   "files": [
     "/bin",
     "/npm-shrinkwrap.json",
-    "/oclif.manifest.json",
     "/src"
   ],
   "homepage": "https://github.com/lando/hyperdrive",
   "keywords": [
+    "lando",
     "oclif"
   ],
   "license": "GPL-3.0",
@@ -44,12 +47,23 @@
       "@oclif/plugin-help"
     ]
   },
+  "pkg": {
+    "outputPath": "dist",
+    "scripts": [
+      "bin/*.js",
+      "src/**/*.js"
+    ],
+    "assets": [
+      "package.json",
+      "yarn.lock"
+    ]
+  },
   "repository": "lando/hyperdrive",
   "scripts": {
-    "postpack": "rm -f oclif.manifest.json",
+    "build": "yarn clean && yarn pkg -c package.json -t node14 bin/hyperdrive",
+    "clean": "rimraf dist",
+    "generate:leia-tests": "leia \"examples/**/README.md\" test/leia -r 2 -s 'Start up tests' -t 'Verification commands' -c 'Destroy tests' --split-file --spawn --stdin",
     "lint": "eslint .",
-    "prepack": "oclif-dev manifest && oclif-dev readme",
-    "test": "nyc mocha --forbid-only \"test/**/*.test.js\"",
-    "version": "oclif-dev readme && git add README.md"
+    "test": "nyc mocha --forbid-only \"test/**/*.test.js\""
   }
 }
