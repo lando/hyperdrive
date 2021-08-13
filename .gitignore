@@ -29,3 +29,4 @@ test/split-file.txt
 test/*.func.js
 .nyc_output
 coverage/
+test/leia

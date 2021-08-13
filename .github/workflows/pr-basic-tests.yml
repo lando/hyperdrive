@@ -17,7 +17,7 @@ jobs:
         node-version:
           - '14'
         leia-tests:
-          - basics
+          - basics-example
     steps:
 
       # Install deps and cache
@@ -65,7 +65,7 @@ jobs:
           hyperdrive version
 
       # This block should eventually become use lando/actions-leia@v2
-      # - name: Generate tests
-      #   run: yarn generate:tests
-      # - name: Run ${{ matrix.leia-tests }} tests
-      #   run: yarn mocha --timeout 900000 ./test/${{ matrix.leia-tests }}.func.js
+      - name: Generate tests
+        run: yarn generate:leia-tests
+      - name: Run ${{ matrix.leia-tests }} leia tests
+        run: yarn mocha --timeout 900000 ./test/${{ matrix.leia-tests }}.func.js
