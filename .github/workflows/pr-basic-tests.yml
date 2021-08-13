@@ -1,10 +1,10 @@
-name: Run Unit Tests
+name: Basic Leia Tests
 
 on:
   pull_request:
 
 jobs:
-  tests:
+  leia-tests:
     runs-on: ${{ matrix.os }}
     env:
       TERM: xterm
@@ -16,10 +16,10 @@ jobs:
           - windows-2019
         node-version:
           - '14'
-        # @TODO: Use leia for functional testing
-        # leia-tests:
-        #   - apache-example
+        leia-tests:
+          - basics
     steps:
+
       # Install deps and cache
       # Eventually it would be great if these steps could live in a separate YAML file
       # that could be included in line to avoid code duplication
@@ -41,6 +41,25 @@ jobs:
       - name: Install Yarn dependencies
         run: yarn install --prefer-offline --frozen-lockfile
 
-      # Run unit tests
-      - name: Run units tests
-        run: yarn test
+      # Package and verify CLI
+      - name: Package CLI
+        shell: bash
+        run: |
+          yarn build
+          ls -lsa dist/@lando
+      - name: Replace source CLI with packaged one
+        shell: bash
+        run: |
+          sudo mv ./dist/@lando/hyperdrive /usr/local/bin/hyperdrive
+          sudo chmod +x /usr/local/bin/hyperdrive
+      - name: Verify we can run the packaged CLI
+        shell: bash
+        run: |
+          which hyperdrive
+          hyperdrive version
+
+      # This block should eventually become use lando/actions-leia@v2
+      # - name: Generate tests
+      #   run: yarn generate:tests
+      # - name: Run ${{ matrix.leia-tests }} tests
+      #   run: yarn mocha --timeout 900000 ./test/${{ matrix.leia-tests }}.func.js

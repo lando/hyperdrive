@@ -1,7 +1,31 @@
-*-debug.log
-*-error.log
-/.nyc_output
-/dist
-/package-lock.json
-/tmp
+# Common sys files
+.*.swp
+._*
+.git
+.hg
+.sign
+.lock-wscript
+.svn
+.wafpickle-*
+.DS_Store
+.idea/
+*.tar
+*.jxp
+*.sublime-*
+
+# Logs
+*.log
+logs
+
+# NPM files
 node_modules
+
+# Build dirs
+build
+dist
+
+# Tests
+test/split-file.txt
+test/*.func.js
+.nyc_output
+coverage/
