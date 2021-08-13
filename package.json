@@ -15,6 +15,7 @@
   "devDependencies": {
     "@oclif/test": "^1",
     "chai": "^4",
+    "command-line-test": "^1.0.10",
     "eslint": "^5.13",
     "eslint-config-oclif": "^3.1",
     "globby": "^10",

@@ -593,6 +593,11 @@ colors@1.0.x:
   resolved "https://registry.yarnpkg.com/colors/-/colors-1.0.3.tgz#0433f44d809680fdeb60ed260f1b0c262e82a40b"
   integrity sha1-BDP0TYCWgP3rYO0mDxsMJi6CpAs=
 
+command-line-test@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/command-line-test/-/command-line-test-1.0.10.tgz#7897c68076a9cfb6a53e78af069c316b5185ee7d"
+  integrity sha1-eJfGgHapz7alPnivBpwxa1GF7n0=
+
 commander@2.15.1:
   version "2.15.1"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.15.1.tgz#df46e867d0fc2aec66a34662b406a9ccafff5b0f"
