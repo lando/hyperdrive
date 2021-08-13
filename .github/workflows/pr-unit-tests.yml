@@ -4,21 +4,18 @@ on:
   pull_request:
 
 jobs:
-  tests:
+  units:
     runs-on: ${{ matrix.os }}
     env:
       TERM: xterm
     strategy:
       matrix:
         os:
-          - macos-11
+          - macos-10.15
           - ubuntu-20.04
           - windows-2019
         node-version:
           - '14'
-        # @TODO: Use leia for functional testing
-        # leia-tests:
-        #   - apache-example
     steps:
       # Install deps and cache
       # Eventually it would be great if these steps could live in a separate YAML file
