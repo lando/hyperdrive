@@ -58,11 +58,11 @@ jobs:
         run: |
           node ./scripts/dev-version.js
           node ./bin/hyperdrive version
-          yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-${{ matrix.arch } bin/hyperdrive
+          yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-${{ matrix.arch }} bin/hyperdrive
           if test -f "dist/@lando/hyperdrive.exe"; then
-            mv dist/@lando/hyperdrive.exe dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }.exe
+            mv dist/@lando/hyperdrive.exe dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}.exe
           else
-            mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }
+            mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}
           fi
       - name: Upload hyperdrive-build-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.sha }}
         uses: actions/upload-artifact@v2
