@@ -17,7 +17,10 @@ jobs:
     strategy:
         node-version:
           - '14'
-
+        platform:
+          - linux
+          - macos
+          - win
     steps:
       # Install deps and cache
       # Eventually it would be great if these steps could live in a separate YAML file
@@ -46,219 +49,219 @@ jobs:
       # @NOTE: We cross-compile on Linux because _right now_ this seems to be
       # the only place we can reliably build all the variants. We use actions/upload
       # so move assets between jobs
-      - name: Package ${{ matrix.variant }} CLI
+      - name: Package x86_x64 ${{ matrix.platform }} CLI
         run: |
           node ./scripts/dev-version.js
-          node ./bin/lando.js version
-          yarn pkg --target=node${{ matrix.node-version }}-${{ matrix.variant }} --no-version
-      - name: Upload lando-build-${{ matrix.variant }}-${{ github.sha }}
+          node ./bin/hyperdrive.js version
+          yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-x64 bin/hyperdrive\
+          ls -lsa @lando/dist
+      - name: Upload lando-build-${{ matrix.platform }}-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
           name: lando-build-${{ matrix.variant }}-${{ github.sha }}
-          path: dist/
+          path: dist/@lando
           if-no-files-found: error
           retention-days: 1
 
-  package-arm64:
-    runs-on: ${{ matrix.os }}
-    env:
-      TERM: xterm
-    strategy:
-      matrix:
-        os:
-          - ubuntu-20.04
-        node-version:
-          - '14'
+  # package-arm64:
+  #   runs-on: ${{ matrix.os }}
+  #   env:
+  #     TERM: xterm
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - ubuntu-20.04
+  #       node-version:
+  #         - '14'
 
-    steps:
-      # Install deps and cache
-      # Eventually it would be great if these steps could live in a separate YAML file
-      # that could be included in line to avoid code duplication
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Get Yarn cache directory
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Use Yarn cache
-        id: yarn-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
-      - name: Install Yarn dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+  #   steps:
+  #     # Install deps and cache
+  #     # Eventually it would be great if these steps could live in a separate YAML file
+  #     # that could be included in line to avoid code duplication
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Install node ${{ matrix.node-version }}
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: ${{ matrix.node-version }}
+  #     - name: Get Yarn cache directory
+  #       id: yarn-cache-dir-path
+  #       run: echo "::set-output name=dir::$(yarn cache dir)"
+  #     - name: Use Yarn cache
+  #       id: yarn-cache
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+  #         key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+  #     - name: Install Yarn dependencies
+  #       run: yarn install --prefer-offline --frozen-lockfile
 
-      # Package and upload the cli
-      # @NOTE: We cross-compile on Linux because _right now_ this seems to be
-      # the only place we can reliably build all the variants. We use actions/upload
-      # so move assets between jobs
-      - name: Package ${{ matrix.variant }} CLI
-        run: |
-          node ./scripts/dev-version.js
-          node ./bin/lando.js version
-          yarn pkg --target=node${{ matrix.node-version }}-${{ matrix.variant }} --no-version
-      - name: Upload lando-build-${{ matrix.variant }}-${{ github.sha }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: lando-build-${{ matrix.variant }}-${{ github.sha }}
-          path: dist/
-          if-no-files-found: error
-          retention-days: 1
+  #     # Package and upload the cli
+  #     # @NOTE: We cross-compile on Linux because _right now_ this seems to be
+  #     # the only place we can reliably build all the variants. We use actions/upload
+  #     # so move assets between jobs
+  #     - name: Package ${{ matrix.variant }} CLI
+  #       run: |
+  #         node ./scripts/dev-version.js
+  #         node ./bin/lando.js version
+  #         yarn pkg --target=node${{ matrix.node-version }}-${{ matrix.variant }} --no-version
+  #     - name: Upload lando-build-${{ matrix.variant }}-${{ github.sha }}
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: lando-build-${{ matrix.variant }}-${{ github.sha }}
+  #         path: dist/
+  #         if-no-files-found: error
+  #         retention-days: 1
 
+  # ship-x64:
+  #   runs-on: ${{ matrix.os }}
+  #   needs:
+  #     - package-x64
+  #   env:
+  #     TERM: xterm
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - macos-10.15
+  #         - ubuntu-20.04
+  #         - windows-2019
+  #       arch:
+  #         - x64
+  #         - arm64
+  #       exclude:
+  #         - os: windows-2019
+  #           arch: arm64
+  #   steps:
+  #     # Set things up for signing, notarizing, uploading etc
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Set other variables
+  #       id: vars
+  #       shell: bash
+  #       run: |
+  #         # Set generic source ref vars
+  #         echo "::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}"
+  #         echo "::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}"
+  #         echo "::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}"
+  #         # Unset vars if it makes sense to do so
+  #         if [ "$GITHUB_REF" == "${GITHUB_REF#refs/tags/}" ]; then echo "::set-output name=SOURCE_TAG::"; fi
+  #         if [ "$GITHUB_REF" == "${GITHUB_REF#refs/heads/}" ]; then echo "::set-output name=SOURCE_BRANCH::"; fi
 
-  ship-x64:
-    runs-on: ${{ matrix.os }}
-    needs:
-      - package-x64
-    env:
-      TERM: xterm
-    strategy:
-      matrix:
-        os:
-          - macos-10.15
-          - ubuntu-20.04
-          - windows-2019
-        arch:
-          - x64
-          - arm64
-        exclude:
-          - os: windows-2019
-            arch: arm64
-    steps:
-      # Set things up for signing, notarizing, uploading etc
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Set other variables
-        id: vars
-        shell: bash
-        run: |
-          # Set generic source ref vars
-          echo "::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}"
-          echo "::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}"
-          echo "::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}"
-          # Unset vars if it makes sense to do so
-          if [ "$GITHUB_REF" == "${GITHUB_REF#refs/tags/}" ]; then echo "::set-output name=SOURCE_TAG::"; fi
-          if [ "$GITHUB_REF" == "${GITHUB_REF#refs/heads/}" ]; then echo "::set-output name=SOURCE_BRANCH::"; fi
+  #         # Set os specific vars
+  #         if [ "$RUNNER_OS" == "Linux" ]; then
+  #           echo '::set-output name=OS::linux'
+  #           echo '::set-output name=PKG_ENDING::'
+  #         elif [ "$RUNNER_OS" == "Windows" ]; then
+  #           echo '::set-output name=OS::win'
+  #           echo '::set-output name=PKG_ENDING::.exe'
+  #         else
+  #           echo '::set-output name=OS::macos'
+  #           echo '::set-output name=PKG_ENDING::'
+  #         fi
+  #     - name: Set SOURCE_PKG
+  #       id: pkg
+  #       shell: bash
+  #       run: echo '::set-output name=SOURCE_PKG::lando-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}${{ steps.vars.outputs.PKG_ENDING }}'
+  #     - name: Test user defined variables
+  #       shell: bash
+  #       run: |
+  #         echo "The OS is ${{ steps.vars.outputs.OS }}"
+  #         echo "The SOURCE_NAME is ${{ steps.vars.outputs.SOURCE_NAME }}"
+  #         echo "The SOURCE_BRANCH is ${{ steps.vars.outputs.SOURCE_BRANCH }}"
+  #         echo "The SOURCE_TAG is ${{ steps.vars.outputs.SOURCE_TAG }}"
+  #         echo "The SOURCE_PKG is ${{ steps.pkg.outputs.SOURCE_PKG }}"
+  #     - name: Download lando-build-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ github.sha }}
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: lando-build-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ github.sha }}
+  #         path: dist
 
-          # Set os specific vars
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            echo '::set-output name=OS::linux'
-            echo '::set-output name=PKG_ENDING::'
-          elif [ "$RUNNER_OS" == "Windows" ]; then
-            echo '::set-output name=OS::win'
-            echo '::set-output name=PKG_ENDING::.exe'
-          else
-            echo '::set-output name=OS::macos'
-            echo '::set-output name=PKG_ENDING::'
-          fi
-      - name: Set SOURCE_PKG
-        id: pkg
-        shell: bash
-        run: echo '::set-output name=SOURCE_PKG::lando-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}${{ steps.vars.outputs.PKG_ENDING }}'
-      - name: Test user defined variables
-        shell: bash
-        run: |
-          echo "The OS is ${{ steps.vars.outputs.OS }}"
-          echo "The SOURCE_NAME is ${{ steps.vars.outputs.SOURCE_NAME }}"
-          echo "The SOURCE_BRANCH is ${{ steps.vars.outputs.SOURCE_BRANCH }}"
-          echo "The SOURCE_TAG is ${{ steps.vars.outputs.SOURCE_TAG }}"
-          echo "The SOURCE_PKG is ${{ steps.pkg.outputs.SOURCE_PKG }}"
-      - name: Download lando-build-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ github.sha }}
-        uses: actions/download-artifact@v2
-        with:
-          name: lando-build-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ github.sha }}
-          path: dist
+  #     # Codesign macOS binaries
+  #     # NOTE: We cannot currently do this on macOS because of below issue
+  #     # https://github.com/vercel/pkg/issues/128
+  #     # However, the logic is here and ready to go once that is resolved
+  #     # NOTE: We also should add notarization logic here?
+  #     - name: Codesign macOS binaries
+  #       env:
+  #         APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
+  #         APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+  #         APPLE_TEAM_ID: FY8GAUX282
+  #       if: ${{ steps.vars.outputs.OS == 'macos' }}
+  #       run: |
+  #         ./scripts/sign-macos.sh ./dist/${{ steps.pkg.outputs.SOURCE_PKG }}
+  #         echo "::warning:: Codesign currently disabled because of https://github.com/vercel/pkg/issues/128"
+  #     # Codesign WiNdOzE binaries
+  #     - name: Codesign Windoze binaries
+  #       env:
+  #         WINDOZE_CERT_DATA: ${{ secrets.WINDOZE_CERT_DATA }}
+  #         WINDOZE_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
+  #       if: ${{ steps.vars.outputs.OS == 'win' }}
+  #       shell: powershell
+  #       run: ./scripts/sign-win.ps1 ./dist/${{ steps.pkg.outputs.SOURCE_PKG }}
 
-      # Codesign macOS binaries
-      # NOTE: We cannot currently do this on macOS because of below issue
-      # https://github.com/vercel/pkg/issues/128
-      # However, the logic is here and ready to go once that is resolved
-      # NOTE: We also should add notarization logic here?
-      - name: Codesign macOS binaries
-        env:
-          APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
-          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
-          APPLE_TEAM_ID: FY8GAUX282
-        if: ${{ steps.vars.outputs.OS == 'macos' }}
-        run: |
-          ./scripts/sign-macos.sh ./dist/${{ steps.pkg.outputs.SOURCE_PKG }}
-          echo "::warning:: Codesign currently disabled because of https://github.com/vercel/pkg/issues/128"
-      # Codesign WiNdOzE binaries
-      - name: Codesign Windoze binaries
-        env:
-          WINDOZE_CERT_DATA: ${{ secrets.WINDOZE_CERT_DATA }}
-          WINDOZE_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
-        if: ${{ steps.vars.outputs.OS == 'win' }}
-        shell: powershell
-        run: ./scripts/sign-win.ps1 ./dist/${{ steps.pkg.outputs.SOURCE_PKG }}
+  #     # Depending on the type of commit eg tagged, etc create the releases we need
+  #     - name: Create releases
+  #       env:
+  #         SOURCE_BRANCH: ${{ steps.vars.outputs.SOURCE_BRANCH }}
+  #         SOURCE_TAG: ${{ steps.vars.outputs.SOURCE_TAG }}
+  #         PKG_PREFIX: "lando-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}"
+  #         PKG_SUFFIX: ${{ steps.vars.outputs.PKG_ENDING }}
+  #       shell: bash
+  #       run: |
+  #         # Create release directories
+  #         mkdir -p ./releases ./dev-builds
 
-      # Depending on the type of commit eg tagged, etc create the releases we need
-      - name: Create releases
-        env:
-          SOURCE_BRANCH: ${{ steps.vars.outputs.SOURCE_BRANCH }}
-          SOURCE_TAG: ${{ steps.vars.outputs.SOURCE_TAG }}
-          PKG_PREFIX: "lando-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}"
-          PKG_SUFFIX: ${{ steps.vars.outputs.PKG_ENDING }}
-        shell: bash
-        run: |
-          # Create release directories
-          mkdir -p ./releases ./dev-builds
+  #         # Snapshot release
+  #         cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./dev-builds/$PKG_PREFIX-build-${{ github.sha }}$PKG_SUFFIX"
 
-          # Snapshot release
-          cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./dev-builds/$PKG_PREFIX-build-${{ github.sha }}$PKG_SUFFIX"
+  #         # Branch releases
+  #         if [ -z "$SOURCE_TAG" ]; then cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./releases/$PKG_PREFIX-$SOURCE_BRANCH-latest$PKG_SUFFIX"; fi
+  #         # Latest dev release
+  #         if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./releases/$PKG_PREFIX-latest$PKG_SUFFIX"; fi
+  #         # Tag releases
+  #         if [ ! -z "$SOURCE_TAG" ]; then cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./releases/$PKG_PREFIX-$SOURCE_TAG$PKG_SUFFIX"; fi
+  #         # Latest stable release
+  #         if [ ! -z "$SOURCE_TAG" ]; then cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./releases/$PKG_PREFIX-stable$PKG_SUFFIX"; fi
 
-          # Branch releases
-          if [ -z "$SOURCE_TAG" ]; then cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./releases/$PKG_PREFIX-$SOURCE_BRANCH-latest$PKG_SUFFIX"; fi
-          # Latest dev release
-          if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./releases/$PKG_PREFIX-latest$PKG_SUFFIX"; fi
-          # Tag releases
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./releases/$PKG_PREFIX-$SOURCE_TAG$PKG_SUFFIX"; fi
-          # Latest stable release
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f ./dist/${{ steps.pkg.outputs.SOURCE_PKG }} "./releases/$PKG_PREFIX-stable$PKG_SUFFIX"; fi
+  #         # Print what we end up with
+  #         ls -lsa ./releases
+  #         ls -lsa ./dev-builds
 
-          # Print what we end up with
-          ls -lsa ./releases
-          ls -lsa ./dev-builds
-
-      # Replace previously posted unsigned raw artifacts with signed build snapshots
-      - name: Remove unsigned artifacts
-        uses: geekyeggo/delete-artifact@v1
-        with:
-          name: lando-build-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ github.sha }}
-      - name: Upload build snapshot as Actions artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: lando-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ github.sha }}${{ steps.vars.outputs.PKG_ENDING }}
-          path: dev-builds/
-          if-no-files-found: error
-          retention-days: 30
-      # Upload releases to S3
-      - name: Configure S3 Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-      - name: Upload releases to S3
-        shell: bash
-        run: |
-          aws s3 sync ./releases s3://files.lando.dev/cli --acl public-read
-      # Upload releases to GitHub Releases
-      - name: Upload releases to GitHub Releases
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          draft: true
-          files: ./releases/lando-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ steps.vars.outputs.SOURCE_TAG }}${{ steps.vars.outputs.PKG_ENDING }}
-          # @TODO: Handle autochangelog stuff here eventaully
-          # body_path: ${{ github.workflow }}-CHANGELOG.txt
+  #     # Replace previously posted unsigned raw artifacts with signed build snapshots
+  #     - name: Remove unsigned artifacts
+  #       uses: geekyeggo/delete-artifact@v1
+  #       with:
+  #         name: lando-build-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ github.sha }}
+  #     - name: Upload build snapshot as Actions artifact
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: lando-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ github.sha }}${{ steps.vars.outputs.PKG_ENDING }}
+  #         path: dev-builds/
+  #         if-no-files-found: error
+  #         retention-days: 30
+  #     # Upload releases to S3
+  #     - name: Configure S3 Credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.S3_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+  #         aws-region: us-east-1
+  #     - name: Upload releases to S3
+  #       shell: bash
+  #       run: |
+  #         aws s3 sync ./releases s3://files.lando.dev/cli --acl public-read
+  #     # Upload releases to GitHub Releases
+  #     - name: Upload releases to GitHub Releases
+  #       uses: softprops/action-gh-release@v1
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         draft: true
+  #         files: ./releases/lando-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}-${{ steps.vars.outputs.SOURCE_TAG }}${{ steps.vars.outputs.PKG_ENDING }}
+  #         # @TODO: Handle autochangelog stuff here eventaully
+  #         # body_path: ${{ github.workflow }}-CHANGELOG.txt

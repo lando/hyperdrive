@@ -34,7 +34,9 @@
   },
   "files": [
     "/bin",
+    "/lib",
     "/npm-shrinkwrap.json",
+    "/scripts",
     "/src"
   ],
   "homepage": "https://github.com/lando/hyperdrive",
