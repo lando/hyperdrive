@@ -17,15 +17,8 @@ jobs:
       TERM: xterm
     strategy:
       matrix:
-        arch:
-          - x64
-          - arm64
         node-version:
           - '14'
-        platform:
-          - linux
-          - macos
-          - win
     steps:
       # Install deps and cache
       # Eventually it would be great if these steps could live in a separate YAML file
@@ -49,37 +42,33 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install Yarn dependencies
         run: yarn install --prefer-offline --frozen-lockfile
+      - name: Reset version if needed
+        run: |
+          node ./scripts/dev-version.js
+          node ./bin/hyperdrive version
 
       # Package and upload the cli
       # @NOTE: We cross-compile on Linux because _right now_ this seems to be
       # the only place we can reliably build all the variants. We use actions/upload
       # so move assets between jobs
-      - name: Package ${{ matrix.platform }} CLI
-        if: ${{ matrix.arch == 'x64' }}
+      - name: Package x64 CLI
         run: |
-          node ./scripts/dev-version.js
-          node ./bin/hyperdrive version
-          yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-${{ matrix.arch }} bin/hyperdrive
-          if test -f "dist/@lando/hyperdrive.exe"; then
-            mv dist/@lando/hyperdrive.exe dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}.exe
-          else
-            mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}
-          fi
+          yarn pkg \
+            --config package.json \
+            --targets=node${{ matrix.node-version }}-linux-x64,node${{ matrix.node-version }}-macos-x64,node${{ matrix.node-version }}-win-x64 \
+            bin/hyperdrive
+          ls -lsa dist/@lando
 
       # @NOTE: We cannot cross-compile arm64 builds on x64 runners so we run through docker for now
       # @TODO: switch this to use arm64 runners whenever those are available
-      - name: Package ${{ matrix.platform }} CLI
+      - name: Package arm64 CLI
         uses: uraimo/run-on-arch-action@v2.0.5
-        if: ${{ matrix.arch == 'arm64' }}
         with:
           arch: aarch64
           # @TODO: eventually we need to get this to work on ubuntu20.04 for build parity but we are using
           # 18.04 because it was easier to get working, apparently there is a bug in 20.04s gpg?
           distro: ubuntu18.04
           githubToken: ${{ github.token }}
-          env: |
-            BUILD_PLATFORM: ${{ matrix.platform }}
-            BUILD_ARCH: ${{ matrix.arch }}
           # We need to install node and yarn "again" because they dont exist inside our build container
           install: |
             apt update && apt -y install curl
@@ -89,12 +78,11 @@ jobs:
             echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
             apt update && apt -y install yarn
           run: |
-            yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-${{ matrix.arch }} bin/hyperdrive
-            if test -f "dist/@lando/hyperdrive.exe"; then
-              mv dist/@lando/hyperdrive.exe dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}.exe
-            else
-              mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}
-            fi
+            yarn pkg \
+            --config package.json \
+            --targets=node${{ matrix.node-version }}-linux-arm64,node${{ matrix.node-version }}-macos-arm64,node${{ matrix.node-version }}-win-arm64 \
+            bin/hyperdrive
+            ls -lsa dist/@lando
 
       # Upload the raw build artificats
       - name: Upload hyperdrive-build-${{ github.sha }}
@@ -128,7 +116,13 @@ jobs:
       - name: Download hyperdrive-build-${{ github.sha }}
         uses: actions/download-artifact@v2
         with:
+          name: hyperdrive-build-${{ github.sha }}
           path: dist/@lando
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: dist/@lando
+
 
       # Codesign macOS binaries
       # TODO: We also should add notarization logic here?
