@@ -53,7 +53,7 @@ jobs:
       # @NOTE: We cross-compile on Linux because _right now_ this seems to be
       # the only place we can reliably build all the variants. We use actions/upload
       # so move assets between jobs
-      - name: Package ${{ matrix.arch }} ${{ matrix.platform }} CLI
+      - name: Package ${{ matrix.platform }} CLI
         if: ${{ matrix.arch == 'x64' }}
         run: |
           node ./scripts/dev-version.js
@@ -66,7 +66,7 @@ jobs:
           fi
 
       # @NOTE: We cannot cross-compile arm64 builds on x64 runners so we run through docker for now
-      - name: Package ${{ matrix.arch }} ${{ matrix.platform }} CLI
+      - name: Package ${{ matrix.platform }} CLI
         uses: uraimo/run-on-arch-action@v2.0.5
         if: ${{ matrix.arch == 'arm64' }}
         with:
@@ -84,7 +84,7 @@ jobs:
           run: |
             uname -a
             ls -lsa /tmp/build
-            touch dist/@lando/hyperdrive-$BUILD_PLATFORM-$BUILD_ARCH
+            touch /tmp/build/dist/@lando/hyperdrive-$BUILD_PLATFORM-$BUILD_ARCH
             node -v
             yarn -v
 
