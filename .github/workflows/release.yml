@@ -53,7 +53,7 @@ jobs:
       - name: Package x86_x64 ${{ matrix.platform }} CLI
         run: |
           node ./scripts/dev-version.js
-          node ./bin/hyperdrive.js version
+          node ./bin/hyperdrive version
           yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-x64 bin/hyperdrive\
           ls -lsa @lando/dist
       - name: Upload lando-build-${{ matrix.platform }}-${{ github.sha }}
