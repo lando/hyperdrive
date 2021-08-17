@@ -115,9 +115,6 @@ jobs:
           - macos-10.15
           - ubuntu-20.04
           - windows-2019
-        artifacts:
-          - x64
-          - arm64
 
     steps:
       # Set things up for signing, notarizing, uploading etc
@@ -136,60 +133,42 @@ jobs:
           # Unset vars if it makes sense to do so
           if [ "$GITHUB_REF" == "${GITHUB_REF#refs/tags/}" ]; then echo "::set-output name=SOURCE_TAG::"; fi
           if [ "$GITHUB_REF" == "${GITHUB_REF#refs/heads/}" ]; then echo "::set-output name=SOURCE_BRANCH::"; fi
-
-          # Set os specific vars
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            echo '::set-output name=OS::linux'
-            echo '::set-output name=PKG_ENDING::'
-          elif [ "$RUNNER_OS" == "Windows" ]; then
-            echo '::set-output name=OS::win'
-            echo '::set-output name=PKG_ENDING::.exe'
-          else
-            echo '::set-output name=OS::macos'
-            echo '::set-output name=PKG_ENDING::'
-          fi
-      - name: Set SOURCE_PKG
-        id: pkg
-        shell: bash
-        run: echo '::set-output name=SOURCE_PKG::hyperdrive-${{ steps.vars.outputs.OS }}-${{ matrix.arch }}${{ steps.vars.outputs.PKG_ENDING }}'
-      - name: Test user defined variables
-        shell: bash
-        run: |
-          echo "The OS is ${{ steps.vars.outputs.OS }}"
-          echo "The SOURCE_NAME is ${{ steps.vars.outputs.SOURCE_NAME }}"
-          echo "The SOURCE_BRANCH is ${{ steps.vars.outputs.SOURCE_BRANCH }}"
-          echo "The SOURCE_TAG is ${{ steps.vars.outputs.SOURCE_TAG }}"
-          echo "The SOURCE_PKG is ${{ steps.pkg.outputs.SOURCE_PKG }}"
       - name: Download hyperdrive-build-${{ github.sha }}
         uses: actions/download-artifact@v2
         with:
-          # name: hyperdrive-build-${{ github.sha }}
           path: dist/@lando
 
-      # Codesign macOS binaries
-      # NOTE: We cannot currently do this on macOS because of below issue
-      # https://github.com/vercel/pkg/issues/128
-      # However, the logic is here and ready to go once that is resolved
-      # NOTE: We also should add notarization logic here?
-      - name: Codesign macOS binaries
+      # Codesign and create macOS binaries
+      # TODO: We also should add notarization logic here?
+      - name: Codesign and create macOS binaries
         env:
           APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
           APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
           APPLE_TEAM_ID: FY8GAUX282
-        if: ${{ steps.vars.outputs.OS == 'macos' }}
+        if: ${{ runner.os == 'macOS' }}
         run: |
+          # Sign the binaries
           ./scripts/sign-macos.sh ./dist/@lando/hyperdrive-macos-x64
           ./scripts/sign-macos.sh ./dist/@lando/hyperdrive-macos-arm64
-      # Codesign WiNdOzE binaries
-      - name: Codesign Windoze binaries
+          # Generate release names
+
+      # Codesign and create WiNdOzE binaries
+      - name: Codesign and create Windoze binaries
         env:
           WINDOZE_CERT_DATA: ${{ secrets.WINDOZE_CERT_DATA }}
           WINDOZE_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
-        if: ${{ steps.vars.outputs.OS == 'win' }}
+        if: ${{ runner.os == 'Windows' }}
         shell: powershell
         run:
-          ./scripts/sign-win.ps1 ./dist/@lando/hyperdrive-win-x64
-          ./scripts/sign-win.ps1 ./dist/@lando/hyperdrive-win-arm64
+          ./scripts/sign-win.ps1 ./dist/@lando/hyperdrive-win-x64.exe
+          ./scripts/sign-win.ps1 ./dist/@lando/hyperdrive-win-arm64.exe
+
+      # Create linux binaries
+      - name: Create
+        env:
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          ls -lsa
 
       # Depending on the type of commit eg tagged, etc create the releases we need
       - name: Create releases
