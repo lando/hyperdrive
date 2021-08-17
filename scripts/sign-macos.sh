@@ -39,8 +39,7 @@ security set-key-partition-list -S apple-tool:,apple: -s -k actions macos-build.
 # Verify the things
 security find-identity -v macos-build.keychain | grep "$APPLE_TEAM_ID" | grep "Developer ID Application"
 
-# NOTE: We cannot currently do this on macOS because of below issue
-# https://github.com/vercel/pkg/issues/128
-# However, the logic is here and ready to go once that is resolved
-# codesign --force --options runtime -s "$APPLE_TEAM_ID" "$FILE" || true
-# @TODO: verify the codesignature
+# Force the codesignature
+codesign --force --options runtime -s "$APPLE_TEAM_ID" "$FILE"
+# Verify the code signature
+codesign -v "$FILE" --verbose
