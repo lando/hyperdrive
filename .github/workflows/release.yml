@@ -50,12 +50,15 @@ jobs:
       # @NOTE: We cross-compile on Linux because _right now_ this seems to be
       # the only place we can reliably build all the variants. We use actions/upload
       # so move assets between jobs
-      - name: Package x86_x64 ${{ matrix.platform }} CLI
+      - name: Package x64 ${{ matrix.platform }} CLI
         run: |
           node ./scripts/dev-version.js
           node ./bin/hyperdrive version
           yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-x64 bin/hyperdrive
-          ls -lsa @lando/dist
+          ls -lsa dist
+      - name: Asses our situation
+        run: |
+          true
       - name: Upload lando-build-${{ matrix.platform }}-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
