@@ -55,10 +55,11 @@ jobs:
           node ./scripts/dev-version.js
           node ./bin/hyperdrive version
           yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-x64 bin/hyperdrive
-          ls -lsa "dist/@lando"
-      - name: Asses our situation
-        run: |
-          true
+          if test -f "dist/@lando/hyperdrive.exe"; then
+            mv dist/@lando/hyperdrive.exe dist/@lando/hyperdrive-${{ matrix.platform }}-x64.exe
+          else
+            mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-x64
+          fi
       - name: Upload lando-build-${{ matrix.platform }}-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
