@@ -72,29 +72,20 @@ jobs:
         if: ${{ matrix.arch == 'arm64' }}
         with:
           arch: aarch64
-          distro: ubuntu20.04
+          # @TODO: eventually we need to get this to work on ubuntu20.04 for build parity but we are using
+          # 18.04 because it was easier to get working
+          distro: ubuntu18.04
           githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/tmp/build"
             --workdir /tmp/build
           env: |
-            # @TODO: The below is bad but its not currently obvious why we are getting the below error or whether
-            # there is anything we can do about it while using uraimo/run-on-arch-action@v2.0.5
-            #
-            #  Warning: apt-key output should not be parsed (stdout is not a terminal)
-            #  gpg: no valid OpenPGP data found.
-            #
-            APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: bad
-
             BUILD_PLATFORM: ${{ matrix.platform }}
             BUILD_ARCH: ${{ matrix.arch }}
           # We need to install node and yarn "again" because they dont exist inside our build container
           install: |
             apt update && apt -y install curl
             curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
-            curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key > /tmp/key
-            cat /tmp/key
-            curl -s https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor | tee /usr/share/keyrings/nodesource.gpg
             apt-get install -y nodejs
             curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
             echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
