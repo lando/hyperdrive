@@ -66,6 +66,7 @@ jobs:
           fi
 
       # @NOTE: We cannot cross-compile arm64 builds on x64 runners so we run through docker for now
+      # @TODO: switch this to use arm64 runners whenever those are available
       - name: Package ${{ matrix.platform }} CLI
         uses: uraimo/run-on-arch-action@v2.0.5
         if: ${{ matrix.arch == 'arm64' }}
@@ -76,14 +77,21 @@ jobs:
           dockerRunArgs: |
             --volume "${PWD}:/tmp/build"
             --workdir /tmp/build
-          env: | # YAML, but pipe character is necessary
+          env: |
             BUILD_PLATFORM: ${{ matrix.platform }}
             BUILD_ARCH: ${{ matrix.arch }}
+          # We need to install node and yarn "again" because they dont exist inside our build container
           setup: |
-            mkdir -p /tmp/build/dist/@lando
+            apt -y update
+            curl -sL https://deb.nodesource.com/setup_14.x | bash -
+            apt -y install nodejs
+            curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+            echo "deb https://dl.yarnpkg.com/debian/ stable main" |  tee /etc/apt/sources.list.d/yarn.list
+            apt -y update && apt -y install yarn
           run: |
             uname -a
             ls -lsa /tmp/build
+            mkdir -p /tmp/build/dist/@lando
             touch /tmp/build/dist/@lando/hyperdrive-$BUILD_PLATFORM-$BUILD_ARCH
             node -v
             yarn -v
