@@ -95,11 +95,11 @@ jobs:
               mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}
             fi
 
-      - name: Upload hyperdrive-build-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.sha }}
+      - name: Upload hyperdrive-build-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
           name: hyperdrive-build-${{ github.sha }}
-          path: dist/@lando
+          path: dist/@lando/*
           if-no-files-found: error
           retention-days: 1
 
@@ -115,7 +115,7 @@ jobs:
           - macos-10.15
           - ubuntu-20.04
           - windows-2019
-        arch:
+        artifacts:
           - x64
           - arm64
 
@@ -163,7 +163,7 @@ jobs:
       - name: Download hyperdrive-build-${{ github.sha }}
         uses: actions/download-artifact@v2
         with:
-          name: hyperdrive-build-${{ github.sha }}
+          # name: hyperdrive-build-${{ github.sha }}
           path: dist/@lando
 
       # Codesign macOS binaries
