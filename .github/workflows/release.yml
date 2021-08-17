@@ -125,11 +125,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: hyperdrive-unsigned-build-${{ github.sha }}
-          path: dist/@lando
-
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: dist/@lando
+          path: /tmp/@lando/unsigned
+      - name: Setup dist
+        shell: bash
+        run: mkdir -p dist/@lando
 
       # Codesign macOS binaries
       # TODO: We also should add notarization logic here?
@@ -140,8 +139,9 @@ jobs:
           APPLE_TEAM_ID: FY8GAUX282
         if: ${{ runner.os == 'macOS' }}
         run: |
-          ./scripts/sign-macos.sh ./dist/@lando/hyperdrive-macos-x64
-          ./scripts/sign-macos.sh ./dist/@lando/hyperdrive-macos-arm64
+          ./scripts/sign-macos.sh /tmp/@lando/unsigned/hyperdrive-macos-x64
+          ./scripts/sign-macos.sh /tmp/@lando/unsigned/hyperdrive-macos-arm64
+          cp -a /tmp/@lando/unsigned/. dist/@lando
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
@@ -153,6 +153,10 @@ jobs:
         run: |
           ./scripts/sign-win.ps1 ./dist/@lando/hyperdrive-win-x64.exe
           ./scripts/sign-win.ps1 ./dist/@lando/hyperdrive-win-arm64.exe
+      - name: Move the Windoze binaries
+        if: ${{ runner.os == 'Windows' }}
+        shell: bash
+        run: cp -a /tmp/@lando/unsigned/. dist/@lando
 
       # Codesign linux binaries
       # @TODO: Eventually we should figure out how to do this on Linux but right now there
@@ -160,6 +164,7 @@ jobs:
       - name: Codesign the Linux binaries
         if: ${{ runner.os == 'Linux' }}
         run: |
+          cp -a /tmp/@lando/unsigned/. dist/@lando
           echo "::warning:: Eventually we should figure out how to do this on Linux but right now there is no requirement to do so"
 
       # Replace previously posted unsigned raw artifacts with signed ones
@@ -167,7 +172,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: hyperdrive-build-${{ github.sha }}
-          path: dist/@lando/*
+          path: dist/@lando
           if-no-files-found: error
           retention-days: 1
 
