@@ -53,11 +53,15 @@ jobs:
       # so move assets between jobs
       - name: Package x64 CLI
         run: |
+          # Package
           yarn pkg \
             --config package.json \
             --targets=node${{ matrix.node-version }}-linux-x64,node${{ matrix.node-version }}-macos-x64,node${{ matrix.node-version }}-win-x64 \
             bin/hyperdrive
-          ls -lsa dist/@lando
+          # Rename to include arch
+          mv dist/@lando/hyperdrive-linux dist/@lando/hyperdrive-linux-x64
+          mv dist/@lando/hyperdrive-macos dist/@lando/hyperdrive-macos-x64
+          mv dist/@lando/hyperdrive-win.exe dist/@lando/hyperdrive-win-x64.exe
 
       # @NOTE: We cannot cross-compile arm64 builds on x64 runners so we run through docker for now
       # @TODO: switch this to use arm64 runners whenever those are available
@@ -78,17 +82,21 @@ jobs:
             echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
             apt update && apt -y install yarn
           run: |
+            # Package
             yarn pkg \
             --config package.json \
             --targets=node${{ matrix.node-version }}-linux-arm64,node${{ matrix.node-version }}-macos-arm64,node${{ matrix.node-version }}-win-arm64 \
             bin/hyperdrive
-            ls -lsa dist/@lando
+            # Rename to include arch
+            mv dist/@lando/hyperdrive-linux dist/@lando/hyperdrive-linux-arm64
+            mv dist/@lando/hyperdrive-macos dist/@lando/hyperdrive-macos-arm64
+            mv dist/@lando/hyperdrive-win.exe dist/@lando/hyperdrive-win-arm64.exe
 
       # Upload the raw build artificats
       - name: Upload hyperdrive-build-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
-          name: hyperdrive-build-${{ github.sha }}
+          name: hyperdrive-unsigned-build-${{ github.sha }}
           path: dist/@lando/*
           if-no-files-found: error
           retention-days: 1
@@ -113,16 +121,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Download hyperdrive-build-${{ github.sha }}
+      - name: Download hyperdrive-unsigned-build-${{ github.sha }}
         uses: actions/download-artifact@v2
         with:
-          name: hyperdrive-build-${{ github.sha }}
+          name: hyperdrive-unsigned-build-${{ github.sha }}
           path: dist/@lando
 
       - name: Display structure of downloaded files
         run: ls -R
         working-directory: dist/@lando
-
 
       # Codesign macOS binaries
       # TODO: We also should add notarization logic here?
@@ -156,10 +163,6 @@ jobs:
           echo "::warning:: Eventually we should figure out how to do this on Linux but right now there is no requirement to do so"
 
       # Replace previously posted unsigned raw artifacts with signed ones
-      - name: Remove unsigned artifacts
-        uses: geekyeggo/delete-artifact@v1
-        with:
-          name: hyperdrive-build-${{ github.sha }}
       - name: Upload hyperdrive-build-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
