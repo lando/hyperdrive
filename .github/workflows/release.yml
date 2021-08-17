@@ -54,7 +54,7 @@ jobs:
         run: |
           node ./scripts/dev-version.js
           node ./bin/hyperdrive version
-          yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-x64 bin/hyperdrive\
+          yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-x64 bin/hyperdrive
           ls -lsa @lando/dist
       - name: Upload lando-build-${{ matrix.platform }}-${{ github.sha }}
         uses: actions/upload-artifact@v2
