@@ -82,8 +82,7 @@ jobs:
             BUILD_ARCH: ${{ matrix.arch }}
           # We need to install node and yarn "again" because they dont exist inside our build container
           install: |
-            whoami
-            apt update
+            apt update && apt install apt-transport-https ca-certificates curl software-properties-common wget
             curl -sL https://deb.nodesource.com/setup_14.x | bash -
             apt install nodejs
             curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
