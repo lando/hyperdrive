@@ -55,7 +55,7 @@ jobs:
           node ./scripts/dev-version.js
           node ./bin/hyperdrive version
           yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-x64 bin/hyperdrive
-          ls -lsa dist
+          ls -lsa "dist/@lando"
       - name: Asses our situation
         run: |
           true
