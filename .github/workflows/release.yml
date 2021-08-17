@@ -125,10 +125,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: hyperdrive-unsigned-build-${{ github.sha }}
-          path: /tmp/@lando/unsigned
+          path: dist/@lando/unsigned
       - name: Setup dist
         shell: bash
-        run: mkdir -p dist/@lando
+        run: mkdir -p dist/@lando/signed
 
       # Codesign macOS binaries
       # TODO: We also should add notarization logic here?
@@ -139,9 +139,12 @@ jobs:
           APPLE_TEAM_ID: FY8GAUX282
         if: ${{ runner.os == 'macOS' }}
         run: |
-          ./scripts/sign-macos.sh /tmp/@lando/unsigned/hyperdrive-macos-x64
-          ./scripts/sign-macos.sh /tmp/@lando/unsigned/hyperdrive-macos-arm64
-          cp -a /tmp/@lando/unsigned/. dist/@lando
+          # x64
+          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64
+          cp -f dist/@lando/unsigned/hyperdrive-macos-x64 dist/@lando/signed/hyperdrive-macos-x64
+          # arm64
+          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64
+           cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 dist/@lando/signed/hyperdrive-macos-arm64
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
@@ -151,12 +154,14 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         shell: powershell
         run: |
-          ./scripts/sign-win.ps1 ./dist/@lando/hyperdrive-win-x64.exe
-          ./scripts/sign-win.ps1 ./dist/@lando/hyperdrive-win-arm64.exe
+          ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-x64.exe
+          ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-arm64.exe
       - name: Move the Windoze binaries
         if: ${{ runner.os == 'Windows' }}
         shell: bash
-        run: cp -a /tmp/@lando/unsigned/. dist/@lando
+        run: |
+          cp -f dist/@lando/unsigned/hyperdrive-win-x64.exe dist/@lando/signed/hyperdrive-win-x64.exe
+          cp -f dist/@lando/unsigned/hyperdrive-win-arm64.exe dist/@lando/signed/hyperdrive-win-arm64.exe
 
       # Codesign linux binaries
       # @TODO: Eventually we should figure out how to do this on Linux but right now there
@@ -164,15 +169,20 @@ jobs:
       - name: Codesign the Linux binaries
         if: ${{ runner.os == 'Linux' }}
         run: |
-          cp -a /tmp/@lando/unsigned/. dist/@lando
-          echo "::warning:: Eventually we should figure out how to do this on Linux but right now there is no requirement to do so"
+          echo "::warning:: Eventually we should figure out how to do codesign on Linux but right now there is no requirement to do so"
+          # x64
+          # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-x64
+          cp -f dist/@lando/unsigned/hyperdrive-linux-x64 dist/@lando/signed/hyperdrive-linux-x64
+          # arm64
+          # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-arm64
+          cp -f dist/@lando/unsigned/hyperdrive-linux-arm64 dist/@lando/signed/hyperdrive-linux-arm64
 
       # Replace previously posted unsigned raw artifacts with signed ones
       - name: Upload hyperdrive-build-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
           name: hyperdrive-build-${{ github.sha }}
-          path: dist/@lando
+          path: dist/@lando/signed
           if-no-files-found: error
           retention-days: 1
 
