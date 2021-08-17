@@ -10,12 +10,15 @@ on:
       - v*
 
 jobs:
-  package-x64:
+  package:
     runs-on: ubuntu-20.04
     env:
       TERM: xterm
     strategy:
       matrix:
+        arch:
+          - x64
+          - arm64
         node-version:
           - '14'
         platform:
@@ -50,80 +53,29 @@ jobs:
       # @NOTE: We cross-compile on Linux because _right now_ this seems to be
       # the only place we can reliably build all the variants. We use actions/upload
       # so move assets between jobs
-      - name: Package x64 ${{ matrix.platform }} CLI
+      - name: Package ${{ matrix.arch }} ${{ matrix.platform }} CLI
+        if: ${{ matrix.arc == 'x64' }}
         run: |
           node ./scripts/dev-version.js
           node ./bin/hyperdrive version
-          yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-x64 bin/hyperdrive
+          yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-${{ matrix.arch } bin/hyperdrive
           if test -f "dist/@lando/hyperdrive.exe"; then
-            mv dist/@lando/hyperdrive.exe dist/@lando/hyperdrive-${{ matrix.platform }}-x64.exe
+            mv dist/@lando/hyperdrive.exe dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }.exe
           else
-            mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-x64
+            mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }
           fi
-      - name: Upload lando-build-${{ matrix.platform }}-${{ github.sha }}
+      - name: Upload hyperdrive-build-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
-          name: lando-build-${{ matrix.variant }}-${{ github.sha }}
+          name: hyperdrive-build-${{ github.sha }}
           path: dist/@lando
           if-no-files-found: error
           retention-days: 1
 
-  # package-arm64:
-  #   runs-on: ${{ matrix.os }}
-  #   env:
-  #     TERM: xterm
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - ubuntu-20.04
-  #       node-version:
-  #         - '14'
-
-  #   steps:
-  #     # Install deps and cache
-  #     # Eventually it would be great if these steps could live in a separate YAML file
-  #     # that could be included in line to avoid code duplication
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 0
-  #     - name: Install node ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - name: Get Yarn cache directory
-  #       id: yarn-cache-dir-path
-  #       run: echo "::set-output name=dir::$(yarn cache dir)"
-  #     - name: Use Yarn cache
-  #       id: yarn-cache
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-  #         key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
-  #     - name: Install Yarn dependencies
-  #       run: yarn install --prefer-offline --frozen-lockfile
-
-  #     # Package and upload the cli
-  #     # @NOTE: We cross-compile on Linux because _right now_ this seems to be
-  #     # the only place we can reliably build all the variants. We use actions/upload
-  #     # so move assets between jobs
-  #     - name: Package ${{ matrix.variant }} CLI
-  #       run: |
-  #         node ./scripts/dev-version.js
-  #         node ./bin/lando.js version
-  #         yarn pkg --target=node${{ matrix.node-version }}-${{ matrix.variant }} --no-version
-  #     - name: Upload lando-build-${{ matrix.variant }}-${{ github.sha }}
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: lando-build-${{ matrix.variant }}-${{ github.sha }}
-  #         path: dist/
-  #         if-no-files-found: error
-  #         retention-days: 1
-
-  # ship-x64:
+  # ship-${{ matrix.platform }:
   #   runs-on: ${{ matrix.os }}
   #   needs:
-  #     - package-x64
+  #     - package-${{ matrix.platform }
   #   env:
   #     TERM: xterm
   #   strategy:
@@ -133,7 +85,7 @@ jobs:
   #         - ubuntu-20.04
   #         - windows-2019
   #       arch:
-  #         - x64
+  #         - ${{ matrix.platform }
   #         - arm64
   #       exclude:
   #         - os: windows-2019
