@@ -81,7 +81,7 @@ jobs:
             BUILD_PLATFORM: ${{ matrix.platform }}
             BUILD_ARCH: ${{ matrix.arch }}
           # We need to install node and yarn "again" because they dont exist inside our build container
-          setup: |
+          install: |
             apt -y update
             curl -sL https://deb.nodesource.com/setup_14.x | bash -
             apt -y install nodejs
