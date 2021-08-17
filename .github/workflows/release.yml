@@ -54,7 +54,7 @@ jobs:
       # the only place we can reliably build all the variants. We use actions/upload
       # so move assets between jobs
       - name: Package ${{ matrix.arch }} ${{ matrix.platform }} CLI
-        if: ${{ matrix.arc == 'x64' }}
+        if: ${{ matrix.arch == 'x64' }}
         run: |
           node ./scripts/dev-version.js
           node ./bin/hyperdrive version
