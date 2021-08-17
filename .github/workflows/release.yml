@@ -73,19 +73,16 @@ jobs:
         with:
           arch: aarch64
           # @TODO: eventually we need to get this to work on ubuntu20.04 for build parity but we are using
-          # 18.04 because it was easier to get working
+          # 18.04 because it was easier to get working, apparently there is a bug in 20.04s gpg?
           distro: ubuntu18.04
           githubToken: ${{ github.token }}
-          dockerRunArgs: |
-            --volume "${PWD}:/tmp/build"
-            --workdir /tmp/build
           env: |
             BUILD_PLATFORM: ${{ matrix.platform }}
             BUILD_ARCH: ${{ matrix.arch }}
           # We need to install node and yarn "again" because they dont exist inside our build container
           install: |
             apt update && apt -y install curl
-            curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+            curl -fsSL https://deb.nodesource.com/setup_${{ matrix.node-version }}.x | bash -
             apt-get install -y nodejs
             curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
             echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
