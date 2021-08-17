@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable node/no-unpublished-require */
 
 /*
  * This is a nifty cross platform script that will replace relevant versions

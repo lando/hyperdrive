@@ -15,6 +15,7 @@ jobs:
     env:
       TERM: xterm
     strategy:
+      matrix:
         node-version:
           - '14'
         platform:
