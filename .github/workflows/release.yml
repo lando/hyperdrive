@@ -64,6 +64,30 @@ jobs:
           else
             mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}
           fi
+
+      # @NOTE: We cannot cross-compile arm64 builds on x64 runners so we run through docker for now
+      - name: Package ${{ matrix.arch }} ${{ matrix.platform }} CLI
+        uses: uraimo/run-on-arch-action@v2.0.5
+        if: ${{ matrix.arch == 'arm64' }}
+        with:
+          arch: aarch64
+          distro: ubuntu20.04
+          githubToken: ${{ github.token }}
+          dockerRunArgs: |
+            --volume "${PWD}:/tmp/build"
+            --workdir /tmp/build
+          env: | # YAML, but pipe character is necessary
+            BUILD_PLATFORM: ${{ matrix.platform }}
+            BUILD_ARCH: ${{ matrix.arch }}
+          setup: |
+            mkdir -p /tmp/build/dist/@lando
+          run: |
+            uname -a
+            ls -lsa /tmp/build
+            touch dist/@lando/hyperdrive-$BUILD_PLATFORM-$BUILD_ARCH
+            node -v
+            yarn -v
+
       - name: Upload hyperdrive-build-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
