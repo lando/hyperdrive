@@ -78,11 +78,13 @@ jobs:
             --volume "${PWD}:/tmp/build"
             --workdir /tmp/build
           env: |
+            # Its not exactly clear why we need the below
+            APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: bad
             BUILD_PLATFORM: ${{ matrix.platform }}
             BUILD_ARCH: ${{ matrix.arch }}
           # We need to install node and yarn "again" because they dont exist inside our build container
           install: |
-            apt update && apt -y install curl build-essential
+            apt update && apt -y install curl
             curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
             apt-get install -y nodejs
             curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
