@@ -88,12 +88,12 @@ jobs:
             echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
             apt update && apt -y install yarn
           run: |
-            uname -a
-            ls -lsa /tmp/build
-            mkdir -p /tmp/build/dist/@lando
-            touch /tmp/build/dist/@lando/hyperdrive-$BUILD_PLATFORM-$BUILD_ARCH
-            node -v
-            yarn -v
+            yarn pkg --config package.json --target=node${{ matrix.node-version }}-${{ matrix.platform }}-${{ matrix.arch }} bin/hyperdrive
+            if test -f "dist/@lando/hyperdrive.exe"; then
+              mv dist/@lando/hyperdrive.exe dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}.exe
+            else
+              mv dist/@lando/hyperdrive dist/@lando/hyperdrive-${{ matrix.platform }}-${{ matrix.arch }}
+            fi
 
       - name: Upload hyperdrive-build-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.sha }}
         uses: actions/upload-artifact@v2
