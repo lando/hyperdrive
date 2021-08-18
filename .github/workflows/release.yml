@@ -164,17 +164,17 @@ jobs:
           # arm64
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64
            cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 dist/@lando/signed/hyperdrive-macos-arm64
-      - name: Notarize ${{ matrix.notarize }
+      - name: Notarize ${{ matrix.notarize }}
         uses: devbotsxyz/xcode-notarize@v1
         with:
-          product-path: dist/@lando/signed/${{ matrix.notarize }
+          product-path: dist/@lando/signed/${{ matrix.notarize }}
           appstore-connect-username: ${{ secrets.APPLE_NOTARY_USER }}
           appstore-connect-password: ${{ secrets.APPLE_NOTARY_PASSWORD }}
           primary-bundle-id: dev.lando.hyperdrive
-      - name: Staple ${{ matrix.notarize }
+      - name: Staple ${{ matrix.notarize }}
         uses: devbotsxyz/xcode-staple@v1
         with:
-          product-path: dist/@lando/signed/${{ matrix.notarize }
+          product-path: dist/@lando/signed/${{ matrix.notarize }}
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
