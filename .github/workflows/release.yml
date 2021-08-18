@@ -331,4 +331,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           draft: true
-          files: dist/releases/hyperdrive-${{ matrix.os }}-${{ matrix.arch }}${{ steps.vars.outputs.PKG_ENDING }}
+          files: dist/releases/hyperdrive-${{ matrix.os }}-${{ matrix.arch }}-${{ steps.vars.outputs.SOURCE_TAG }}${{ steps.vars.outputs.PKG_ENDING }}
