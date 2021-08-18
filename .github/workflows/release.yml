@@ -137,10 +137,11 @@ jobs:
           APPLE_TEAM_ID: FY8GAUX282
         if: ${{ runner.os == 'macOS' }}
         run: |
+          # Import certs
+          ./scripts/import-macos-certs.sh
           # x64
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64
           cp -f dist/@lando/unsigned/hyperdrive-macos-x64 dist/@lando/signed/hyperdrive-macos-x64
-
           # arm64
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64
            cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 dist/@lando/signed/hyperdrive-macos-arm64
@@ -148,15 +149,17 @@ jobs:
         if: ${{ runner.os == 'macOS' }}
         uses: devbotsxyz/xcode-notarize@v1
         with:
-          product-path: dist/@lando/signed/hyperdrive-macos-x64
           appstore-connect-username: ${{ secrets.APPLE_NOTARY_USER }}
           appstore-connect-password: ${{ secrets.APPLE_NOTARY_PASSWORD }}
           primary-bundle-id: dev.lando.hyperdrive
+          product-path: dist/@lando/signed/hyperdrive-macos-x64
+          verbose: true
       - name: Staple x64
         if: ${{ runner.os == 'macOS' }}
         uses: devbotsxyz/xcode-staple@v1
         with:
           product-path: dist/@lando/signed/hyperdrive-macos-x64
+          verbose: true
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
@@ -166,7 +169,11 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         shell: powershell
         run: |
+          # Import certs
+          ./scripts/import-win-certs.ps1
+          # x64
           ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-x64.exe
+          # arm64
           ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-arm64.exe
       - name: Move the Windoze binaries
         if: ${{ runner.os == 'Windows' }}
