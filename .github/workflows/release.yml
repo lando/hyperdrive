@@ -1,4 +1,4 @@
-name: Package, Sign and Release
+name: Package, Sign, Seal and Deliver
 
 on:
   push:
@@ -114,6 +114,8 @@ jobs:
           - macos-10.15
           - ubuntu-20.04
           - windows-2019
+        include:
+
     steps:
       # Set things up for signing, notarizing, uploading etc
       - name: Checkout code
@@ -141,10 +143,16 @@ jobs:
           ./scripts/import-macos-certs.sh
           # x64
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64
-          cp -f dist/@lando/unsigned/hyperdrive-macos-x64 dist/@lando/signed/hyperdrive-macos-x64
           # arm64
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64
-           cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 dist/@lando/signed/hyperdrive-macos-arm64
+          # Create zip for notarization
+          mkdir -p /tmp/notarize
+          cp -f dist/@lando/unsigned/hyperdrive-macos-x64 /tmp/notarize/hyperdrive-macos-x64
+          cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 /tmp/notarize/hyperdrive-macos-arm64
+          ls -lsa /tmp/notarize
+          zip -r -X dist/@lando/unsigned/notarize.zip /tmp/notarize
+          unzip -l dist/@lando/unsigned/notarize.zip
+
       - name: Notarize x64
         if: ${{ runner.os == 'macOS' }}
         uses: devbotsxyz/xcode-notarize@v1
@@ -152,14 +160,16 @@ jobs:
           appstore-connect-username: ${{ secrets.APPLE_NOTARY_USER }}
           appstore-connect-password: ${{ secrets.APPLE_NOTARY_PASSWORD }}
           primary-bundle-id: dev.lando.hyperdrive
-          product-path: dist/@lando/signed/hyperdrive-macos-x64
+          product-path: dist/@lando/unsigned/notarize.zip
           verbose: true
-      - name: Staple x64
+      - name: Move the macOS binaries
         if: ${{ runner.os == 'macOS' }}
-        uses: devbotsxyz/xcode-staple@v1
-        with:
-          product-path: dist/@lando/signed/hyperdrive-macos-x64
-          verbose: true
+        run: |
+          # Unzip
+          unzip -o dist/@lando/unsigned/notarize.zip
+          ls -lsa dist/@lando/unsigned
+          cp -f dist/@lando/unsigned/hyperdrive-macos-x64 dist/@lando/signed/hyperdrive-macos-x64
+          cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 dist/@lando/signed/hyperdrive-macos-arm64
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
