@@ -267,10 +267,11 @@ jobs:
           # Unset vars if it makes sense to do so
           if [ "$GITHUB_REF" == "${GITHUB_REF#refs/tags/}" ]; then echo "::set-output name=SOURCE_TAG::"; fi
           if [ "$GITHUB_REF" == "${GITHUB_REF#refs/heads/}" ]; then echo "::set-output name=SOURCE_BRANCH::"; fi
-          if [ "$RUNNER_OS" != "Windows" ]; then echo "::set-output name=PKG_ENDING::"; fi
+          # if [ "$RUNNER_OS" != "Windows" ]; then echo "::set-output name=PKG_ENDING::"; fi
       - name: Test helper variables
         shell: bash
         run: |
+          echo "The RUNNER_OS is $RUNNER_OS"
           echo "The SOURCE_NAME is ${{ steps.vars.outputs.SOURCE_NAME }}"
           echo "The SOURCE_BRANCH is ${{ steps.vars.outputs.SOURCE_BRANCH }}"
           echo "The SOURCE_TAG is ${{ steps.vars.outputs.SOURCE_TAG }}"
