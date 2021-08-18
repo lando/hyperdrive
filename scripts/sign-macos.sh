@@ -15,6 +15,6 @@ if [ -z "$APPLE_TEAM_ID" ]; then
 fi
 
 # Force the codesignature
-codesign --force --options runtime -s "$APPLE_TEAM_ID" "$FILE"
+codesign --force -s "$APPLE_TEAM_ID" "$FILE"
 # Verify the code signature
 codesign -v "$FILE" --verbose

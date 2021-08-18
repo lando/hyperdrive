@@ -149,7 +149,7 @@ jobs:
           mv -f dist/@lando/unsigned/hyperdrive-macos-x64 /tmp/notarize/hyperdrive-macos-x64
           mv -f dist/@lando/unsigned/hyperdrive-macos-arm64 /tmp/notarize/hyperdrive-macos-arm64
           zip -rjX dist/@lando/unsigned/notarize.zip /tmp/notarize/*
-      - name: Notarize x64
+      - name: Notarize binaries
         if: ${{ runner.os == 'macOS' }}
         uses: devbotsxyz/xcode-notarize@v1
         with:
@@ -162,7 +162,8 @@ jobs:
         if: ${{ runner.os == 'macOS' }}
         run: |
           unzip -o dist/@lando/unsigned/notarize.zip -d dist/@lando/signed
-          ls -lsa dist/@lando/signed
+          codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-x64
+          codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-arm64
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
