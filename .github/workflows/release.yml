@@ -257,29 +257,29 @@ jobs:
           path: dist/@lando
       - name: Set helper variables
         id: vars
+        env:
+          OS: ${{ matrix.os }}
         shell: bash
         run: |
           # Set generic source ref vars
           echo "::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}"
           echo "::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}"
           echo "::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}"
+          echo "::set-output name=SOURCE_ENDING::"
           # Unset vars if it makes sense to do so
           if [ "$GITHUB_REF" == "${GITHUB_REF#refs/tags/}" ]; then echo "::set-output name=SOURCE_TAG::"; fi
           if [ "$GITHUB_REF" == "${GITHUB_REF#refs/heads/}" ]; then echo "::set-output name=SOURCE_BRANCH::"; fi
-          # Set PKG_ENDING
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            echo '::set-output name=PKG_ENDING::.exe'
-          else
-            echo '::set-output name=PKG_ENDING::'
-          fi
+          # Modify SOURCE_ENDING on win
+          if [ "$OS" == "win" ]; then echo '::set-output name=SOURCE_ENDING::.exe'; fi
       - name: Test helper variables
         shell: bash
         run: |
-          echo "The RUNNER_OS is $RUNNER_OS"
-          echo "The SOURCE_NAME is ${{ steps.vars.outputs.SOURCE_NAME }}"
-          echo "The SOURCE_BRANCH is ${{ steps.vars.outputs.SOURCE_BRANCH }}"
-          echo "The SOURCE_TAG is ${{ steps.vars.outputs.SOURCE_TAG }}"
-          echo "The PKG_ENDING is ${{ steps.vars.outputs.PKG_ENDING }}"
+          echo "The source OS is ${{ matrix.os }}"
+          echo "The source Architecture is ${{ matrix.arch }}"
+          echo "The source name is ${{ steps.vars.outputs.SOURCE_NAME }}"
+          echo "The source branch is ${{ steps.vars.outputs.SOURCE_BRANCH }}"
+          echo "The source tag is ${{ steps.vars.outputs.SOURCE_TAG }}"
+          echo "The source ending is ${{ steps.vars.outputs.SOURCE_ENDING }}"
       - name: Setup release buckets
         shell: bash
         run: |
@@ -289,24 +289,24 @@ jobs:
         env:
           SOURCE_BRANCH: ${{ steps.vars.outputs.SOURCE_BRANCH }}
           SOURCE_TAG: ${{ steps.vars.outputs.SOURCE_TAG }}
-          SOURCE_PACKAGE: "hyperdrive-${{ matrix.os }}-${{ matrix.arch }}${{ steps.vars.outputs.PKG_ENDING }}"
+          SOURCE_PACKAGE: "hyperdrive-${{ matrix.os }}-${{ matrix.arch }}${{ steps.vars.outputs.SOURCE_ENDING }}"
           DEST_PACKAGE: "hyperdrive-${{ matrix.os }}-${{ matrix.arch }}"
-          PKG_ENDING: ${{ steps.vars.outputs.PKG_ENDING }}
+          SOURCE_ENDING: ${{ steps.vars.outputs.SOURCE_ENDING }}
         shell: bash
         run: |
           # Snapshot release
-          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/dev/$DEST_PACKAGE-build-${{ github.sha }}$PKG_ENDING"
+          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/dev/$DEST_PACKAGE-build-${{ github.sha }}$SOURCE_ENDING"
 
           # S3 releases
-          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-latest$PKG_ENDING"
-          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-edge$PKG_ENDING"
-          if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-latest$PKG_ENDING"; fi
-          if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-edge$PKG_ENDING"; fi
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-stable$PKG_ENDING"; fi
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-SOURCE_TAG$PKG_ENDING"; fi
+          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-latest$SOURCE_ENDING"
+          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-edge$SOURCE_ENDING"
+          if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-latest$SOURCE_ENDING"; fi
+          if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-edge$SOURCE_ENDING"; fi
+          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-stable$SOURCE_ENDING"; fi
+          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-SOURCE_TAG$SOURCE_ENDING"; fi
 
           # GitHub Releases
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/releases/$DEST_PACKAGE-SOURCE_TAG$PKG_ENDING"; fi
+          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/releases/$DEST_PACKAGE-SOURCE_TAG$SOURCE_ENDING"; fi
 
           # Print what we end up with
           ls -lsa dist/dev
@@ -341,4 +341,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           draft: true
-          files: dist/releases/hyperdrive-${{ matrix.os }}-${{ matrix.arch }}-${{ steps.vars.outputs.SOURCE_TAG }}${{ steps.vars.outputs.PKG_ENDING }}
+          files: dist/releases/hyperdrive-${{ matrix.os }}-${{ matrix.arch }}-${{ steps.vars.outputs.SOURCE_TAG }}${{ steps.vars.outputs.SOURCE_ENDING }}
