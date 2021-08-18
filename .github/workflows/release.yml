@@ -114,6 +114,9 @@ jobs:
           - macos-10.15
           - ubuntu-20.04
           - windows-2019
+        notarize:
+          - hyperdrive-macos-x64
+          - hyperdrive-macos-arm64
 
     steps:
       # Set things up for signing, notarizing, uploading etc
@@ -130,8 +133,8 @@ jobs:
         shell: bash
         run: mkdir -p dist/@lando/signed
 
-      # Codesign macOS binaries
-      - name: Codesign and notarize macOS binaries
+      # Codesign and notarize macOS binaries
+      - name: Codesign macOS binaries
         env:
           APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
           APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
@@ -143,12 +146,35 @@ jobs:
           # x64
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64
           cp -f dist/@lando/unsigned/hyperdrive-macos-x64 dist/@lando/signed/hyperdrive-macos-x64
-          ./scripts/notarize-macos.sh dist/@lando/signed/hyperdrive-macos-x64
 
           # arm64
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64
            cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 dist/@lando/signed/hyperdrive-macos-arm64
-          ./scripts/notarize-macos.sh dist/@lando/signed/hyperdrive-macos-arm64
+      - name: Codesign macOS binaries
+        env:
+          APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          APPLE_TEAM_ID: FY8GAUX282
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          # x64
+          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64
+          cp -f dist/@lando/unsigned/hyperdrive-macos-x64 dist/@lando/signed/hyperdrive-macos-x64
+
+          # arm64
+          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64
+           cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 dist/@lando/signed/hyperdrive-macos-arm64
+      - name: Notarize ${{ matrix.notarize }
+        uses: devbotsxyz/xcode-notarize@v1
+        with:
+          product-path: dist/@lando/signed/${{ matrix.notarize }
+          appstore-connect-username: ${{ secrets.APPLE_NOTARY_USER }}
+          appstore-connect-password: ${{ secrets.APPLE_NOTARY_PASSWORD }}
+          primary-bundle-id: dev.lando.hyperdrive
+      - name: Staple ${{ matrix.notarize }
+        uses: devbotsxyz/xcode-staple@v1
+        with:
+          product-path: dist/@lando/signed/${{ matrix.notarize }
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
@@ -177,6 +203,7 @@ jobs:
           # x64
           # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-x64
           cp -f dist/@lando/unsigned/hyperdrive-linux-x64 dist/@lando/signed/hyperdrive-linux-x64
+
           # arm64
           # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-arm64
           cp -f dist/@lando/unsigned/hyperdrive-linux-arm64 dist/@lando/signed/hyperdrive-linux-arm64
