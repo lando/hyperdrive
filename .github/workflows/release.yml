@@ -146,12 +146,9 @@ jobs:
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64
           # Create zip for notarization
           mkdir -p /tmp/notarize
-          cp -f dist/@lando/unsigned/hyperdrive-macos-x64 /tmp/notarize/hyperdrive-macos-x64
-          cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 /tmp/notarize/hyperdrive-macos-arm64
-          ls -lsa /tmp/notarize
-          zip -r -X dist/@lando/unsigned/notarize.zip /tmp/notarize
-          unzip -l dist/@lando/unsigned/notarize.zip
-
+          mv -f dist/@lando/unsigned/hyperdrive-macos-x64 /tmp/notarize/hyperdrive-macos-x64
+          mv -f dist/@lando/unsigned/hyperdrive-macos-arm64 /tmp/notarize/hyperdrive-macos-arm64
+          zip -rjX dist/@lando/unsigned/notarize.zip /tmp/notarize/*
       - name: Notarize x64
         if: ${{ runner.os == 'macOS' }}
         uses: devbotsxyz/xcode-notarize@v1
@@ -164,11 +161,8 @@ jobs:
       - name: Move the macOS binaries
         if: ${{ runner.os == 'macOS' }}
         run: |
-          # Unzip
-          unzip -o dist/@lando/unsigned/notarize.zip
-          ls -lsa dist/@lando/unsigned
-          cp -f dist/@lando/unsigned/hyperdrive-macos-x64 dist/@lando/signed/hyperdrive-macos-x64
-          cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 dist/@lando/signed/hyperdrive-macos-arm64
+          unzip -o dist/@lando/unsigned/notarize.zip -d dist/@lando/signed
+          ls -lsa dist/@lando/signed
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
