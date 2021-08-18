@@ -131,20 +131,24 @@ jobs:
         run: mkdir -p dist/@lando/signed
 
       # Codesign macOS binaries
-      # TODO: We also should add notarization logic here?
-      - name: Codesign macOS binaries
+      - name: Codesign and notarize macOS binaries
         env:
           APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
           APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          APPLE_NOTARY_USER: ${{ secrets.APPLE_NOTARY_USER }}
+          APPLE_NOTARY_PASSWORD: ${{ secrets.APPLE_NOTARY_PASSWORD }}
           APPLE_TEAM_ID: FY8GAUX282
         if: ${{ runner.os == 'macOS' }}
         run: |
           # x64
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64
           cp -f dist/@lando/unsigned/hyperdrive-macos-x64 dist/@lando/signed/hyperdrive-macos-x64
+          ./scripts/notarize-macos.sh dist/@lando/signed/hyperdrive-macos-x64
+
           # arm64
           ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64
            cp -f dist/@lando/unsigned/hyperdrive-macos-arm64 dist/@lando/signed/hyperdrive-macos-arm64
+          ./scripts/notarize-macos.sh dist/@lando/signed/hyperdrive-macos-arm64
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
@@ -177,14 +181,14 @@ jobs:
           # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-arm64
           cp -f dist/@lando/unsigned/hyperdrive-linux-arm64 dist/@lando/signed/hyperdrive-linux-arm64
 
-      # Replace previously posted unsigned raw artifacts with signed ones
+      # Upload the signed artifacts to a different bucket
       - name: Upload hyperdrive-build-${{ github.sha }}
         uses: actions/upload-artifact@v2
         with:
           name: hyperdrive-build-${{ github.sha }}
           path: dist/@lando/signed
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 30
 
       # # Upload releases to S3
       # - name: Configure S3 Credentials

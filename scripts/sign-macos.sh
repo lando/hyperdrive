@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 # Get our file
 FILE="$(pwd)/$1"
