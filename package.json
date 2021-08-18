@@ -1,7 +1,7 @@
 {
   "name": "@lando/hyperdrive",
   "description": "A library and cli for Lando dependency and package management.",
-  "version": "0.7.0",
+  "version": "0.7.0-alpha.0",
   "author": "Mike Pirog @pirog",
   "bin": {
     "hyperdrive": "./bin/hyperdrive"
