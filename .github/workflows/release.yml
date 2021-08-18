@@ -285,7 +285,7 @@ jobs:
         shell: bash
         run: |
           # Snapshot release
-          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/dev/$DEST_PACKAGE-build-${{ github.sha }$PKG_ENDING"
+          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/dev/$DEST_PACKAGE-build-${{ github.sha }}$PKG_ENDING"
 
           # S3 releases
           cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-latest$PKG_ENDING"
