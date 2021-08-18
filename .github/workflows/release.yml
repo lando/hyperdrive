@@ -263,14 +263,11 @@ jobs:
           echo "::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}"
           echo "::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}"
           echo "::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}"
-          echo "::set-output name=PKG_ENDING::"
+          echo "::set-output name=PKG_ENDING::.exe"
           # Unset vars if it makes sense to do so
           if [ "$GITHUB_REF" == "${GITHUB_REF#refs/tags/}" ]; then echo "::set-output name=SOURCE_TAG::"; fi
           if [ "$GITHUB_REF" == "${GITHUB_REF#refs/heads/}" ]; then echo "::set-output name=SOURCE_BRANCH::"; fi
-          # Change PKG_ENDING on windows
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            echo "::set-output name=PKG_ENDING::.exe"
-          fi
+          if [ "$RUNNER_OS" != "Windows" ]; then echo "::set-output name=PKG_ENDING::"; fi
       - name: Test helper variables
         shell: bash
         run: |
