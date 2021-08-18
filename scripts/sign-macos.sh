@@ -3,6 +3,9 @@ set -eo pipefail
 
 # Get our file
 FILE="$(pwd)/$1"
+# Shift file and pass through anything else
+shift
+OPTIONS="$@"
 
 # Throw error if file does not exist
 if [ ! -f "$FILE" ]; then
@@ -15,6 +18,6 @@ if [ -z "$APPLE_TEAM_ID" ]; then
 fi
 
 # Force the codesignature
-codesign --force -s "$APPLE_TEAM_ID" "$FILE"
+codesign $OPTIONS -s "$APPLE_TEAM_ID" "$FILE"
 # Verify the code signature
 codesign -v "$FILE" --verbose

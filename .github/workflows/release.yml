@@ -131,7 +131,7 @@ jobs:
         run: mkdir -p dist/@lando/signed
 
       # Codesign and notarize macOS binaries
-      - name: Codesign macOS binaries
+      - name: Codesign the macOS binaries
         env:
           APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
           APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
@@ -141,15 +141,16 @@ jobs:
           # Import certs
           ./scripts/import-macos-certs.sh
           # x64
-          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64
+          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64 --force --options runtime --entitlements entitlements.xml
           # arm64
-          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64
+          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64 --force --options runtime --entitlements entitlements.xml
+
           # Create zip for notarization
           mkdir -p /tmp/notarize
           mv -f dist/@lando/unsigned/hyperdrive-macos-x64 /tmp/notarize/hyperdrive-macos-x64
           mv -f dist/@lando/unsigned/hyperdrive-macos-arm64 /tmp/notarize/hyperdrive-macos-arm64
           zip -rjX dist/@lando/unsigned/notarize.zip /tmp/notarize/*
-      - name: Notarize binaries
+      - name: Notarize the macOS binaries
         if: ${{ runner.os == 'macOS' }}
         uses: devbotsxyz/xcode-notarize@v1
         with:
@@ -160,10 +161,15 @@ jobs:
           verbose: true
       - name: Move the macOS binaries
         if: ${{ runner.os == 'macOS' }}
+        run: unzip -o dist/@lando/unsigned/notarize.zip -d dist/@lando/signed
+      - name: Verify the macOS binaries
+        if: ${{ runner.os == 'macOS' }}
         run: |
-          unzip -o dist/@lando/unsigned/notarize.zip -d dist/@lando/signed
           codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-x64
           codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-arm64
+          chmod +x dist/@lando/signed/hyperdrive-macos-x64
+          ./dist/@lando/signed/hyperdrive-macos-x64 version
+          chmod -x dist/@lando/signed/hyperdrive-macos-x64
 
       # Codesign WiNdOzE binaries
       - name: Codesign the Windoze binaries
@@ -185,6 +191,13 @@ jobs:
         run: |
           cp -f dist/@lando/unsigned/hyperdrive-win-x64.exe dist/@lando/signed/hyperdrive-win-x64.exe
           cp -f dist/@lando/unsigned/hyperdrive-win-arm64.exe dist/@lando/signed/hyperdrive-win-arm64.exe
+      - name: Verify the Windoze binaries
+        if: ${{ runner.os == 'Windows' }}
+        shell: bash
+        run: |
+          chmod +x dist/@lando/signed/hyperdrive-win-x64
+          ./dist/@lando/signed/hyperdrive-win-x64 version
+          chmod -x dist/@lando/signed/hyperdrive-win-x64
 
       # Codesign linux binaries
       # @TODO: Eventually we should figure out how to do this on Linux but right now there
@@ -193,13 +206,19 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: |
           echo "::warning:: Eventually we should figure out how to do codesign on Linux but right now there is no requirement to do so"
-          # x64
           # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-x64
-          cp -f dist/@lando/unsigned/hyperdrive-linux-x64 dist/@lando/signed/hyperdrive-linux-x64
-
-          # arm64
           # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-arm64
+      - name: Move the Linux binaries
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          cp -f dist/@lando/unsigned/hyperdrive-linux-x64 dist/@lando/signed/hyperdrive-linux-x64
           cp -f dist/@lando/unsigned/hyperdrive-linux-arm64 dist/@lando/signed/hyperdrive-linux-arm64
+      - name: Verify the Linux binaries
+        if: ${{ runner.os == 'Linux' }}
+        run: |
+          chmod +x dist/@lando/signed/hyperdrive-linux-x64
+          ./dist/@lando/signed/hyperdrive-linux-x64 version
+          chmod -x dist/@lando/signed/hyperdrive-linux-x64
 
       # Upload the signed artifacts to a different bucket
       - name: Upload hyperdrive-build-${{ github.sha }}
