@@ -1,7 +1,7 @@
 {
   "name": "@lando/hyperdrive",
   "description": "A library and cli for Lando dependency and package management.",
-  "version": "7.14.5",
+  "version": "0.7.0-alpha.0",
   "author": "Mike Pirog @pirog",
   "bin": {
     "hyperdrive": "./bin/hyperdrive"
@@ -71,7 +71,7 @@
     "clean": "rimraf dist",
     "generate:leia-tests": "leia \"examples/**/README.md\" test/leia -r 2 -s 'Start up tests' -t 'Verification commands' -c 'Destroy tests' --split-file --spawn --stdin",
     "lint": "eslint .",
-    "release": "bump --tag --all --push *",
+    "release": "bump --preid alpha --tag --all --push package.json",
     "test:functional": "mocha --timeout 900000 test/**/*.func.js",
     "test:unit": "nyc mocha --forbid-only \"test/**/*.test.js\""
   }
