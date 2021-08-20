@@ -2,6 +2,11 @@
   "extends": "oclif",
   "rules": {
     "semi": ["error", "always"],
-    "semi-style": ["error", "last"]
+    "semi-style": ["error", "last"],
+    "space-before-function-paren": ["error", {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "never"
+    }]
   }
 }

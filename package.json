@@ -27,7 +27,8 @@
     "mocha": "^5",
     "nyc": "^14",
     "pkg": "^5.3.1",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "version-bump-prompt": "^6.1.0"
   },
   "engines": {
     "node": ">=14.0.0"
@@ -70,6 +71,8 @@
     "clean": "rimraf dist",
     "generate:leia-tests": "leia \"examples/**/README.md\" test/leia -r 2 -s 'Start up tests' -t 'Verification commands' -c 'Destroy tests' --split-file --spawn --stdin",
     "lint": "eslint .",
-    "test": "nyc mocha --forbid-only \"test/**/*.test.js\""
+    "release": "bump --prompt --tag --all --push",
+    "test:functional": "mocha --timeout 900000 test/**/*.func.js",
+    "test:unit": "nyc mocha --forbid-only \"test/**/*.test.js\""
   }
 }

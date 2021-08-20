@@ -41,4 +41,4 @@ jobs:
 
       # Lint Code
       - name: Lint code
-        run: yarn test
+        run: yarn lint

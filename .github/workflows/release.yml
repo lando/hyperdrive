@@ -84,9 +84,9 @@ jobs:
           run: |
             # Package
             yarn pkg \
-            --config package.json \
-            --targets=node${{ matrix.node-version }}-linux-arm64,node${{ matrix.node-version }}-macos-arm64,node${{ matrix.node-version }}-win-arm64 \
-            bin/hyperdrive
+              --config package.json \
+              --targets=node${{ matrix.node-version }}-linux-arm64,node${{ matrix.node-version }}-macos-arm64,node${{ matrix.node-version }}-win-arm64 \
+              bin/hyperdrive
             # Rename to include arch
             mv dist/@lando/hyperdrive-linux dist/@lando/hyperdrive-linux-arm64
             mv dist/@lando/hyperdrive-macos dist/@lando/hyperdrive-macos-arm64
@@ -306,7 +306,7 @@ jobs:
           if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-SOURCE_TAG$SOURCE_ENDING"; fi
 
           # GitHub Releases
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/releases/$DEST_PACKAGE-SOURCE_TAG$SOURCE_ENDING"; fi
+          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/releases/$DEST_PACKAGE-$SOURCE_TAG$SOURCE_ENDING"; fi
 
           # Print what we end up with
           ls -lsa dist/dev
