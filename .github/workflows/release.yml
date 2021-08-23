@@ -303,7 +303,7 @@ jobs:
           if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-latest$SOURCE_ENDING"; fi
           if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-edge$SOURCE_ENDING"; fi
           if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-stable$SOURCE_ENDING"; fi
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-SOURCE_TAG$SOURCE_ENDING"; fi
+          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_TAG$SOURCE_ENDING"; fi
 
           # GitHub Releases
           if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/releases/$DEST_PACKAGE-$SOURCE_TAG$SOURCE_ENDING"; fi
