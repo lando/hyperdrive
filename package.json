@@ -69,7 +69,7 @@
   "scripts": {
     "build": "yarn clean && yarn pkg -c package.json -t node14 bin/hyperdrive",
     "clean": "rimraf dist",
-    "generate:leia-tests": "leia \"examples/**/README.md\" test/leia -r 2 -s \"Start up tests\" -t 'Verification commands' -c 'Destroy tests' --split-file --spawn --stdin",
+    "generate:leia-tests": "leia \"examples/**/README.md\" test/leia -r 2 -s \"Start up tests\" -t \"Verification commands\" -c \"Destroy tests\" --split-file --spawn --stdin",
     "lint": "eslint .",
     "release": "bump --preid alpha --tag --all --push package.json",
     "test:functional": "mocha --timeout 900000 test/**/*.func.js",
