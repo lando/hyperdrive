@@ -48,8 +48,22 @@
   "license": "GPL-3.0",
   "main": "src/index.js",
   "oclif": {
-    "commands": "./src/commands",
     "bin": "hyperdrive",
+    "commands": "./src/commands",
+    "hooks": {
+      "init": [
+        "./src/hooks/init.js"
+      ],
+      "prerun": [
+        "./src/hooks/prerun.js"
+      ],
+      "postrun": [
+        "./src/hooks/postrun.js"
+      ],
+      "command_not_found": [
+        "./src/hooks/cnt.js"
+      ]
+    },
     "plugins": [
       "@oclif/plugin-help"
     ]
