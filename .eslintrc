@@ -1,6 +1,7 @@
 {
   "extends": "oclif",
   "rules": {
+    "no-console": ["warn"],
     "semi": ["error", "always"],
     "semi-style": ["error", "last"],
     "space-before-function-paren": ["error", {

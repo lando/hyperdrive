@@ -4,7 +4,6 @@ class GoodbyeCommand extends Command {
   async run() {
     const {flags} = this.parse(GoodbyeCommand);
     const name = flags.name || 'world';
-    console.log(flags);
     this.log(`goodbye ${name} from ./src/commands/hello.js`);
   }
 }

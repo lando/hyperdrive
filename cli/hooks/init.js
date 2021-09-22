@@ -1,81 +1,62 @@
-const { Command } = require('@oclif/config');
-const {flags} = require('@oclif/command');
-const Config = require('@oclif/config');
+'use strict';
 
-class DynamicPlugin extends Config.Plugin {
-  get hooks() { return {} }
-  get topics() {
-    return []
-  }
-  get commandIDs() {
-    return ['mydynamiccommand']
-  }
+// @NOTE: We use LET so we can rename the debugger as needed
+const createDebugger = require('./../../lib/debug');
+const path = require('path');
+const Ministrapper = require('./../../lib/ministrapper');
 
-  get commands() {
-    const cmd = require('./../more/bye');
-    cmd.id = 'bye';
-    cmd.load = () => cmd;
-    return [cmd];
-  }
-}
+module.exports = async({id, argv, config}) => {
+  let debug = createDebugger(config.dirname, 'hooks', 'init');
+  const sourceConfig =  path.join(__dirname, '..', '..', 'config.yml');
+  const userConfig = path.join(config.configDir, 'config.yml');
 
-/*
- * New plugin types:
- * HyperdrivePlugin extends Config.Plugin
- * 1. accepts a list of commands and an optional selector function for a "parent"
- *
- *
-*/
+  // @TODO: set this based on some options (--debug?). if boolean/null should set * if string should set as if DEBUG
+  //        envvar was set.
+  // @NOTE: this shows all debug right now for dev purposes. see @TODO above.
+  require('debug').enable('*'); // eslint-disable-line node/no-extraneous-require
+  debug('cli init start with id=%s, argv=%O', id, argv);
 
-module.exports = async (options) => {
-  // commands = [require('./../more/bye')];
-  // config.plugins.push(new DynamicPlugin(config))
-  // console.log(config.plugins);
-  // config.plugins[0].commands[0].flags.stuff = flags.string({char: 'z', description: 'name to print'});
-  console.log(options); // {id, argv, conf}
+  // Get config vars
+  const ENV_PREFIX = process.env.HYPERDRIVE_BOOTSTRAP_ENV_PREFIX || 'HYPERDRIVE';
+  const ENV_SEPARATOR = process.env.HYPERDRIVE_BOOTSTRAP_ENV_SEPARATOR || '_';
+
+  // Build up hyperdrive/product config from various sources
+  const bootstrapConf = new Ministrapper([config.name, 'lib', 'ministrapper']);
+
+  // @NOTE: do we want to accept some hidden args for this eg `hyperdrive --config bootstrap.module=something?`
+  // ENVARS are highest priority
+  bootstrapConf.env(ENV_PREFIX, ENV_SEPARATOR);
+  debug('get config from %s%s* envvars done', ENV_PREFIX, ENV_SEPARATOR);
+
+  // Then user config if it exists
+  bootstrapConf.file('user', {file: userConfig, format: require('nconf-yaml')});
+  debug('get config from file %s done', userConfig);
+
+  // Then source config
+  bootstrapConf.file('source', {file: sourceConfig, format: require('nconf-yaml')});
+  debug('get config from file %s done', sourceConfig);
+
+  // Then defaults
+  bootstrapConf.defaults({
+    mode: 'cli',
+    leia: Object.prototype.hasOwnProperty.call(process.env, 'LEIA_PARSER_RUNNING'),
+    packaged: Object.prototype.hasOwnProperty.call(process, 'pkg'),
+    product: 'hyperdrive',
+  });
+  debug('get config from defaults');
+
+  // Reset debugger to indicate product status
+  debug = createDebugger(bootstrapConf.get('product'), 'hooks', 'init');
+  debug('bootstrap config set to %O', bootstrapConf.get());
 
   // Set DEBUG=* when -vvv is set?
-
-  // Load in bootstrap config from configDir
+  // run bootstrap
+  // 1. merge in more config
+  // 2. go through plugins and build manifest of components/config/whatever
+  // 3. traverse plugins to find commands
+  // 4. what do commandIDs do?
+  // 5. install defaults eg desktop -> lando-desktop
   /*
-    bootstrap:
-      bootstrapper: ./lib/bootstrap.js
-      envPrefix:
-        - HYPERDRIVE_
-      configSources:
-        - config.yml
-      mode: 'cli',
-      packaged: _.has(process, 'pkg'),
-
-      channel: stable?
-      leia: _.has(process, 'env.LEIA_PARSER_RUNNING')
-      pluginDirs: _.compact(pluginDirs.concat(process.landoAppPluginDirs))
-      plugins: ,
-      product: 'lando',
-      userAgent: `Lando/${version}`,
-
-      //
-      channel: 'stable',
-      landoFile: '.lando.yml',
-      logLevelConsole: (this.argv().verbose) ? this.argv().verbose + 1 : this.logLevel,
-      logDir: path.join(this.userConfRoot, 'logs'),
-      mode: 'cli',
-      packaged: _.has(process, 'pkg'),
-      pluginDirs: _.compact(pluginDirs.concat(process.landoAppPluginDirs)),
-      preLandoFiles: ['.lando.base.yml', '.lando.dist.yml', '.lando.upstream.yml'],
-      postLandoFiles: ['.lando.local.yml'],
-      userConfRoot: this.userConfRoot,
-      version,
-
-    */
-
-    // run bootstrap
-    // 1. merge in more config
-    // 2. go through plugins and build manifest of components/config/whatever
-    // 3. traverse plugins to find commands
-    // 4. what do commandIDs do?
-    // 5. install defaults eg desktop -> lando-desktop
-    /*
       hyperdrive:
         // list of installers
         installers:
@@ -91,5 +72,11 @@ module.exports = async (options) => {
         mods: (?)
           - {id: 'install', path: }
 
+  // commands = [require('./../more/bye')];
+  // config.plugins.push(new DynamicPlugin(config))
+  // console.log(config.plugins);
+  // config.plugins[0].commands[0].flags.stuff = flags.string({char: 'z', description: 'name to print'});
+  // console.log(id, argv, config); // {id, argv, conf}
+
     */
-}
+};
