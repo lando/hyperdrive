@@ -6,8 +6,6 @@
  * in json files with a "dev" version generated with `git describe`
  */
 
-'use strict';
-
 // Grab needed modules
 const _ = require('lodash');
 const {cli} = require('cli-ux');

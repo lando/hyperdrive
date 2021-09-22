@@ -1,0 +1,5 @@
+bootstrap:
+  module: ./lib/bootstrap.js
+  env:
+    separator: _
+    prefix: HYPERDRIVE
