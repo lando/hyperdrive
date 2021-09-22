@@ -1,9 +1,9 @@
 'use strict';
 
 // @NOTE: We use LET so we can rename the debugger as needed
-const createDebugger = require('./../../lib/debug');
+const createDebugger = require('../../utils/debug');
 const path = require('path');
-const Ministrapper = require('./../../lib/ministrapper');
+const Ministrapper = require('../../utils/ministrapper');
 
 module.exports = async({id, argv, config}) => {
   let debug = createDebugger(config.dirname, 'hooks', 'init');
@@ -21,7 +21,7 @@ module.exports = async({id, argv, config}) => {
   const ENV_SEPARATOR = process.env.HYPERDRIVE_BOOTSTRAP_ENV_SEPARATOR || '_';
 
   // Build up hyperdrive/product config from various sources
-  const bootstrapConf = new Ministrapper([config.name, 'lib', 'ministrapper']);
+  const bootstrapConf = new Ministrapper([config.name, 'utils', 'ministrapper']);
 
   // @NOTE: do we want to accept some hidden args for this eg `hyperdrive --config bootstrap.module=something?`
   // ENVARS are highest priority
@@ -41,6 +41,8 @@ module.exports = async({id, argv, config}) => {
     mode: 'cli',
     leia: Object.prototype.hasOwnProperty.call(process.env, 'LEIA_PARSER_RUNNING'),
     packaged: Object.prototype.hasOwnProperty.call(process, 'pkg'),
+    plugins: [],
+    pluginDirs: [],
     product: 'hyperdrive',
   });
   debug('get config from defaults');
@@ -49,15 +51,29 @@ module.exports = async({id, argv, config}) => {
   debug = createDebugger(bootstrapConf.get('product'), 'hooks', 'init');
   debug('bootstrap config set to %O', bootstrapConf.get());
 
-  // Set DEBUG=* when -vvv is set?
+  // 0. need to add plugins and plugin dirs to bootstrap config
+  // 1. Check if bootstrap exists, throw error if not
+  // 1. bootstrap hook?
+  // 2. run bootstrap
+  //  * consolidate and organize plugins
+  //    * external plugins
+  //    * ./plugins
+  //    * dataDir/plugins
+  //  *  build plugin manifest/registry
+  //  * load plugins
+  // 3. hook?
+  // 4. merge into config?
+
   // run bootstrap
   // 1. merge in more config
   // 2. go through plugins and build manifest of components/config/whatever
   // 3. traverse plugins to find commands
-  // 4. what do commandIDs do?
-  // 5. install defaults eg desktop -> lando-desktop
+
+  // *. what do commandIDs do?
+  // *. install defaults eg desktop -> lando-desktop
   /*
       hyperdrive:
+        config:
         // list of installers
         installers:
 

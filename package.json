@@ -41,7 +41,8 @@
     "/lib",
     "/npm-shrinkwrap.json",
     "/scripts",
-    "/src"
+    "/src",
+    "/utils"
   ],
   "homepage": "https://github.com/lando/hyperdrive",
   "keywords": [
@@ -49,7 +50,7 @@
     "oclif"
   ],
   "license": "GPL-3.0",
-  "main": "lib/index.js",
+  "main": "lib/hyperdrive.js",
   "oclif": {
     "bin": "hyperdrive",
     "commands": "./cli/commands",
