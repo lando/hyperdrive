@@ -29,10 +29,6 @@ class UninstallCommand extends Command {
   // static parserOptions
   // static
 
-  static flags = {
-    name: flags.string({char: 'n', description: 'name to print'}),
-  }
-
   async run() {
     const {flags} = this.parse(UninstallCommand);
     const name = flags.name || 'world';
