@@ -16,6 +16,8 @@ module.exports = async({id, argv, config}) => {
   require('debug').enable('*'); // eslint-disable-line node/no-extraneous-require
   debug('cli init start with id=%s, argv=%O', id, argv);
 
+  // if config cache exists then just load that and move on?
+
   // Get config vars
   const ENV_PREFIX = process.env.HYPERDRIVE_BOOTSTRAP_ENV_PREFIX || 'HYPERDRIVE';
   const ENV_SEPARATOR = process.env.HYPERDRIVE_BOOTSTRAP_ENV_SEPARATOR || '_';
@@ -38,18 +40,40 @@ module.exports = async({id, argv, config}) => {
 
   // Then defaults
   bootstrapConf.defaults({
-    mode: 'cli',
-    leia: Object.prototype.hasOwnProperty.call(process.env, 'LEIA_PARSER_RUNNING'),
-    packaged: Object.prototype.hasOwnProperty.call(process, 'pkg'),
-    plugins: [],
-    pluginDirs: [],
     product: 'hyperdrive',
+    mode: 'cli',
+    bootstrap: {
+      module: path.join(__dirname, '..', '..', 'utils', 'bootstrap.js'),
+      env: {
+        separator: '_',
+        prefix: 'HYPERDRIVE',
+      },
+      landoPlugins: true,
+      // @TODO: core plugin() below?
+      /*
+        plugins/core
+        plugins/
+      */
+      plugins: [],
+      // @TODO:
+      pluginDirs: [],
+    },
   });
   debug('get config from defaults');
 
+  // @TODO: optionally add in lando plugin dirs?
+  // @NOTE: this will need to do a light lando bootstrap to get plugin dirs and such
+  // plugin manifests should be yaml eg dumpable to file
+
   // Reset debugger to indicate product status
   debug = createDebugger(bootstrapConf.get('product'), 'hooks', 'init');
-  debug('bootstrap config set to %O', bootstrapConf.get());
+  debug('bootstrap config set to %O', bootstrapConf.get('source'));
+
+  // @TODO: load in oclif somewhere?
+  // leia: Object.prototype.hasOwnProperty.call(process.env, 'LEIA_PARSER_RUNNING'),
+  // packaged: Object.prototype.hasOwnProperty.call(process, 'pkg'),
+
+  // merge in some oclif stuff?
 
   // 0. need to add plugins and plugin dirs to bootstrap config
   // 1. Check if bootstrap exists, throw error if not
@@ -72,22 +96,6 @@ module.exports = async({id, argv, config}) => {
   // *. what do commandIDs do?
   // *. install defaults eg desktop -> lando-desktop
   /*
-      hyperdrive:
-        config:
-        // list of installers
-        installers:
-
-        // Just OCLIF command objects, this is just a list of metadata
-        commands:
-          - {id: 'install', variant: 'lando-docker-engine', path:  }
-
-        plugins:
-          - pathtofunction -> gets config and returns plugin
-
-        // Final mods to commands, useful to add more options/args etc
-        mods: (?)
-          - {id: 'install', path: }
-
   // commands = [require('./../more/bye')];
   // config.plugins.push(new DynamicPlugin(config))
   // console.log(config.plugins);
