@@ -1,5 +1,9 @@
 {
-  "extends": "oclif",
+  "extends": ["oclif"],
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false
+  },
   "rules": {
     "no-console": ["warn"],
     "semi": ["error", "always"],

@@ -2,6 +2,19 @@ const Provider = require('nconf').Provider;
 
 /*
  * Just a lite wrapper around nconf to make things a bit easier
+ *
+ * @NOTE: eventually this should be a config loading util for both lando/hyperdrive
+ *
+ * should be able to:
+ *  0. convenience methods for json/yaml
+ *  1. load YAML files
+ *  2. load "plugin manifests"
+ *  3. load "landofiles"
+ *  4. load namespaced envvars
+ *
+ *
+ *
+ *
  */
 class Ministrapper extends Provider {
   constructor(namespace = 'ministrapper') {
