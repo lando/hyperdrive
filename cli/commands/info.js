@@ -15,7 +15,7 @@ class UninstallCommand extends Command {
 
   static help = 'stuff';
 
-  static aliases = ['uninstall'];
+  // static aliases = ['uninstall'];
 
   // static strict = false;
   // static parse = true;
@@ -28,10 +28,6 @@ class UninstallCommand extends Command {
   // static examples
   // static parserOptions
   // static
-
-  static flags = {
-    name: flags.string({char: 'n', description: 'name to print'}),
-  }
 
   async run() {
     const {flags} = this.parse(UninstallCommand);
