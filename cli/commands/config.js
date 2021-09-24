@@ -33,6 +33,7 @@ class UninstallCommand extends Command {
     const {flags} = this.parse(UninstallCommand);
     const name = flags.name || 'world';
     this.log(`hello ${name} from ./src/commands/hello.js`);
+    // Instantiate hyperd
   }
 }
 
