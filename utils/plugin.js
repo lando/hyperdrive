@@ -1,27 +1,30 @@
-/*
- * New plugin types:
- * HyperdrivePlugin extends Config.Plugin
- * 1. accepts a list of commands and an optional selector function for a "parent"
- *
- *
-*/
-/*
-const Config = require('@oclif/config');
+const OclifPlugin = require('@oclif/config').Plugin;
 
-class DynamicPlugin extends Config.Plugin {
-  get hooks() { return {} }
-  get topics() {
-    return []
+class LandoOclifPlugin extends OclifPlugin {
+  constructor(config, replace) {
+    super(config);
+    this.replace = replace;
   }
+
+  get hooks() {
+    return {};
+  }
+
+  get topics() {
+    return [];
+  }
+
+  // @TODO: do we need this?
   get commandIDs() {
-    return ['mydynamiccommand']
+    return [this.replace.id];
   }
 
   get commands() {
-    const cmd = require('../more/bye');
-    cmd.id = 'bye';
+    const cmd = require(this.replace.path);
+    cmd.id = this.replace.id;
     cmd.load = () => cmd;
     return [cmd];
   }
 }
-*/
+
+module.exports = LandoOclifPlugin;

@@ -1,7 +1,7 @@
 const {Command} = require('@oclif/command');
 
-class AddCommand extends Command {
-  static description = 'add things';
+class UninstallCommand extends Command {
+  static description = 'install things';
 
   static usage = 'usage';
 
@@ -10,10 +10,10 @@ class AddCommand extends Command {
   static examples = [];
 
   async run() {
-    const {flags} = this.parse(AddCommand);
+    const {flags} = this.parse(UninstallCommand);
     const name = flags.name || 'world';
     this.log(`goodbye ${name} from ./src/commands/hello.js`);
   }
 }
 
-module.exports = AddCommand;
+module.exports = UninstallCommand;

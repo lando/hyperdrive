@@ -2,7 +2,7 @@ const {Command, flags} = require('@oclif/command');
 
 class InstallDockerDesktop extends Command {
   // static _base = 'thing';
-  // static id = 'thing';
+  static id = 'install';
   // static title = 'title';
 
   static description = 'install docker desktop'
@@ -12,8 +12,6 @@ class InstallDockerDesktop extends Command {
   static usage = 'stuff';
 
   static help = 'stuff';
-
-  static aliases = ['add'];
 
   // static strict = false;
   // static parse = true;
