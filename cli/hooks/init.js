@@ -1,9 +1,6 @@
 const createDebugger = require('./../../utils/debug');
 const path = require('path');
 
-// @TODO: only load this if we need it
-const LandoOclifPlugin = require('./../../utils/plugin');
-
 module.exports = async({id, argv, config}) => {
   let debug = createDebugger(config.dirname, 'hooks', 'init');
   // Below is mostly just to DEBUG confirm we can get this far
@@ -53,42 +50,39 @@ module.exports = async({id, argv, config}) => {
 
   // @TODO: move findPlugin to utils/utils.js? and eventually into @lando/oclifer?
   // @TODO: eventually we should make criteria able to match by more than just name/id
-  const findPlugin = (plugins = [], criteria) =>  plugins.find(({name}) => name === criteria);
-  // @TODO: remove command should eventually be a method on LandoOclifPlugin
-  const removeCommand = (plugin = {}, cmdId) => {
-    const commandIndex = plugin.commands.findIndex(({id}) => id === cmdId);
-    if (commandIndex === -1) {
-      debug('could not find a command called %s in plugin %s, doing nothing', cmdId, plugin.name);
-      return plugin.commands;
-    }
-    plugin.commands.splice(commandIndex, 1);
-    debug('removed command %s: plugin now has commands %o', cmdId, plugin.commands.map(command => command.id).join(', '));
-    return plugin.commands;
-  };
+  // const findPlugin = (plugins = [], criteria) =>  plugins.find(({name}) => name === criteria);
+  const findPluginIndex = (plugins = [], criteria) =>  plugins.findIndex(({name}) => name === criteria);
 
-  // @TODO: restantiate corePlugin as a ocliflandoplugin?
+  // @TODO: We should only load our plugin class and replace the core plugin if
+  // we have an id/argv combination that will require command removal and/or
+  // dynamically loading commands eg hyperdrive install docker-desktop
+  const LandoOclifPlugin = require('./../../utils/plugin');
+  // Create a drop in replacement of the corePlugin using our extended plugin class and load it
+  // @NOTE: root probably will not be universally config.root
+  const newCorePlugin = new LandoOclifPlugin({type: 'hyperdrive', root: config.root});
+  await newCorePlugin.load();
 
   // if id-argv matches a signature then remove id and load up queuer
   // @NOTE: should this be both add and install?
   if (id === 'install' && argv[0] === 'docker-desktop') {
-    // Lets remove the add command
-    const corePlugin = findPlugin(config.plugins, '@lando/hyperdrive');
-    // delete corePlugin.manifest.commands.add;
-    corePlugin.commands = removeCommand(corePlugin, 'install');
+    // Remove the install command
+    newCorePlugin.commands = newCorePlugin.removeCommand('install');
     // find the correct install plugin?
-    const installerPlugin = findPlugin(config.installers, 'docker-desktop');
-    config.plugins.push(new LandoOclifPlugin(config, {id: 'install', path: installerPlugin.path}));
+    // const installerPlugin = findPlugin(config.installers, 'docker-desktop');
+    // config.plugins.push(new LandoOclifPlugin(config, {id: 'install', path: installerPlugin.path}));
   }
 
   // if id-argv matches a signature then remove id and load up queuer
   // @NOTE: should this be both add and install?
   if (id === 'uninstall' && argv[0] === 'docker-desktop') {
-    // Lets remove the add command
-    const corePlugin = findPlugin(config.plugins, '@lando/hyperdrive');
-    // delete corePlugin.manifest.commands.add;
-    corePlugin.commands = removeCommand(corePlugin, 'uninstall');
+    // Lets remove the uninstall command
+    newCorePlugin.commands = newCorePlugin.removeCommand('uninstall');
     // find the correct install plugin?
-    const uninstallerPlugin = findPlugin(config.uninstallers, 'docker-desktop');
-    config.plugins.push(new LandoOclifPlugin(config, {id: 'uninstall', path: uninstallerPlugin.path}));
+    // const uninstallerPlugin = findPlugin(config.uninstallers, 'docker-desktop');
+    // config.plugins.push(new LandoOclifPlugin(config, {id: 'uninstall', path: uninstallerPlugin.path}));
   }
+
+  // Let's replace it with our extended plugin class
+  const corePluginIndex = findPluginIndex(config.plugins, '@lando/hyperdrive');
+  config.plugins.splice(corePluginIndex, 1, newCorePlugin);
 };
