@@ -13,7 +13,7 @@ class UninstallDockerDesktop extends Command {
 
   static help = 'stuff';
 
-  static aliases = ['remove'];
+  // static aliases = ['remove'];
 
   // static strict = false;
   // static parse = true;

@@ -1,6 +1,6 @@
 const {Command, flags} = require('@oclif/command');
 
-class UninstallCommand extends Command {
+class RemoveCommand extends Command {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
@@ -15,7 +15,7 @@ class UninstallCommand extends Command {
 
   static help = 'stuff';
 
-  static aliases = ['uninstall'];
+  // static aliases = ['uninstall'];
 
   // static strict = false;
   // static parse = true;
@@ -30,10 +30,10 @@ class UninstallCommand extends Command {
   // static
 
   async run() {
-    const {flags} = this.parse(UninstallCommand);
+    const {flags} = this.parse(RemoveCommand);
     const name = flags.name || 'unin';
     this.log(`erg ${name} from ./src/commands/hello.js`);
   }
 }
 
-module.exports = UninstallCommand;
+module.exports = RemoveCommand;
