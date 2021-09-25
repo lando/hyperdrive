@@ -18,17 +18,16 @@ module.exports = async({id, argv, config}) => {
 
   // @TODOS:
   /*
-   * ~~1. get debug flag~~
-   * ~~2. plugin helper commands that to do not require lodash (find plugins)~~
-   * 3. extended plugin class with extra methods?
-   *  *  eg removeCommand, replaceCommand
-   * 4. extended plugin class with ability to dynamically add commands vs from manifest file
-   * 5. create metadata to handle the below
-   * 6. revisit config loading to handle metadata above (ministrapper -> configurator)
-   * 7. stub out all our needed commands, methods, installers, etc
-   * 8. revisit get help, we need a help class that can delegate help and print other things eg list of available installers
-   * 9. stub out hyperdrive library?
-   * 10. move configurator into its own thing, move oclif helpers in their own thing?
+   * ~~3. extended plugin class with extra methods?
+   *  *  eg removeCommand~~
+   * * extended plugin class with ability to dynamically add commands vs from manifest file
+   * * create metadata to handle the below
+   * * revisit config loading to handle metadata above (ministrapper -> configurator)
+   * * stub out all our needed commands, methods, installers, etc
+   * * revisit get help, we need a help class that can delegate help and print other things eg list of available installers
+   * * stub out hyperdrive library?
+   * * move configurator into its own thing, move oclif helpers in their own thing?
+   * * Do we want other helper methods on LandoOclifPlugin eg replaceCommand?
    */
 
   // handle argv install aliases
@@ -50,39 +49,32 @@ module.exports = async({id, argv, config}) => {
 
   // @TODO: move findPlugin to utils/utils.js? and eventually into @lando/oclifer?
   // @TODO: eventually we should make criteria able to match by more than just name/id
-  // const findPlugin = (plugins = [], criteria) =>  plugins.find(({name}) => name === criteria);
+  const findPlugin = (plugins = [], criteria) =>  plugins.find(({name}) => name === criteria);
   const findPluginIndex = (plugins = [], criteria) =>  plugins.findIndex(({name}) => name === criteria);
 
   // @TODO: We should only load our plugin class and replace the core plugin if
   // we have an id/argv combination that will require command removal and/or
   // dynamically loading commands eg hyperdrive install docker-desktop
-  const LandoOclifPlugin = require('./../../utils/plugin');
-  // Create a drop in replacement of the corePlugin using our extended plugin class and load it
-  // @NOTE: root probably will not be universally config.root
-  const newCorePlugin = new LandoOclifPlugin({type: 'hyperdrive', root: config.root});
-  await newCorePlugin.load();
+  const needsElevation = true;
+  if (needsElevation) {
+    const LandoOclifPlugin = require('./../../utils/plugin');
+    // Create a drop in replacement of the corePlugin using our extended plugin class and load it
+    // const newCorePlugin = new LandoOclifPlugin({type: 'hyperdrive', root: config.root});
+    const newCorePlugin = new LandoOclifPlugin({root: config.root, type: 'hyperdrive'});
+    await newCorePlugin.load();
+    // Replace core oclif plugin with our lando one
+    config.plugins.splice(findPluginIndex(config.plugins, '@lando/hyperdrive'), 1, newCorePlugin);
 
-  // if id-argv matches a signature then remove id and load up queuer
-  // @NOTE: should this be both add and install?
-  if (id === 'install' && argv[0] === 'docker-desktop') {
-    // Remove the install command
-    newCorePlugin.commands = newCorePlugin.removeCommand('install');
-    // find the correct install plugin?
-    // const installerPlugin = findPlugin(config.installers, 'docker-desktop');
-    // config.plugins.push(new LandoOclifPlugin(config, {id: 'install', path: installerPlugin.path}));
+    // if id-argv matches a signature then remove id and load up queuer
+    // @NOTE: should this be both add and install?
+    if (id === 'install' && argv[0] === 'docker-desktop') {
+      newCorePlugin.replaceCommand('install', findPlugin(config.installers, 'docker-desktop').path);
+    }
+
+    // if id-argv matches a signature then remove id and load up queuer
+    // @NOTE: should this be both remove and uninstall?
+    if (id === 'uninstall' && argv[0] === 'docker-desktop') {
+      newCorePlugin.replaceCommand('uninstall', findPlugin(config.uninstallers, 'docker-desktop').path);
+    }
   }
-
-  // if id-argv matches a signature then remove id and load up queuer
-  // @NOTE: should this be both add and install?
-  if (id === 'uninstall' && argv[0] === 'docker-desktop') {
-    // Lets remove the uninstall command
-    newCorePlugin.commands = newCorePlugin.removeCommand('uninstall');
-    // find the correct install plugin?
-    // const uninstallerPlugin = findPlugin(config.uninstallers, 'docker-desktop');
-    // config.plugins.push(new LandoOclifPlugin(config, {id: 'uninstall', path: uninstallerPlugin.path}));
-  }
-
-  // Let's replace it with our extended plugin class
-  const corePluginIndex = findPluginIndex(config.plugins, '@lando/hyperdrive');
-  config.plugins.splice(corePluginIndex, 1, newCorePlugin);
 };

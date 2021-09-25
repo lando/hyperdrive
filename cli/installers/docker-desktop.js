@@ -5,7 +5,7 @@ class InstallDockerDesktop extends Command {
   static id = 'install';
   // static title = 'title';
 
-  static description = 'install docker desktop'
+  static description = 'install docker desktop';
 
   static hidden = true;
 
