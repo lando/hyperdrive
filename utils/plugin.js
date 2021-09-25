@@ -1,50 +1,33 @@
-const OclifPlugin = require('@oclif/config').Plugin;
+const {Command, Plugin} = require('@oclif/config');
 
-class LandoOclifPlugin extends OclifPlugin {
-  // constructor(config) {
-  //   super(config);
-  //   // this.replace = replace;
-  // }
+class LandoOclifPlugin extends Plugin {
+  // Replaces the command with id === cmdId with command file at path
+  // @NOTE: do we need cmd.pluginName/cmd.pluginType?
+  replaceCommand(cmdId, path) {
+    // Build a command we can inject
+    const cmd = require(path);
+    cmd.id = cmdId;
+    cmd.load = () => cmd;
 
+    // Reset the needed things
+    this.commands[this.commands.findIndex(({id}) => id === cmdId)] = cmd;
+    this.manifest.commands[cmdId] = Command.toCached(cmd);
+    this._debug('replaced %s command with file at %s', cmdId, path);
+  }
+
+  // Removes the command with id === cmdId
   // @TODO: this should handle a string id or an array of ids to be removed
   removeCommand(cmdId) {
-    // remove command logic here
-    // @NOTE: this is not namespaced in a useful way until load is run
-
     const commandIndex = this.commands.findIndex(({id}) => id === cmdId);
     if (commandIndex === -1) {
       this._debug('could not find a command called %s in plugin %s, doing nothing', cmdId, this.name);
       return this.commands;
     }
     this.commands.splice(commandIndex, 1);
+    delete this.commands.manifest[cmdId];
     this._debug('removed command %s: plugin now has commands %o', cmdId, this.commands.map(command => command.id));
     return this.commands;
   }
-
-  // @TODO: we need to make sure that when we reinstantiate @lando/hyperdrive that this
-  // gets the list of hooks correctly, otherwise is set to {}
-
-  // get hooks() {
-  //   return {};
-  // }
-
-  // get topics() {
-  //   return [];
-  // }
-
-  // // @TODO: do we need this?
-  // get commandIDs() {
-  //   return [this.replace.id];
-  // }
-
-  /*
-  get commands() {
-    const cmd = require(this.replace.path);
-    cmd.id = this.replace.id;
-    cmd.load = () => cmd;
-    return [cmd];
-  }
-  */
 }
 
 module.exports = LandoOclifPlugin;
