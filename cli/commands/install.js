@@ -10,7 +10,7 @@ class InstallCommand extends Command {
   async run() {
     const {flags} = this.parse(InstallCommand);
     const name = flags.name || 'world';
-    this.log(`goodbye ${name} from ./src/commands/hello.js`);
+    this.log('install plugin');
   }
 }
 
