@@ -8,8 +8,6 @@ class InstallCommand extends Command {
   static examples = [];
 
   async run() {
-    const {flags} = this.parse(InstallCommand);
-    const name = flags.name || 'world';
     this.log('install plugin');
   }
 }
