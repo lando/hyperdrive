@@ -1,25 +1,16 @@
 #!/usr/bin/env node
 
+const argv = require('./../utils/argv');
+
 // Check for --debug and internally set DEBUG=* if its set
 // @TODO: we should make debug a string flag so it can work like setting DEBUG=something
 // @TODO: should we handle --debug on our own or use something lightweight like minimist?
 // @TODO: or maybe add this as a util?
 // @TODO: we should give preference to process.env.DEBUG if its set.
 
-process.argv.slice(2).some(element =>  {
-  if (element.includes('--debug')) {
-    let debugString;
-    if (element.indexOf('=') >= 0) {
-      debugString = element.split('=')[1];
-    }
-    else {
-      const debugIndex = process.argv.indexOf('--debug');
-      let check = process.argv[debugIndex + 1];
-      debugString = check === undefined || check.indexOf('--') ? '*' : check;
-    }
-    require('debug').enable(debugString);
-  }
-});
+if (argv.hasOption('--debug')) {
+  require('debug').enable(argv.getOption('--debug', {defaultValue: '*'}));
+}
 
 require('@oclif/command')
 .run()
