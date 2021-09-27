@@ -5,9 +5,21 @@
 // @TODO: should we handle --debug on our own or use something lightweight like minimist?
 // @TODO: or maybe add this as a util?
 // @TODO: we should give preference to process.env.DEBUG if its set.
-if (process.argv.slice(2).find(element => element === '--debug') === '--debug') {
-  require('debug').enable('*'); // eslint-disable-line node/no-extraneous-require
-}
+
+process.argv.slice(2).some(element =>  {
+  if (element.includes('--debug')) {
+    let debugString;
+    if (element.indexOf('=') >= 0) {
+      debugString = element.split('=')[1];
+    }
+    else {
+      const debugIndex = process.argv.indexOf('--debug');
+      let check = process.argv[debugIndex + 1];
+      debugString = check === undefined || check.indexOf('--') ? '*' : check;
+    }
+    require('debug').enable(debugString);
+  }
+});
 
 require('@oclif/command')
 .run()
