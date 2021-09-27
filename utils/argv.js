@@ -5,11 +5,12 @@ const hasOption = option => {
 
 const getOption = (option, args) => {
   const defaultValue = Object.prototype.hasOwnProperty.call(args, 'defaultValue') ? args.defaultValue : '';
-  const optionIndex = process.argv.indexOf(option);
+  const optionIndex = process.argv.findIndex(element => element.indexOf(option) >= 0);
+  const rawOption = process.argv[optionIndex];
 
   let optionValue;
-  if (option.indexOf('=') >= 0) {
-    optionValue = option.split('=')[1];
+  if (rawOption.indexOf('=') >= 0) {
+    optionValue = rawOption.split('=')[1];
   } else {
     const checkNext = process.argv[optionIndex + 1];
     optionValue = checkNext === undefined || checkNext.indexOf('--') >= 0 ? defaultValue : checkNext;
