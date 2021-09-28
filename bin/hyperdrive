@@ -8,8 +8,9 @@ const argv = require('./../utils/argv');
 // @TODO: or maybe add this as a util?
 // @TODO: we should give preference to process.env.DEBUG if its set.
 
-if (argv.hasOption('--debug')) {
-  require('debug').enable(argv.getOption('--debug', {defaultValue: '*'}));
+if (process.env.DEBUG !== undefined || argv.hasOption('--debug')) {
+  let args = process.env.DEBUG || argv.getOption('--debug', {defaultValue: '*'});
+  require('debug').enable(args);
 }
 
 require('@oclif/command')
