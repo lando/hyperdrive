@@ -79,7 +79,8 @@ describe('argv', () => {
           'node',
           'hyperdrive',
           'list',
-          '--debug "trill"',
+          '--debug',
+          '"trill"',
         ];
       });
 
@@ -91,6 +92,28 @@ describe('argv', () => {
       it('getOption with space should not return "tronic"', function() {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
         expect(getOption).to.not.equal('"tronic"');
+      });
+    });
+
+    describe('wildcard with multiple flags', function() {
+      beforeEach(function() {
+        process.argv = [
+          'node',
+          'hyperdrive',
+          'list',
+          '--debug',
+          '--help',
+        ];
+      });
+
+      it('getOption with multiple flags should return "*"', function() {
+        const getOption = argv.getOption('--debug', {defaultValue: '*'});
+        expect(getOption).to.equal('*');
+      });
+
+      it('getOption with multiple flags should not return --help', function() {
+        const getOption = argv.getOption('--debug', {defaultValue: '*'});
+        expect(getOption).to.not.equal('--help');
       });
     });
   });
