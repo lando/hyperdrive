@@ -26,4 +26,15 @@ describe('hasOption', () => {
     const hasOption = argv.hasOption('--trill');
     expect(hasOption).to.equal(false);
   });
+
+  it('should return false', () => {
+    process.argv = [
+      'node',
+      'hyperdrive',
+      'list',
+      '--debug',
+    ];
+    const hasOption = argv.hasOption('--debugs');
+    expect(hasOption).to.equal(false);
+  });
 });

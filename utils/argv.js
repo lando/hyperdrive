@@ -1,6 +1,6 @@
 
 const hasOption = option => {
-  return process.argv.slice(2).some(element => element.includes(option));
+  return process.argv.slice(2).some(element => option.split('=')[0] === element);
 };
 
 const getOption = (option, args) => {
