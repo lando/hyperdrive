@@ -19,23 +19,37 @@ const getFlagType = flag => {
   return getNextElement(flag) === undefined ||  getNextElement(flag).startsWith('-') ? 'boolean' : 'string';
 };
 
+// stuff
 const getStringValue = flag => {
   return getCurrentElement(flag).split('=')[1] ?? getNextElement(flag);
 };
 
+/**
+ *
+ * @param {*} flag
+ * @returns
+ */
 const hasOption = flag => {
   return process.argv.slice(2).some(element => element.split('=')[0] === flag);
 };
 
+/**
+ *
+ * @param {*} flag
+ * @param {*} options
+ * @returns
+ */
 const getOption = (flag, options = {}) => {
-  // Immediately fail if flag is undefined, null, or empty.
-  if (flag === undefined || flag === null || flag === '') throw new Error('Flag is not set');
+  // // Immediately fail if flag is undefined, null, or empty.
+  // if (flag === undefined || flag === null || flag === '') throw new Error('Flag is not set');
+
+  if (process.argv.slice(2).some(element => element.split('=')[0] === flag) === false) throw new Error('No such flag');
 
   // If flag is boolean then return default value or true
   if (getFlagType(flag) === 'boolean') return options.defaultValue || true;
 
   // If flag is string, then return the string value.
-  if (getFlagType(flag) === 'string') return getStringValue(flag);
+  return getStringValue(flag);
 };
 
 module.exports = {

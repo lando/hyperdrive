@@ -127,8 +127,20 @@ describe('argv', () => {
         ];
       });
 
-      it('should throw an error as flag is NULL', () => {
+      it('should throw an error as flag is set incorrectly', () => {
+        expect(() => argv.getOption('--trill', {defaultValue: '*'})).to.throw(Error); // eslint-disable-line max-nested-callbacks
+      });
+
+      it('should throw an error as flag is empty', () => {
+        expect(() => argv.getOption('')).to.throw(Error); // eslint-disable-line max-nested-callbacks
+      });
+
+      it('should throw an error as flag is undefined', () => {
         expect(() => argv.getOption()).to.throw(Error); // eslint-disable-line max-nested-callbacks
+      });
+
+      it('should throw an error as flag is null', () => {
+        expect(() => argv.getOption(null)).to.throw(Error); // eslint-disable-line max-nested-callbacks
       });
     });
   });
