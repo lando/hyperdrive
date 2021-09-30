@@ -16,12 +16,12 @@ describe('argv', () => {
 
     it('should return true if option exists in argv', () => {
       const hasOption = argv.hasOption('--debug');
-      expect(hasOption).to.equal(true);
+      hasOption.should.equal(true);
     });
 
     it('should return false if option does not exist in argv', () => {
       const hasOption = argv.hasOption('--trill');
-      expect(hasOption).to.equal(false);
+      hasOption.should.equal(false);
     });
   });
 
@@ -38,12 +38,17 @@ describe('argv', () => {
 
       it('should return default flag if option is boolean and matches argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
-        expect(getOption).to.equal('*');
+        getOption.should.equal('*');
+      });
+
+      it('should return true if option is boolean, matches argv, and default value is not set', () => {
+        const getOption = argv.getOption('--debug');
+        getOption.should.equal(true);
       });
 
       it('should not return default flag if option is boolean and does not match argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
-        expect(getOption).to.not.equal('trill');
+        getOption.should.not.equal('trill');
       });
     });
 
@@ -59,12 +64,12 @@ describe('argv', () => {
 
       it('should match string if option is string with equal sign and flag matches argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
-        expect(getOption).to.equal('"trill"');
+        getOption.should.equal('"trill"');
       });
 
       it('should not match string if option is string with equal sign and flag does not matche argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
-        expect(getOption).to.not.equal('"tronic"');
+        getOption.should.not.equal('"tronic"');
       });
     });
 
@@ -81,12 +86,12 @@ describe('argv', () => {
 
       it('should match string if option is string with space after flag and flag matches argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
-        expect(getOption).to.equal('"trill"');
+        getOption.should.equal('"trill"');
       });
 
       it('should not match string if option is string with space after flag and flag does not match argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
-        expect(getOption).to.not.equal('"tronic"');
+        getOption.should.not.equal('"tronic"');
       });
     });
 
@@ -103,12 +108,27 @@ describe('argv', () => {
 
       it('should return default flag if option is boolean, matches argv, and multiple flags are present', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
-        expect(getOption).to.equal('*');
+        getOption.should.equal('*');
       });
 
       it('should not return next flag if option is boolean, matches argv, and multiple flags are present', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
-        expect(getOption).to.not.equal('--help');
+        getOption.should.not.equal('--help');
+      });
+    });
+
+    describe('flag is null', () => {
+      beforeEach(() => {
+        process.argv = [
+          'node',
+          'hyperdrive',
+          'list',
+          '--debug',
+        ];
+      });
+
+      it('should throw an error as flag is NULL', () => {
+        expect(() => argv.getOption()).to.throw(Error); // eslint-disable-line max-nested-callbacks
       });
     });
   });
