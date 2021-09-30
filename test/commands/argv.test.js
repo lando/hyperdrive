@@ -14,18 +14,13 @@ describe('argv', () => {
       ];
     });
 
-    it('hasOption should return true with --debug', () => {
+    it('should return true if option exists in argv', () => {
       const hasOption = argv.hasOption('--debug');
       expect(hasOption).to.equal(true);
     });
 
-    it('hasOption should return false with --trill', () => {
+    it('should return false if option does not exist in argv', () => {
       const hasOption = argv.hasOption('--trill');
-      expect(hasOption).to.equal(false);
-    });
-
-    it('hasOption should return false with --debugs', () => {
-      const hasOption = argv.hasOption('--debugs');
       expect(hasOption).to.equal(false);
     });
   });
@@ -41,12 +36,12 @@ describe('argv', () => {
         ];
       });
 
-      it('getOption should return "*"', () => {
+      it('should return default flag if option is boolean and matches argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
         expect(getOption).to.equal('*');
       });
 
-      it('getOption should not return "trill"', () => {
+      it('should not return default flag if option is boolean and does not match argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
         expect(getOption).to.not.equal('trill');
       });
@@ -62,12 +57,12 @@ describe('argv', () => {
         ];
       });
 
-      it('getOption with equal sign should return "trill"', () => {
+      it('should match string if option is string with equal sign and flag matches argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
         expect(getOption).to.equal('"trill"');
       });
 
-      it('getOption with equal sign should not return "tronic"', () => {
+      it('should not match string if option is string with equal sign and flag does not matche argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
         expect(getOption).to.not.equal('"tronic"');
       });
@@ -84,12 +79,12 @@ describe('argv', () => {
         ];
       });
 
-      it('getOption with space should return "trill"', () => {
+      it('should match string if option is string with space after flag and flag matches argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
         expect(getOption).to.equal('"trill"');
       });
 
-      it('getOption with space should not return "tronic"', () => {
+      it('should not match string if option is string with space after flag and flag does not match argv', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
         expect(getOption).to.not.equal('"tronic"');
       });
@@ -106,12 +101,12 @@ describe('argv', () => {
         ];
       });
 
-      it('getOption with multiple flags should return "*"', () => {
+      it('should return default flag if option is boolean, matches argv, and multiple flags are present', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
         expect(getOption).to.equal('*');
       });
 
-      it('getOption with multiple flags should not return --help', () => {
+      it('should not return next flag if option is boolean, matches argv, and multiple flags are present', () => {
         const getOption = argv.getOption('--debug', {defaultValue: '*'});
         expect(getOption).to.not.equal('--help');
       });
