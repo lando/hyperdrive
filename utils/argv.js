@@ -34,10 +34,8 @@ const getOption = (flag, options = {}) => {
   // If flag is boolean then return default value or true
   if (getFlagType(flag) === 'boolean') return options.defaultValue || true;
 
-  // Else if flag is string, then return the string value.
+  // If flag is string, then return the string value.
   if (getFlagType(flag) === 'string') return getStringValue(flag);
-
-  throw new Error('Reached an impossible state');
 };
 
 module.exports = {
