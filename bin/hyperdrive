@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const argv = require('./../utils/argv');
+const argv = require('@lando/argv');
 
 // Check for --debug and internally set DEBUG=* if its set
 if ((process.env.DEBUG === undefined || process.env.DEBUG === null || process.env.DEBUG === '') && argv.hasOption('--debug')) {
