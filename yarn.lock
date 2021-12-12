@@ -329,9 +329,10 @@
     log-symbols "^4.0.0"
     semver "^7.3.2"
 
-"@lando/argv@https://github.com/lando/argv.git", "@lando/argv@https://github.com/lando/argv.git#1.0.0":
-  version "1.0.0"
-  resolved "https://github.com/lando/argv.git#b28ae39e5d9904b77cf98d1797a22cd3309a307f"
+"@lando/argv@^1":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@lando/argv/-/argv-1.0.6.tgz#296bd835f01d3ad3f336dfc24052d29079a1fd36"
+  integrity sha512-+GQ+Cu9QI+bYrhPN4TRLrQg5V3G56b7WNHRO21LPQgXOxUsnDSxPxWLsZoivrcEAGCsKhMQkA//ShXZMovlmqw==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"

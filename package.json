@@ -28,7 +28,7 @@
     "/utils"
   ],
   "dependencies": {
-    "@lando/argv": "https://github.com/lando/argv.git#1.0.0",
+    "@lando/argv": "^1",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "@oclif/plugin-help": "^3",
