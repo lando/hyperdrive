@@ -1,0 +1,18 @@
+name: hyperdrive
+env_file:
+  - lando.env
+excludes:
+  - node_modules
+services:
+  cli:
+    type: node:14
+    build:
+      - yarn install
+    scanner: false
+    ssl: false
+    sslExpose: false
+tooling:
+  node:
+    service: cli
+  yarn:
+    service: cli
