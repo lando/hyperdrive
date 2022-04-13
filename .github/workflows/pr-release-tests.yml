@@ -57,15 +57,15 @@ jobs:
           - os: windows-2022
             key: hyperdrive-node14-win-x64-${{ github.sha }}
           - os: windows-2022
-            key: hyperdrive-node14-win-amd64-${{ github.sha }}
+            key: hyperdrive-node14-win-arm64-${{ github.sha }}
           - os: macos-11
             key: hyperdrive-node14-macos-x64-${{ github.sha }}
           - os: macos-11
-            key: hyperdrive-node14-macos-amd64-${{ github.sha }}
+            key: hyperdrive-node14-macos-arm64-${{ github.sha }}
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-x64-${{ github.sha }}
           - os: ubuntu-20.04
-            key: hyperdrive-node14-linux-amd64-${{ github.sha }}
+            key: hyperdrive-node14-linux-arm64-${{ github.sha }}
 
     steps:
       - name: Download ${{ matrix.key }}
