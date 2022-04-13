@@ -10,15 +10,16 @@ jobs:
     env:
       TERM: xterm
     strategy:
-      arch:
-        - x64
-        - arm64
-      node-version:
-        - 14
-      os:
-        - linux
-        - macos
-        - win
+      matrix:
+        arch:
+          - x64
+          - arm64
+        node-version:
+          - 14
+        os:
+          - linux
+          - macos
+          - win
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
