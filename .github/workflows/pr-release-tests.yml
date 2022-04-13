@@ -45,7 +45,7 @@ jobs:
           os: ${{ matrix.os }}
 
   # Sign the binaries as needed with the given OS tools
-  sign-n-seal:
+  sign-n-deploy:
     runs-on: ${{ matrix.os }}
     needs:
       - package
@@ -59,11 +59,13 @@ jobs:
             file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
+            result: hyperdrive-${{ github.sha }}.exe
           - os: windows-2022
             key: hyperdrive-node14-win-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
+            result: hyperdrive-${{ github.sha }}.exe
           - os: macos-11
             key: hyperdrive-node14-macos-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
@@ -74,6 +76,7 @@ jobs:
             apple-notary-user: APPLE_NOTARY_USER
             apple-notary-password: APPLE_NOTARY_PASSWORD
             options: --options runtime --entitlements entitlements.xml
+            result: hyperdrive-${{ github.sha }}
           - os: macos-11
             key: hyperdrive-node14-macos-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
@@ -84,12 +87,15 @@ jobs:
             apple-notary-user: APPLE_NOTARY_USER
             apple-notary-password: APPLE_NOTARY_PASSWORD
             options: --options runtime --entitlements entitlements.xml
+            result: hyperdrive-${{ github.sha }}
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
+            result: hyperdrive-${{ github.sha }}
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
+            result: hyperdrive-${{ github.sha }}
 
     steps:
       - name: Checkout code
@@ -111,126 +117,15 @@ jobs:
           apple-product-id: ${{ matrix.apple-product-id }}
           apple-team-id: ${{ matrix.apple-team-id }}
           options: ${{ matrix.options }}
-
-  #     # Upload the signed artifacts to a different bucket
-  #     - name: Upload hyperdrive-build-${{ github.sha }}
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: hyperdrive-build-${{ github.sha }}
-  #         path: dist/@lando/signed
-  #         if-no-files-found: error
-  #         retention-days: 1
-
-  # # Release to the various channels
-  # deliver:
-  #   runs-on: ubuntu-20.04
-  #   needs:
-  #     - sign-n-seal
-  #   env:
-  #     TERM: xterm
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - win
-  #         - macos
-  #         - linux
-  #       arch:
-  #         - x64
-  #         - arm64
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 0
-  #     - name: Download hyperdrive-build-${{ github.sha }}
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: hyperdrive-build-${{ github.sha }}
-  #         path: dist/@lando
-  #     - name: Set helper variables
-  #       id: vars
-  #       env:
-  #         OS: ${{ matrix.os }}
-  #       shell: bash
-  #       run: |
-  #         # Set generic source ref vars
-  #         echo "::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}"
-  #         echo "::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}"
-  #         echo "::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}"
-  #         echo "::set-output name=SOURCE_ENDING::"
-  #         # Unset vars if it makes sense to do so
-  #         if [ "$GITHUB_REF" == "${GITHUB_REF#refs/tags/}" ]; then echo "::set-output name=SOURCE_TAG::"; fi
-  #         if [ "$GITHUB_REF" == "${GITHUB_REF#refs/heads/}" ]; then echo "::set-output name=SOURCE_BRANCH::"; fi
-  #         # Modify SOURCE_ENDING on win
-  #         if [ "$OS" == "win" ]; then echo '::set-output name=SOURCE_ENDING::.exe'; fi
-  #     - name: Test helper variables
-  #       shell: bash
-  #       run: |
-  #         echo "The source OS is ${{ matrix.os }}"
-  #         echo "The source Architecture is ${{ matrix.arch }}"
-  #         echo "The source name is ${{ steps.vars.outputs.SOURCE_NAME }}"
-  #         echo "The source branch is ${{ steps.vars.outputs.SOURCE_BRANCH }}"
-  #         echo "The source tag is ${{ steps.vars.outputs.SOURCE_TAG }}"
-  #         echo "The source ending is ${{ steps.vars.outputs.SOURCE_ENDING }}"
-  #     - name: Setup release buckets
-  #       shell: bash
-  #       run: |
-  #         ls -lsa dist/@lando
-  #         mkdir -p dist/releases dist/s3 dist/dev
-  #     - name: Name and sort releases
-  #       env:
-  #         SOURCE_BRANCH: ${{ steps.vars.outputs.SOURCE_BRANCH }}
-  #         SOURCE_TAG: ${{ steps.vars.outputs.SOURCE_TAG }}
-  #         SOURCE_PACKAGE: "hyperdrive-${{ matrix.os }}-${{ matrix.arch }}${{ steps.vars.outputs.SOURCE_ENDING }}"
-  #         DEST_PACKAGE: "hyperdrive-${{ matrix.os }}-${{ matrix.arch }}"
-  #         SOURCE_ENDING: ${{ steps.vars.outputs.SOURCE_ENDING }}
-  #       shell: bash
-  #       run: |
-  #         # Snapshot release
-  #         cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/dev/$DEST_PACKAGE-build-${{ github.sha }}$SOURCE_ENDING"
-
-  #         # S3 releases
-  #         cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-latest$SOURCE_ENDING"
-  #         cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-edge$SOURCE_ENDING"
-  #         if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-latest$SOURCE_ENDING"; fi
-  #         if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-edge$SOURCE_ENDING"; fi
-  #         if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-stable$SOURCE_ENDING"; fi
-  #         if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_TAG$SOURCE_ENDING"; fi
-
-  #         # GitHub Releases
-  #         if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/releases/$DEST_PACKAGE-$SOURCE_TAG$SOURCE_ENDING"; fi
-
-  #         # Print what we end up with
-  #         ls -lsa dist/dev
-  #         ls -lsa dist/s3
-  #         ls -lsa dist/releases
-
-  #     # Upload snapshot releases as artifacts
-  #     - name: Upload snapshot releases
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: hyperdrive-snapshot-releases-${{ github.sha }}
-  #         path: dist/dev
-  #         if-no-files-found: error
-  #         retention-days: 30
-
-  #     # Upload releases to S3
-  #     - name: Configure S3 Credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.S3_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-  #         aws-region: us-east-1
-  #     - name: Upload releases to S3
-  #       shell: bash
-  #       run: |
-  #         aws s3 sync dist/s3 s3://files.lando.dev/hyperdrive --acl public-read
-  #     # Upload releases to GitHub Releases
-  #     - name: Upload releases to GitHub Releases
-  #       uses: softprops/action-gh-release@v1
-  #       if: startsWith(github.ref, 'refs/tags/')
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         draft: true
-  #         files: dist/releases/hyperdrive-${{ matrix.os }}-${{ matrix.arch }}-${{ steps.vars.outputs.SOURCE_TAG }}${{ steps.vars.outputs.SOURCE_ENDING }}
+      - name: Execute
+        shell: bash
+        run: |
+          chmod +x ${{ steps.code-sign-action.outputs.file }}
+          mv ${{ steps.code-sign-action.outputs.file }} ${{ matrix.result }}
+      - name: Upload hyperdrive-snapshot-${{ github.sha }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: hyperdrive-snapshot-${{ github.sha }}
+          path: hyperdrive/${{ matrix.result }}
+          if-no-files-found: error
+          retention-days: 1
