@@ -56,17 +56,17 @@ jobs:
         include:
           - os: windows-2022
             key: hyperdrive-node14-win-x64-${{ github.sha }}
-            file: dist/@lando/hyperdrive.exe
+            file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
           - os: windows-2022
             key: hyperdrive-node14-win-arm64-${{ github.sha }}
-            file: dist/@lando/hyperdrive.exe
+            file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
           - os: macos-11
             key: hyperdrive-node14-macos-x64-${{ github.sha }}
-            file: dist/@lando/hyperdrive
+            file: hyperdrive/hyperdrive
             certificate-data: APPLE_CERT_DATA
             certificate-password: APPLE_CERT_PASSWORD
             apple-product-id: dev.lando.hyperdrive
@@ -76,7 +76,7 @@ jobs:
             options: --options runtime --entitlements entitlements.xml
           - os: macos-11
             key: hyperdrive-node14-macos-arm64-${{ github.sha }}
-            file: dist/@lando/hyperdrive
+            file: hyperdrive/hyperdrive
             certificate-data: APPLE_CERT_DATA
             certificate-password: APPLE_CERT_PASSWORD
             apple-product-id: dev.lando.hyperdrive
@@ -86,10 +86,10 @@ jobs:
             options: --options runtime --entitlements entitlements.xml
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-x64-${{ github.sha }}
-            file: dist/@lando/hyperdrive
+            file: hyperdrive/hyperdrive
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-arm64-${{ github.sha }}
-            file: dist/@lando/hyperdrive
+            file: hyperdrive/hyperdrive
 
     steps:
       - name: Download ${{ matrix.key }}
