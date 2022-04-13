@@ -56,16 +56,40 @@ jobs:
         include:
           - os: windows-2022
             key: hyperdrive-node14-win-x64-${{ github.sha }}
+            file: dist/@lando/hyperdrive.exe
+            certificate-data: WINDOZE_CERT_DATA
+            certificate-password: WINDOZE_CERT_PASSWORD
           - os: windows-2022
             key: hyperdrive-node14-win-arm64-${{ github.sha }}
+            file: dist/@lando/hyperdrive.exe
+            certificate-data: WINDOZE_CERT_DATA
+            certificate-password: WINDOZE_CERT_PASSWORD
           - os: macos-11
             key: hyperdrive-node14-macos-x64-${{ github.sha }}
+            file: dist/@lando/hyperdrive
+            certificate-data: APPLE_CERT_DATA
+            certificate-password: APPLE_CERT_PASSWORD
+            apple-product-id: dev.lando.hyperdrive
+            apple-team-id: FY8GAUX282
+            apple-notary-user: APPLE_NOTARY_USER
+            apple-notary-password: APPLE_NOTARY_PASSWORD
+            options: --options runtime --entitlements entitlements.xml
           - os: macos-11
             key: hyperdrive-node14-macos-arm64-${{ github.sha }}
+            file: dist/@lando/hyperdrive
+            certificate-data: APPLE_CERT_DATA
+            certificate-password: APPLE_CERT_PASSWORD
+            apple-product-id: dev.lando.hyperdrive
+            apple-team-id: FY8GAUX282
+            apple-notary-user: APPLE_NOTARY_USER
+            apple-notary-password: APPLE_NOTARY_PASSWORD
+            options: --options runtime --entitlements entitlements.xml
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-x64-${{ github.sha }}
+            file: dist/@lando/hyperdrive
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-arm64-${{ github.sha }}
+            file: dist/@lando/hyperdrive
 
     steps:
       - name: Download ${{ matrix.key }}
@@ -73,101 +97,19 @@ jobs:
         with:
           name: ${{ matrix.key }}
           path: hyperdrive
-      - name: Setup dist
-        shell: bash
-        working-directory: hyperdrive
-        run: |
-          ls -lsa
-
-  #     # Codesign and notarize macOS binaries
-  #     - name: Codesign the macOS binaries
-  #       env:
-  #         APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
-  #         APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
-  #         APPLE_TEAM_ID: FY8GAUX282
-  #       if: ${{ runner.os == 'macOS' }}
-  #       run: |
-  #         # Import certs
-  #         ./scripts/import-macos-certs.sh
-  #         # x64
-  #         ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64 --force --options runtime --entitlements entitlements.xml
-  #         # arm64
-  #         ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64 --force --options runtime --entitlements entitlements.xml
-
-  #         # Create zip for notarization
-  #         mkdir -p /tmp/notarize
-  #         mv -f dist/@lando/unsigned/hyperdrive-macos-x64 /tmp/notarize/hyperdrive-macos-x64
-  #         mv -f dist/@lando/unsigned/hyperdrive-macos-arm64 /tmp/notarize/hyperdrive-macos-arm64
-  #         zip -rjX dist/@lando/unsigned/notarize.zip /tmp/notarize/*
-  #     - name: Notarize the macOS binaries
-  #       if: ${{ runner.os == 'macOS' }}
-  #       uses: devbotsxyz/xcode-notarize@v1
-  #       with:
-  #         appstore-connect-username: ${{ secrets.APPLE_NOTARY_USER }}
-  #         appstore-connect-password: ${{ secrets.APPLE_NOTARY_PASSWORD }}
-  #         primary-bundle-id: dev.lando.hyperdrive
-  #         product-path: dist/@lando/unsigned/notarize.zip
-  #         verbose: true
-  #     - name: Move the macOS binaries
-  #       if: ${{ runner.os == 'macOS' }}
-  #       run: unzip -o dist/@lando/unsigned/notarize.zip -d dist/@lando/signed
-  #     - name: Verify the macOS binaries
-  #       if: ${{ runner.os == 'macOS' }}
-  #       run: |
-  #         codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-x64
-  #         codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-arm64
-  #         chmod +x dist/@lando/signed/hyperdrive-macos-x64
-  #         ./dist/@lando/signed/hyperdrive-macos-x64 version
-  #         chmod -x dist/@lando/signed/hyperdrive-macos-x64
-
-  #     # Codesign WiNdOzE binaries
-  #     - name: Codesign the Windoze binaries
-  #       env:
-  #         WINDOZE_CERT_DATA: ${{ secrets.WINDOZE_CERT_DATA }}
-  #         WINDOZE_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
-  #       if: ${{ runner.os == 'Windows' }}
-  #       shell: powershell
-  #       run: |
-  #         # Import certs
-  #         ./scripts/import-win-certs.ps1
-  #         # x64
-  #         ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-x64.exe
-  #         # arm64
-  #         ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-arm64.exe
-  #     - name: Move the Windoze binaries
-  #       if: ${{ runner.os == 'Windows' }}
-  #       shell: bash
-  #       run: |
-  #         cp -f dist/@lando/unsigned/hyperdrive-win-x64.exe dist/@lando/signed/hyperdrive-win-x64.exe
-  #         cp -f dist/@lando/unsigned/hyperdrive-win-arm64.exe dist/@lando/signed/hyperdrive-win-arm64.exe
-  #     - name: Verify the Windoze binaries
-  #       if: ${{ runner.os == 'Windows' }}
-  #       shell: bash
-  #       run: |
-  #         chmod +x dist/@lando/signed/hyperdrive-win-x64
-  #         ./dist/@lando/signed/hyperdrive-win-x64 version
-  #         chmod -x dist/@lando/signed/hyperdrive-win-x64
-
-  #     # Codesign linux binaries
-  #     # @TODO: Eventually we should figure out how to do this on Linux but right now there
-  #     # is no requirement to do so
-  #     - name: Codesign the Linux binaries
-  #       if: ${{ runner.os == 'Linux' }}
-  #       run: |
-  #         echo "::warning:: Eventually we should figure out how to do codesign on Linux but right now there is no requirement to do so"
-  #         # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-x64
-  #         # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-arm64
-  #     - name: Move the Linux binaries
-  #       if: ${{ runner.os == 'Linux' }}
-  #       run: |
-  #         cp -f dist/@lando/unsigned/hyperdrive-linux-x64 dist/@lando/signed/hyperdrive-linux-x64
-  #         cp -f dist/@lando/unsigned/hyperdrive-linux-arm64 dist/@lando/signed/hyperdrive-linux-arm64
-  #     - name: Verify the Linux binaries
-  #       if: ${{ runner.os == 'Linux' }}
-  #       run: |
-  #         chmod +x dist/@lando/signed/hyperdrive-linux-x64
-  #         ./dist/@lando/signed/hyperdrive-linux-x64 version
-  #         chmod -x dist/@lando/signed/hyperdrive-linux-x64
+      - name: Sign and Notarize
+        uses: ./
+        id: code-sign-action
+        with:
+          file: ${{ matrix.file }}
+          certificate-data: ${{ secrets[matrix.certificate-data] }}
+          certificate-password: ${{ secrets[matrix.certificate-password] }}
+          apple-team-id: ${{ matrix.apple-team-id }}
+          apple-notary-user: ${{ secrets[matrix.apple-notary-user] }}
+          apple-notary-password: ${{ secrets[matrix.apple-notary-password] }}
+          apple-team-id: ${{ matrix.apple-team-id }}
+          apple-product-id: ${{ matrix.apple-product-id }}
+          options: ${{ matrix.options }}
 
   #     # Upload the signed artifacts to a different bucket
   #     - name: Upload hyperdrive-build-${{ github.sha }}
