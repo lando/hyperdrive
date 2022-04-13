@@ -104,11 +104,10 @@ jobs:
           file: ${{ matrix.file }}
           certificate-data: ${{ secrets[matrix.certificate-data] }}
           certificate-password: ${{ secrets[matrix.certificate-password] }}
-          apple-team-id: ${{ matrix.apple-team-id }}
           apple-notary-user: ${{ secrets[matrix.apple-notary-user] }}
           apple-notary-password: ${{ secrets[matrix.apple-notary-password] }}
-          apple-team-id: ${{ matrix.apple-team-id }}
           apple-product-id: ${{ matrix.apple-product-id }}
+          apple-team-id: ${{ matrix.apple-team-id }}
           options: ${{ matrix.options }}
 
   #     # Upload the signed artifacts to a different bucket
