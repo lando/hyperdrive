@@ -1,14 +1,5 @@
 name: Package, Sign, Seal and Deliver
 
-on:
-  push:
-    branches:
-      - main
-      - 'preview/**'
-    tags:
-      - test*
-      - v*
-
 jobs:
   # Create raw unsigned binaries for win, mac, linux and on x64 and arm64
   package:
