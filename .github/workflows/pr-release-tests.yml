@@ -98,7 +98,7 @@ jobs:
           name: ${{ matrix.key }}
           path: hyperdrive
       - name: Sign and Notarize
-        uses: ./
+        uses: lando/code-sign-action@v2
         id: code-sign-action
         with:
           file: ${{ matrix.file }}
