@@ -44,34 +44,39 @@ jobs:
           node-version: node${{ matrix.node-version }}
           os: ${{ matrix.os }}
 
-  # # Sign the binaries as needed with the given OS tools
-  # sign-n-seal:
-  #   runs-on: ${{ matrix.os }}
-  #   needs:
-  #     - package
-  #   env:
-  #     TERM: xterm
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - macos-10.15
-  #         - ubuntu-20.04
-  #         - windows-2019
+  # Sign the binaries as needed with the given OS tools
+  sign-n-seal:
+    runs-on: ${{ matrix.os }}
+    needs:
+      - package
+    env:
+      TERM: xterm
+    strategy:
+      matrix:
+        include:
+          - os: windows-2022
+            key: hyperdrive-node14-win-x64-${{ github.sha }}
+          - os: windows-2022
+            key: hyperdrive-node14-win-amd64-${{ github.sha }}
+          - os: macos-11
+            key: hyperdrive-node14-macos-x64-${{ github.sha }}
+          - os: macos-11
+            key: hyperdrive-node14-macos-amd64-${{ github.sha }}
+          - os: ubuntu-20.04
+            key: hyperdrive-node14-linux-x64-${{ github.sha }}
+          - os: ubuntu-20.04
+            key: hyperdrive-node14-linux-amd64-${{ github.sha }}
 
-  #   steps:
-  #     # Set things up for signing, notarizing, uploading etc
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 0
-  #     - name: Download hyperdrive-unsigned-build-${{ github.sha }}
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: hyperdrive-unsigned-build-${{ github.sha }}
-  #         path: dist/@lando/unsigned
-  #     - name: Setup dist
-  #       shell: bash
-  #       run: mkdir -p dist/@lando/signed
+    steps:
+      - name: Download ${{ matrix.key }}
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.key }}
+          path: hyperdrive
+      - name: Setup dist
+        shell: bash
+        run: |
+          ls -lsa
 
   #     # Codesign and notarize macOS binaries
   #     - name: Codesign the macOS binaries
