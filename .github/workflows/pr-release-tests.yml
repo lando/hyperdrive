@@ -75,7 +75,7 @@ jobs:
           path: hyperdrive
       - name: Setup dist
         shell: bash
-        working-dir: hyperdrive
+        working-directory: hyperdrive
         run: |
           ls -lsa
 
