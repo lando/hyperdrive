@@ -92,6 +92,8 @@ jobs:
             file: hyperdrive/hyperdrive
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Download ${{ matrix.key }}
         uses: actions/download-artifact@v3
         with:
