@@ -59,13 +59,13 @@ jobs:
             file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
-            result: hyperdrive-${{ github.sha }}.exe
+            result: hyperdrive-snapshot-${{ github.sha }}.exe
           - os: windows-2022
             key: hyperdrive-node14-win-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
-            result: hyperdrive-${{ github.sha }}.exe
+            result: hyperdrive-snapshot-${{ github.sha }}.exe
           - os: macos-11
             key: hyperdrive-node14-macos-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
@@ -76,7 +76,7 @@ jobs:
             apple-notary-user: APPLE_NOTARY_USER
             apple-notary-password: APPLE_NOTARY_PASSWORD
             options: --options runtime --entitlements entitlements.xml
-            result: hyperdrive-${{ github.sha }}
+            result: hyperdrive-snapshot-${{ github.sha }}
           - os: macos-11
             key: hyperdrive-node14-macos-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
@@ -87,15 +87,15 @@ jobs:
             apple-notary-user: APPLE_NOTARY_USER
             apple-notary-password: APPLE_NOTARY_PASSWORD
             options: --options runtime --entitlements entitlements.xml
-            result: hyperdrive-${{ github.sha }}
+            result: hyperdrive-snapshot-${{ github.sha }}
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
-            result: hyperdrive-${{ github.sha }}
+            result: hyperdrive-snapshot-${{ github.sha }}
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
-            result: hyperdrive-${{ github.sha }}
+            result: hyperdrive-snapshot-${{ github.sha }}
 
     steps:
       - name: Checkout code
@@ -126,6 +126,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: hyperdrive-snapshot-${{ github.sha }}
-          path: hyperdrive/${{ matrix.result }}
+          path: ${{ matrix.result }}
           if-no-files-found: error
           retention-days: 1
