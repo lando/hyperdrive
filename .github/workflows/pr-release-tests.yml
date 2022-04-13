@@ -37,7 +37,7 @@ jobs:
           node ./scripts/dev-version.js
           node ./bin/hyperdrive version
       - name: Package into node binary
-        uses: lando/pkg-actionn@v2
+        uses: lando/pkg-action@v2
         with:
           entrypoint: bin/hyperdrive
           arch: ${{ matrix.arch }}
