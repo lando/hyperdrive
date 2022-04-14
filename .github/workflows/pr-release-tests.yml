@@ -4,7 +4,6 @@ on:
   pull_request:
 
 jobs:
-  # Create raw unsigned binaries for win, mac, linux and on x64 and arm64
   package:
     runs-on: ubuntu-20.04
     env:
@@ -44,7 +43,6 @@ jobs:
           node-version: node${{ matrix.node-version }}
           os: ${{ matrix.os }}
 
-  # Sign the binaries as needed with the given OS tools
   sign-n-deploy:
     runs-on: ${{ matrix.os }}
     needs:
