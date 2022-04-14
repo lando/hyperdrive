@@ -15,13 +15,13 @@ jobs:
       matrix:
         arch:
           - x64
-          # - arm64
+          - arm64
         node-version:
           - 14
         os:
           - linux
-          # - macos
-          # - win
+          - macos
+          - win
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -55,48 +55,48 @@ jobs:
     strategy:
       matrix:
         include:
-          # - os: windows-2022
-          #   key: hyperdrive-node14-win-x64-${{ github.sha }}
-          #   file: hyperdrive/hyperdrive.exe
-          #   certificate-data: WINDOZE_CERT_DATA
-          #   certificate-password: WINDOZE_CERT_PASSWORD
-          #   result: hyperdrive-win-x64-${{ github.ref_name }}.exe
-          # - os: windows-2022
-          #   key: hyperdrive-node14-win-arm64-${{ github.sha }}
-          #   file: hyperdrive/hyperdrive.exe
-          #   certificate-data: WINDOZE_CERT_DATA
-          #   certificate-password: WINDOZE_CERT_PASSWORD
-          #   result: hyperdrive-win-arm64-${{ github.ref_name }}.exe
-          # - os: macos-11
-          #   key: hyperdrive-node14-macos-x64-${{ github.sha }}
-          #   file: hyperdrive/hyperdrive
-          #   certificate-data: APPLE_CERT_DATA
-          #   certificate-password: APPLE_CERT_PASSWORD
-          #   apple-product-id: dev.lando.hyperdrive
-          #   apple-team-id: FY8GAUX282
-          #   apple-notary-user: APPLE_NOTARY_USER
-          #   apple-notary-password: APPLE_NOTARY_PASSWORD
-          #   options: --options runtime --entitlements entitlements.xml
-          #   result: hyperdrive-macos-x64-${{ github.ref_name }}
-          # - os: macos-11
-          #   key: hyperdrive-node14-macos-arm64-${{ github.sha }}
-          #   file: hyperdrive/hyperdrive
-          #   certificate-data: APPLE_CERT_DATA
-          #   certificate-password: APPLE_CERT_PASSWORD
-          #   apple-product-id: dev.lando.hyperdrive
-          #   apple-team-id: FY8GAUX282
-          #   apple-notary-user: APPLE_NOTARY_USER
-          #   apple-notary-password: APPLE_NOTARY_PASSWORD
-          #   options: --options runtime --entitlements entitlements.xml
-          #   result: hyperdrive-macos-arm64-${{ github.ref_name }}
+          - os: windows-2022
+            key: hyperdrive-node14-win-x64-${{ github.sha }}
+            file: hyperdrive/hyperdrive.exe
+            certificate-data: WINDOZE_CERT_DATA
+            certificate-password: WINDOZE_CERT_PASSWORD
+            result: hyperdrive-win-x64-${{ github.ref_name }}.exe
+          - os: windows-2022
+            key: hyperdrive-node14-win-arm64-${{ github.sha }}
+            file: hyperdrive/hyperdrive.exe
+            certificate-data: WINDOZE_CERT_DATA
+            certificate-password: WINDOZE_CERT_PASSWORD
+            result: hyperdrive-win-arm64-${{ github.ref_name }}.exe
+          - os: macos-11
+            key: hyperdrive-node14-macos-x64-${{ github.sha }}
+            file: hyperdrive/hyperdrive
+            certificate-data: APPLE_CERT_DATA
+            certificate-password: APPLE_CERT_PASSWORD
+            apple-product-id: dev.lando.hyperdrive
+            apple-team-id: FY8GAUX282
+            apple-notary-user: APPLE_NOTARY_USER
+            apple-notary-password: APPLE_NOTARY_PASSWORD
+            options: --options runtime --entitlements entitlements.xml
+            result: hyperdrive-macos-x64-${{ github.ref_name }}
+          - os: macos-11
+            key: hyperdrive-node14-macos-arm64-${{ github.sha }}
+            file: hyperdrive/hyperdrive
+            certificate-data: APPLE_CERT_DATA
+            certificate-password: APPLE_CERT_PASSWORD
+            apple-product-id: dev.lando.hyperdrive
+            apple-team-id: FY8GAUX282
+            apple-notary-user: APPLE_NOTARY_USER
+            apple-notary-password: APPLE_NOTARY_PASSWORD
+            options: --options runtime --entitlements entitlements.xml
+            result: hyperdrive-macos-arm64-${{ github.ref_name }}
           - os: ubuntu-20.04
             key: hyperdrive-node14-linux-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             result: hyperdrive-linux-x64-${{ github.ref_name }}
-          # - os: ubuntu-20.04
-          #   key: hyperdrive-node14-linux-arm64-${{ github.sha }}
-          #   file: hyperdrive/hyperdrive
-          #   result: hyperdrive-linux-arm64-${{ github.ref_name }}
+          - os: ubuntu-20.04
+            key: hyperdrive-node14-linux-arm64-${{ github.sha }}
+            file: hyperdrive/hyperdrive
+            result: hyperdrive-linux-arm64-${{ github.ref_name }}
 
     steps:
       - name: Checkout code
@@ -124,7 +124,6 @@ jobs:
           chmod +x ${{ steps.code-sign-action.outputs.file }}
           mkdir -p /tmp/s3
           mv ${{ steps.code-sign-action.outputs.file }} /tmp/s3/${{ matrix.result }}
-      # Upload releases to S3
       - name: Configure S3 Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
