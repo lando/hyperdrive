@@ -93,10 +93,10 @@ jobs:
             key: hyperdrive-node14-linux-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             result: hyperdrive-linux-x64-${{ github.ref_name }}
-          - os: ubuntu-20.04
-            key: hyperdrive-node14-linux-arm64-${{ github.sha }}
-            file: hyperdrive/hyperdrive
-            result: hyperdrive-linux-arm64-${{ github.ref_name }}
+          # - os: ubuntu-20.04
+          #   key: hyperdrive-node14-linux-arm64-${{ github.sha }}
+          #   file: hyperdrive/hyperdrive
+          #   result: hyperdrive-linux-arm64-${{ github.ref_name }}
 
     steps:
       - name: Checkout code
