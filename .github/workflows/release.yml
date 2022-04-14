@@ -31,314 +31,314 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Get Yarn cache directory
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Use Yarn cache
-        id: yarn-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
-      - name: Install Yarn dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Reset version if needed
-        run: |
-          node ./scripts/dev-version.js
-          node ./bin/hyperdrive version
+  #     - name: Get Yarn cache directory
+  #       id: yarn-cache-dir-path
+  #       run: echo "::set-output name=dir::$(yarn cache dir)"
+  #     - name: Use Yarn cache
+  #       id: yarn-cache
+  #       uses: actions/cache@v2
+  #       with:
+  #         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+  #         key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+  #     - name: Install Yarn dependencies
+  #       run: yarn install --prefer-offline --frozen-lockfile
+  #     - name: Reset version if needed
+  #       run: |
+  #         node ./scripts/dev-version.js
+  #         node ./bin/hyperdrive version
 
-      # Package and upload the cli
-      # @NOTE: We cross-compile on Linux because _right now_ this seems to be
-      # the only place we can reliably build all the variants. We use actions/upload
-      # so move assets between jobs
-      - name: Package x64 CLI
-        run: |
-          # Package
-          yarn pkg \
-            --config package.json \
-            --targets=node${{ matrix.node-version }}-linux-x64,node${{ matrix.node-version }}-macos-x64,node${{ matrix.node-version }}-win-x64 \
-            bin/hyperdrive
-          # Rename to include arch
-          mv dist/@lando/hyperdrive-linux dist/@lando/hyperdrive-linux-x64
-          mv dist/@lando/hyperdrive-macos dist/@lando/hyperdrive-macos-x64
-          mv dist/@lando/hyperdrive-win.exe dist/@lando/hyperdrive-win-x64.exe
+  #     # Package and upload the cli
+  #     # @NOTE: We cross-compile on Linux because _right now_ this seems to be
+  #     # the only place we can reliably build all the variants. We use actions/upload
+  #     # so move assets between jobs
+  #     - name: Package x64 CLI
+  #       run: |
+  #         # Package
+  #         yarn pkg \
+  #           --config package.json \
+  #           --targets=node${{ matrix.node-version }}-linux-x64,node${{ matrix.node-version }}-macos-x64,node${{ matrix.node-version }}-win-x64 \
+  #           bin/hyperdrive
+  #         # Rename to include arch
+  #         mv dist/@lando/hyperdrive-linux dist/@lando/hyperdrive-linux-x64
+  #         mv dist/@lando/hyperdrive-macos dist/@lando/hyperdrive-macos-x64
+  #         mv dist/@lando/hyperdrive-win.exe dist/@lando/hyperdrive-win-x64.exe
 
-      # @NOTE: We cannot cross-compile arm64 builds on x64 runners so we run through docker for now
-      # @TODO: switch this to use arm64 runners whenever those are available
-      - name: Package arm64 CLI
-        uses: uraimo/run-on-arch-action@v2.0.5
-        with:
-          arch: aarch64
-          # @TODO: eventually we need to get this to work on ubuntu20.04 for build parity but we are using
-          # 18.04 because it was easier to get working, apparently there is a bug in 20.04s gpg?
-          distro: ubuntu18.04
-          githubToken: ${{ github.token }}
-          # We need to install node and yarn "again" because they dont exist inside our build container
-          install: |
-            apt update && apt -y install curl
-            curl -fsSL https://deb.nodesource.com/setup_${{ matrix.node-version }}.x | bash -
-            apt-get install -y nodejs
-            curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-            echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-            apt update && apt -y install yarn
-          run: |
-            # Package
-            yarn pkg \
-              --config package.json \
-              --targets=node${{ matrix.node-version }}-linux-arm64,node${{ matrix.node-version }}-macos-arm64,node${{ matrix.node-version }}-win-arm64 \
-              bin/hyperdrive
-            # Rename to include arch
-            mv dist/@lando/hyperdrive-linux dist/@lando/hyperdrive-linux-arm64
-            mv dist/@lando/hyperdrive-macos dist/@lando/hyperdrive-macos-arm64
-            mv dist/@lando/hyperdrive-win.exe dist/@lando/hyperdrive-win-arm64.exe
+  #     # @NOTE: We cannot cross-compile arm64 builds on x64 runners so we run through docker for now
+  #     # @TODO: switch this to use arm64 runners whenever those are available
+  #     - name: Package arm64 CLI
+  #       uses: uraimo/run-on-arch-action@v2.0.5
+  #       with:
+  #         arch: aarch64
+  #         # @TODO: eventually we need to get this to work on ubuntu20.04 for build parity but we are using
+  #         # 18.04 because it was easier to get working, apparently there is a bug in 20.04s gpg?
+  #         distro: ubuntu18.04
+  #         githubToken: ${{ github.token }}
+  #         # We need to install node and yarn "again" because they dont exist inside our build container
+  #         install: |
+  #           apt update && apt -y install curl
+  #           curl -fsSL https://deb.nodesource.com/setup_${{ matrix.node-version }}.x | bash -
+  #           apt-get install -y nodejs
+  #           curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+  #           echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+  #           apt update && apt -y install yarn
+  #         run: |
+  #           # Package
+  #           yarn pkg \
+  #             --config package.json \
+  #             --targets=node${{ matrix.node-version }}-linux-arm64,node${{ matrix.node-version }}-macos-arm64,node${{ matrix.node-version }}-win-arm64 \
+  #             bin/hyperdrive
+  #           # Rename to include arch
+  #           mv dist/@lando/hyperdrive-linux dist/@lando/hyperdrive-linux-arm64
+  #           mv dist/@lando/hyperdrive-macos dist/@lando/hyperdrive-macos-arm64
+  #           mv dist/@lando/hyperdrive-win.exe dist/@lando/hyperdrive-win-arm64.exe
 
-      # Upload the raw build artificats
-      - name: Upload hyperdrive-build-${{ github.sha }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: hyperdrive-unsigned-build-${{ github.sha }}
-          path: dist/@lando/*
-          if-no-files-found: error
-          retention-days: 1
+  #     # Upload the raw build artificats
+  #     - name: Upload hyperdrive-build-${{ github.sha }}
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: hyperdrive-unsigned-build-${{ github.sha }}
+  #         path: dist/@lando/*
+  #         if-no-files-found: error
+  #         retention-days: 1
 
-  # Sign the binaries as needed with the given OS tools
-  sign-n-seal:
-    runs-on: ${{ matrix.os }}
-    needs:
-      - package
-    env:
-      TERM: xterm
-    strategy:
-      matrix:
-        os:
-          - macos-10.15
-          - ubuntu-20.04
-          - windows-2019
+  # # Sign the binaries as needed with the given OS tools
+  # sign-n-seal:
+  #   runs-on: ${{ matrix.os }}
+  #   needs:
+  #     - package
+  #   env:
+  #     TERM: xterm
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - macos-11
+  #         - ubuntu-20.04
+  #         - windows-2022
 
-    steps:
-      # Set things up for signing, notarizing, uploading etc
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Download hyperdrive-unsigned-build-${{ github.sha }}
-        uses: actions/download-artifact@v2
-        with:
-          name: hyperdrive-unsigned-build-${{ github.sha }}
-          path: dist/@lando/unsigned
-      - name: Setup dist
-        shell: bash
-        run: mkdir -p dist/@lando/signed
+  #   steps:
+  #     # Set things up for signing, notarizing, uploading etc
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Download hyperdrive-unsigned-build-${{ github.sha }}
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: hyperdrive-unsigned-build-${{ github.sha }}
+  #         path: dist/@lando/unsigned
+  #     - name: Setup dist
+  #       shell: bash
+  #       run: mkdir -p dist/@lando/signed
 
-      # Codesign and notarize macOS binaries
-      - name: Codesign the macOS binaries
-        env:
-          APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
-          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
-          APPLE_TEAM_ID: FY8GAUX282
-        if: ${{ runner.os == 'macOS' }}
-        run: |
-          # Import certs
-          ./scripts/import-macos-certs.sh
-          # x64
-          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64 --force --options runtime --entitlements entitlements.xml
-          # arm64
-          ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64 --force --options runtime --entitlements entitlements.xml
+  #     # Codesign and notarize macOS binaries
+  #     - name: Codesign the macOS binaries
+  #       env:
+  #         APPLE_CERT_DATA: ${{ secrets.APPLE_CERT_DATA }}
+  #         APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+  #         APPLE_TEAM_ID: FY8GAUX282
+  #       if: ${{ runner.os == 'macOS' }}
+  #       run: |
+  #         # Import certs
+  #         ./scripts/import-macos-certs.sh
+  #         # x64
+  #         ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-x64 --force --options runtime --entitlements entitlements.xml
+  #         # arm64
+  #         ./scripts/sign-macos.sh dist/@lando/unsigned/hyperdrive-macos-arm64 --force --options runtime --entitlements entitlements.xml
 
-          # Create zip for notarization
-          mkdir -p /tmp/notarize
-          mv -f dist/@lando/unsigned/hyperdrive-macos-x64 /tmp/notarize/hyperdrive-macos-x64
-          mv -f dist/@lando/unsigned/hyperdrive-macos-arm64 /tmp/notarize/hyperdrive-macos-arm64
-          zip -rjX dist/@lando/unsigned/notarize.zip /tmp/notarize/*
-      - name: Notarize the macOS binaries
-        if: ${{ runner.os == 'macOS' }}
-        uses: devbotsxyz/xcode-notarize@v1
-        with:
-          appstore-connect-username: ${{ secrets.APPLE_NOTARY_USER }}
-          appstore-connect-password: ${{ secrets.APPLE_NOTARY_PASSWORD }}
-          primary-bundle-id: dev.lando.hyperdrive
-          product-path: dist/@lando/unsigned/notarize.zip
-          verbose: true
-      - name: Move the macOS binaries
-        if: ${{ runner.os == 'macOS' }}
-        run: unzip -o dist/@lando/unsigned/notarize.zip -d dist/@lando/signed
-      - name: Verify the macOS binaries
-        if: ${{ runner.os == 'macOS' }}
-        run: |
-          codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-x64
-          codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-arm64
-          chmod +x dist/@lando/signed/hyperdrive-macos-x64
-          ./dist/@lando/signed/hyperdrive-macos-x64 version
-          chmod -x dist/@lando/signed/hyperdrive-macos-x64
+  #         # Create zip for notarization
+  #         mkdir -p /tmp/notarize
+  #         mv -f dist/@lando/unsigned/hyperdrive-macos-x64 /tmp/notarize/hyperdrive-macos-x64
+  #         mv -f dist/@lando/unsigned/hyperdrive-macos-arm64 /tmp/notarize/hyperdrive-macos-arm64
+  #         zip -rjX dist/@lando/unsigned/notarize.zip /tmp/notarize/*
+  #     - name: Notarize the macOS binaries
+  #       if: ${{ runner.os == 'macOS' }}
+  #       uses: devbotsxyz/xcode-notarize@v1
+  #       with:
+  #         appstore-connect-username: ${{ secrets.APPLE_NOTARY_USER }}
+  #         appstore-connect-password: ${{ secrets.APPLE_NOTARY_PASSWORD }}
+  #         primary-bundle-id: dev.lando.hyperdrive
+  #         product-path: dist/@lando/unsigned/notarize.zip
+  #         verbose: true
+  #     - name: Move the macOS binaries
+  #       if: ${{ runner.os == 'macOS' }}
+  #       run: unzip -o dist/@lando/unsigned/notarize.zip -d dist/@lando/signed
+  #     - name: Verify the macOS binaries
+  #       if: ${{ runner.os == 'macOS' }}
+  #       run: |
+  #         codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-x64
+  #         codesign -vvvv -R="notarized" --check-notarization dist/@lando/signed/hyperdrive-macos-arm64
+  #         chmod +x dist/@lando/signed/hyperdrive-macos-x64
+  #         ./dist/@lando/signed/hyperdrive-macos-x64 version
+  #         chmod -x dist/@lando/signed/hyperdrive-macos-x64
 
-      # Codesign WiNdOzE binaries
-      - name: Codesign the Windoze binaries
-        env:
-          WINDOZE_CERT_DATA: ${{ secrets.WINDOZE_CERT_DATA }}
-          WINDOZE_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
-        if: ${{ runner.os == 'Windows' }}
-        shell: powershell
-        run: |
-          # Import certs
-          ./scripts/import-win-certs.ps1
-          # x64
-          ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-x64.exe
-          # arm64
-          ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-arm64.exe
-      - name: Move the Windoze binaries
-        if: ${{ runner.os == 'Windows' }}
-        shell: bash
-        run: |
-          cp -f dist/@lando/unsigned/hyperdrive-win-x64.exe dist/@lando/signed/hyperdrive-win-x64.exe
-          cp -f dist/@lando/unsigned/hyperdrive-win-arm64.exe dist/@lando/signed/hyperdrive-win-arm64.exe
-      - name: Verify the Windoze binaries
-        if: ${{ runner.os == 'Windows' }}
-        shell: bash
-        run: |
-          chmod +x dist/@lando/signed/hyperdrive-win-x64
-          ./dist/@lando/signed/hyperdrive-win-x64 version
-          chmod -x dist/@lando/signed/hyperdrive-win-x64
+  #     # Codesign WiNdOzE binaries
+  #     - name: Codesign the Windoze binaries
+  #       env:
+  #         WINDOZE_CERT_DATA: ${{ secrets.WINDOZE_CERT_DATA }}
+  #         WINDOZE_CERT_PASSWORD: ${{ secrets.WINDOZE_CERT_PASSWORD }}
+  #       if: ${{ runner.os == 'Windows' }}
+  #       shell: powershell
+  #       run: |
+  #         # Import certs
+  #         ./scripts/import-win-certs.ps1
+  #         # x64
+  #         ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-x64.exe
+  #         # arm64
+  #         ./scripts/sign-win.ps1 dist/@lando/unsigned/hyperdrive-win-arm64.exe
+  #     - name: Move the Windoze binaries
+  #       if: ${{ runner.os == 'Windows' }}
+  #       shell: bash
+  #       run: |
+  #         cp -f dist/@lando/unsigned/hyperdrive-win-x64.exe dist/@lando/signed/hyperdrive-win-x64.exe
+  #         cp -f dist/@lando/unsigned/hyperdrive-win-arm64.exe dist/@lando/signed/hyperdrive-win-arm64.exe
+  #     - name: Verify the Windoze binaries
+  #       if: ${{ runner.os == 'Windows' }}
+  #       shell: bash
+  #       run: |
+  #         chmod +x dist/@lando/signed/hyperdrive-win-x64
+  #         ./dist/@lando/signed/hyperdrive-win-x64 version
+  #         chmod -x dist/@lando/signed/hyperdrive-win-x64
 
-      # Codesign linux binaries
-      # @TODO: Eventually we should figure out how to do this on Linux but right now there
-      # is no requirement to do so
-      - name: Codesign the Linux binaries
-        if: ${{ runner.os == 'Linux' }}
-        run: |
-          echo "::warning:: Eventually we should figure out how to do codesign on Linux but right now there is no requirement to do so"
-          # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-x64
-          # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-arm64
-      - name: Move the Linux binaries
-        if: ${{ runner.os == 'Linux' }}
-        run: |
-          cp -f dist/@lando/unsigned/hyperdrive-linux-x64 dist/@lando/signed/hyperdrive-linux-x64
-          cp -f dist/@lando/unsigned/hyperdrive-linux-arm64 dist/@lando/signed/hyperdrive-linux-arm64
-      - name: Verify the Linux binaries
-        if: ${{ runner.os == 'Linux' }}
-        run: |
-          chmod +x dist/@lando/signed/hyperdrive-linux-x64
-          ./dist/@lando/signed/hyperdrive-linux-x64 version
-          chmod -x dist/@lando/signed/hyperdrive-linux-x64
+  #     # Codesign linux binaries
+  #     # @TODO: Eventually we should figure out how to do this on Linux but right now there
+  #     # is no requirement to do so
+  #     - name: Codesign the Linux binaries
+  #       if: ${{ runner.os == 'Linux' }}
+  #       run: |
+  #         echo "::warning:: Eventually we should figure out how to do codesign on Linux but right now there is no requirement to do so"
+  #         # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-x64
+  #         # ./scripts/sign-linux.sh dist/@lando/unsigned/hyperdrive-linux-arm64
+  #     - name: Move the Linux binaries
+  #       if: ${{ runner.os == 'Linux' }}
+  #       run: |
+  #         cp -f dist/@lando/unsigned/hyperdrive-linux-x64 dist/@lando/signed/hyperdrive-linux-x64
+  #         cp -f dist/@lando/unsigned/hyperdrive-linux-arm64 dist/@lando/signed/hyperdrive-linux-arm64
+  #     - name: Verify the Linux binaries
+  #       if: ${{ runner.os == 'Linux' }}
+  #       run: |
+  #         chmod +x dist/@lando/signed/hyperdrive-linux-x64
+  #         ./dist/@lando/signed/hyperdrive-linux-x64 version
+  #         chmod -x dist/@lando/signed/hyperdrive-linux-x64
 
-      # Upload the signed artifacts to a different bucket
-      - name: Upload hyperdrive-build-${{ github.sha }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: hyperdrive-build-${{ github.sha }}
-          path: dist/@lando/signed
-          if-no-files-found: error
-          retention-days: 1
+  #     # Upload the signed artifacts to a different bucket
+  #     - name: Upload hyperdrive-build-${{ github.sha }}
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: hyperdrive-build-${{ github.sha }}
+  #         path: dist/@lando/signed
+  #         if-no-files-found: error
+  #         retention-days: 1
 
-  # Release to the various channels
-  deliver:
-    runs-on: ubuntu-20.04
-    needs:
-      - sign-n-seal
-    env:
-      TERM: xterm
-    strategy:
-      matrix:
-        os:
-          - win
-          - macos
-          - linux
-        arch:
-          - x64
-          - arm64
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Download hyperdrive-build-${{ github.sha }}
-        uses: actions/download-artifact@v2
-        with:
-          name: hyperdrive-build-${{ github.sha }}
-          path: dist/@lando
-      - name: Set helper variables
-        id: vars
-        env:
-          OS: ${{ matrix.os }}
-        shell: bash
-        run: |
-          # Set generic source ref vars
-          echo "::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}"
-          echo "::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}"
-          echo "::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}"
-          echo "::set-output name=SOURCE_ENDING::"
-          # Unset vars if it makes sense to do so
-          if [ "$GITHUB_REF" == "${GITHUB_REF#refs/tags/}" ]; then echo "::set-output name=SOURCE_TAG::"; fi
-          if [ "$GITHUB_REF" == "${GITHUB_REF#refs/heads/}" ]; then echo "::set-output name=SOURCE_BRANCH::"; fi
-          # Modify SOURCE_ENDING on win
-          if [ "$OS" == "win" ]; then echo '::set-output name=SOURCE_ENDING::.exe'; fi
-      - name: Test helper variables
-        shell: bash
-        run: |
-          echo "The source OS is ${{ matrix.os }}"
-          echo "The source Architecture is ${{ matrix.arch }}"
-          echo "The source name is ${{ steps.vars.outputs.SOURCE_NAME }}"
-          echo "The source branch is ${{ steps.vars.outputs.SOURCE_BRANCH }}"
-          echo "The source tag is ${{ steps.vars.outputs.SOURCE_TAG }}"
-          echo "The source ending is ${{ steps.vars.outputs.SOURCE_ENDING }}"
-      - name: Setup release buckets
-        shell: bash
-        run: |
-          ls -lsa dist/@lando
-          mkdir -p dist/releases dist/s3 dist/dev
-      - name: Name and sort releases
-        env:
-          SOURCE_BRANCH: ${{ steps.vars.outputs.SOURCE_BRANCH }}
-          SOURCE_TAG: ${{ steps.vars.outputs.SOURCE_TAG }}
-          SOURCE_PACKAGE: "hyperdrive-${{ matrix.os }}-${{ matrix.arch }}${{ steps.vars.outputs.SOURCE_ENDING }}"
-          DEST_PACKAGE: "hyperdrive-${{ matrix.os }}-${{ matrix.arch }}"
-          SOURCE_ENDING: ${{ steps.vars.outputs.SOURCE_ENDING }}
-        shell: bash
-        run: |
-          # Snapshot release
-          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/dev/$DEST_PACKAGE-build-${{ github.sha }}$SOURCE_ENDING"
+  # # Release to the various channels
+  # deliver:
+  #   runs-on: ubuntu-20.04
+  #   needs:
+  #     - sign-n-seal
+  #   env:
+  #     TERM: xterm
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - win
+  #         - macos
+  #         - linux
+  #       arch:
+  #         - x64
+  #         - arm64
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Download hyperdrive-build-${{ github.sha }}
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: hyperdrive-build-${{ github.sha }}
+  #         path: dist/@lando
+  #     - name: Set helper variables
+  #       id: vars
+  #       env:
+  #         OS: ${{ matrix.os }}
+  #       shell: bash
+  #       run: |
+  #         # Set generic source ref vars
+  #         echo "::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}"
+  #         echo "::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}"
+  #         echo "::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}"
+  #         echo "::set-output name=SOURCE_ENDING::"
+  #         # Unset vars if it makes sense to do so
+  #         if [ "$GITHUB_REF" == "${GITHUB_REF#refs/tags/}" ]; then echo "::set-output name=SOURCE_TAG::"; fi
+  #         if [ "$GITHUB_REF" == "${GITHUB_REF#refs/heads/}" ]; then echo "::set-output name=SOURCE_BRANCH::"; fi
+  #         # Modify SOURCE_ENDING on win
+  #         if [ "$OS" == "win" ]; then echo '::set-output name=SOURCE_ENDING::.exe'; fi
+  #     - name: Test helper variables
+  #       shell: bash
+  #       run: |
+  #         echo "The source OS is ${{ matrix.os }}"
+  #         echo "The source Architecture is ${{ matrix.arch }}"
+  #         echo "The source name is ${{ steps.vars.outputs.SOURCE_NAME }}"
+  #         echo "The source branch is ${{ steps.vars.outputs.SOURCE_BRANCH }}"
+  #         echo "The source tag is ${{ steps.vars.outputs.SOURCE_TAG }}"
+  #         echo "The source ending is ${{ steps.vars.outputs.SOURCE_ENDING }}"
+  #     - name: Setup release buckets
+  #       shell: bash
+  #       run: |
+  #         ls -lsa dist/@lando
+  #         mkdir -p dist/releases dist/s3 dist/dev
+  #     - name: Name and sort releases
+  #       env:
+  #         SOURCE_BRANCH: ${{ steps.vars.outputs.SOURCE_BRANCH }}
+  #         SOURCE_TAG: ${{ steps.vars.outputs.SOURCE_TAG }}
+  #         SOURCE_PACKAGE: "hyperdrive-${{ matrix.os }}-${{ matrix.arch }}${{ steps.vars.outputs.SOURCE_ENDING }}"
+  #         DEST_PACKAGE: "hyperdrive-${{ matrix.os }}-${{ matrix.arch }}"
+  #         SOURCE_ENDING: ${{ steps.vars.outputs.SOURCE_ENDING }}
+  #       shell: bash
+  #       run: |
+  #         # Snapshot release
+  #         cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/dev/$DEST_PACKAGE-build-${{ github.sha }}$SOURCE_ENDING"
 
-          # S3 releases
-          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-latest$SOURCE_ENDING"
-          cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-edge$SOURCE_ENDING"
-          if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-latest$SOURCE_ENDING"; fi
-          if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-edge$SOURCE_ENDING"; fi
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-stable$SOURCE_ENDING"; fi
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_TAG$SOURCE_ENDING"; fi
+  #         # S3 releases
+  #         cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-latest$SOURCE_ENDING"
+  #         cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_BRANCH-edge$SOURCE_ENDING"
+  #         if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-latest$SOURCE_ENDING"; fi
+  #         if [[ "$SOURCE_BRANCH" == "main" ]]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-edge$SOURCE_ENDING"; fi
+  #         if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-stable$SOURCE_ENDING"; fi
+  #         if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/s3/$DEST_PACKAGE-$SOURCE_TAG$SOURCE_ENDING"; fi
 
-          # GitHub Releases
-          if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/releases/$DEST_PACKAGE-$SOURCE_TAG$SOURCE_ENDING"; fi
+  #         # GitHub Releases
+  #         if [ ! -z "$SOURCE_TAG" ]; then cp -f "dist/@lando/$SOURCE_PACKAGE" "dist/releases/$DEST_PACKAGE-$SOURCE_TAG$SOURCE_ENDING"; fi
 
-          # Print what we end up with
-          ls -lsa dist/dev
-          ls -lsa dist/s3
-          ls -lsa dist/releases
+  #         # Print what we end up with
+  #         ls -lsa dist/dev
+  #         ls -lsa dist/s3
+  #         ls -lsa dist/releases
 
-      # Upload snapshot releases as artifacts
-      - name: Upload snapshot releases
-        uses: actions/upload-artifact@v2
-        with:
-          name: hyperdrive-snapshot-releases-${{ github.sha }}
-          path: dist/dev
-          if-no-files-found: error
-          retention-days: 30
+  #     # Upload snapshot releases as artifacts
+  #     - name: Upload snapshot releases
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: hyperdrive-snapshot-releases-${{ github.sha }}
+  #         path: dist/dev
+  #         if-no-files-found: error
+  #         retention-days: 30
 
-      # Upload releases to S3
-      - name: Configure S3 Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.S3_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-      - name: Upload releases to S3
-        shell: bash
-        run: |
-          aws s3 sync dist/s3 s3://files.lando.dev/hyperdrive --acl public-read
-      # Upload releases to GitHub Releases
-      - name: Upload releases to GitHub Releases
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          draft: true
-          files: dist/releases/hyperdrive-${{ matrix.os }}-${{ matrix.arch }}-${{ steps.vars.outputs.SOURCE_TAG }}${{ steps.vars.outputs.SOURCE_ENDING }}
+  #     # Upload releases to S3
+  #     - name: Configure S3 Credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.S3_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+  #         aws-region: us-east-1
+  #     - name: Upload releases to S3
+  #       shell: bash
+  #       run: |
+  #         aws s3 sync dist/s3 s3://files.lando.dev/hyperdrive --acl public-read
+  #     # Upload releases to GitHub Releases
+  #     - name: Upload releases to GitHub Releases
+  #       uses: softprops/action-gh-release@v1
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         draft: true
+  #         files: dist/releases/hyperdrive-${{ matrix.os }}-${{ matrix.arch }}-${{ steps.vars.outputs.SOURCE_TAG }}${{ steps.vars.outputs.SOURCE_ENDING }}

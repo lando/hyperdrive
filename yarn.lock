@@ -329,7 +329,7 @@
     log-symbols "^4.0.0"
     semver "^7.3.2"
 
-"@lando/argv@https://github.com/lando/argv.git", "@lando/argv@https://github.com/lando/argv.git#1.0.0":
+"@lando/argv@https://github.com/lando/argv.git#1.0.0":
   version "1.0.0"
   resolved "https://github.com/lando/argv.git#b28ae39e5d9904b77cf98d1797a22cd3309a307f"
 
