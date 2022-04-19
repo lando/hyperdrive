@@ -1,3 +1,8 @@
+v0.7.0-alpha.2
+--------------
+
+* Testing new release pipeline
+
 v0.7.0-alpha.1
 --------------
 
