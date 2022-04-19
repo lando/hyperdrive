@@ -1,3 +1,7 @@
+## v0.7.0-alpha.2 [April 19, 2022](https://github.com/lando/hyperdrive/releases/tag/v0.7.0-alpha.2)
+
+* Testing new release pipeline II
+
 ## v0.7.0-alpha.1 [April 19, 2022](https://github.com/lando/hyperdrive/releases/tag/v0.7.0-alpha.1)
 
 * Testing new release pipeline
