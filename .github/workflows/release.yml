@@ -1,10 +1,10 @@
-name: Create Dev Releases
+name: Create Releases
 
 on:
-  push:
-    branches:
-      - main
-      - 'preview/**'
+  release:
+    types:
+      - published
+      - edited
 
 jobs:
   package:
@@ -118,12 +118,18 @@ jobs:
           apple-product-id: ${{ matrix.apple-product-id }}
           apple-team-id: ${{ matrix.apple-team-id }}
           options: ${{ matrix.options }}
-      - name: Execute
+      - name: Rename as needed
         shell: bash
         run: |
-          chmod +x ${{ steps.code-sign-action.outputs.file }}
-          mkdir -p /tmp/s3
-          mv ${{ steps.code-sign-action.outputs.file }} /tmp/s3/${{ matrix.result }}
+          mkdir -p /tmp/releases
+          cp ${{ steps.code-sign-action.outputs.file }} /tmp/releases/${{ matrix.result }}
+          if [ "${{ github.event.release.prerelease }}" ==  "false" ]; then
+            cp /tmp/releases/${{ matrix.result }} "/tmp/releases/$(echo ${{ matrix.result }} | sed 's/${{ github.ref_name }}/stable/;')"
+          else
+            cp /tmp/releases/${{ matrix.result }} "/tmp/releases/$(echo ${{ matrix.result }} | sed 's/${{ github.ref_name }}/edge/;')"
+          fi
+          chmod +x /tmp/releases/*
+          ls -lsa /tmp/releases
       - name: Configure S3 Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -133,3 +139,9 @@ jobs:
       - name: Upload dev releases to S3
         shell: bash
         run: aws s3 sync /tmp/s3 s3://files.lando.dev/hyperdrive --acl public-read
+      - name: Upload releases to GitHub Releases
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: /tmp/releases/${{ matrix.result }}

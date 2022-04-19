@@ -24,6 +24,9 @@ Testing
 Releasing
 ---------
 
+1. `yarn release`.
+2. Create GitHub release or prerelease.
+
 Other Resources
 ---------------
 
