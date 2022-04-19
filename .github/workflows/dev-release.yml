@@ -118,7 +118,7 @@ jobs:
           apple-product-id: ${{ matrix.apple-product-id }}
           apple-team-id: ${{ matrix.apple-team-id }}
           options: ${{ matrix.options }}
-      - name: Execute
+      - name: Rename as needed
         shell: bash
         run: |
           mkdir -p /tmp/releases

@@ -115,12 +115,12 @@ jobs:
           apple-product-id: ${{ matrix.apple-product-id }}
           apple-team-id: ${{ matrix.apple-team-id }}
           options: ${{ matrix.options }}
-      - name: Execute
+      - name: Rename as needed
         shell: bash
         run: |
           chmod +x ${{ steps.code-sign-action.outputs.file }}
           mv ${{ steps.code-sign-action.outputs.file }} ${{ matrix.result }}
-      - name: Upload ${{ matrix.result }}
+      - name: Upload snapshot release ${{ matrix.result }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.result }}
