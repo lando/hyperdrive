@@ -1,9 +1,8 @@
-v0.7.0-alpha.2
---------------
+## v0.7.0-alpha.1 [April 19, 2022](https://github.com/lando/hyperdrive/releases/tag/v0.7.0-alpha.1)
 
 * Testing new release pipeline
 
-v0.7.0-alpha.1
+v0.7.0-alpha.0
 --------------
 
 As of this release `hyperdrive` is expanding in scope to be a proper package and dependency management tool for `lando`. Check out the [README](https://github.com/lando/hyperdrive/blob/main/README.md) for details on `hyperdrives` new mission and purpose.
