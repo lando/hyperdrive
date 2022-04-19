@@ -121,15 +121,17 @@ jobs:
       - name: Rename as needed
         shell: bash
         run: |
-          mkdir -p /tmp/releases
-          cp ${{ steps.code-sign-action.outputs.file }} /tmp/releases/${{ matrix.result }}
+          mkdir -p releases
+          cp ${{ steps.code-sign-action.outputs.file }} releases/${{ matrix.result }}
           if [ "${{ github.event.release.prerelease }}" ==  "false" ]; then
-            cp /tmp/releases/${{ matrix.result }} "/tmp/releases/$(echo ${{ matrix.result }} | sed 's/${{ github.ref_name }}/stable/;')"
+            cp releases/${{ matrix.result }} "releases/$(echo ${{ matrix.result }} | sed 's/${{ github.ref_name }}/stable/;')"
           else
-            cp /tmp/releases/${{ matrix.result }} "/tmp/releases/$(echo ${{ matrix.result }} | sed 's/${{ github.ref_name }}/edge/;')"
+            cp releases/${{ matrix.result }} "releases/$(echo ${{ matrix.result }} | sed 's/${{ github.ref_name }}/edge/;')"
           fi
-          chmod +x /tmp/releases/*
-          ls -lsa /tmp/releases
+          chmod +x releases/*
+          ls -lsa releases
+          cd releases
+          pwd
       - name: Configure S3 Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -138,10 +140,10 @@ jobs:
           aws-region: us-east-1
       - name: Upload releases to S3
         shell: bash
-        run: aws s3 sync /tmp/releases s3://files.lando.dev/hyperdrive --acl public-read
+        run: aws s3 sync releases s3://files.lando.dev/hyperdrive --acl public-read
       - name: Upload releases to GitHub Releases
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: /tmp/releases/${{ matrix.result }}
+          files: releases/${{ matrix.result }}
