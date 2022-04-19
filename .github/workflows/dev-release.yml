@@ -121,9 +121,10 @@ jobs:
       - name: Execute
         shell: bash
         run: |
-          chmod +x ${{ steps.code-sign-action.outputs.file }}
-          mkdir -p /tmp/s3
-          mv ${{ steps.code-sign-action.outputs.file }} /tmp/s3/${{ matrix.result }}
+          mkdir -p /tmp/releases
+          cp ${{ steps.code-sign-action.outputs.file }} /tmp/releases/${{ matrix.result }}
+          chmod +x /tmp/releases/*
+          ls -lsa /tmp/releases
       - name: Configure S3 Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -132,4 +133,4 @@ jobs:
           aws-region: us-east-1
       - name: Upload dev releases to S3
         shell: bash
-        run: aws s3 sync /tmp/s3 s3://files.lando.dev/hyperdrive --acl public-read
+        run: aws s3 sync /tmp/releases s3://files.lando.dev/hyperdrive --acl public-read
