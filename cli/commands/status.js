@@ -1,14 +1,17 @@
-const {Command, flags} = require('@oclif/command');
+const {flags} = require('@oclif/command');
+const {BaseCommand} = require('../lib/command');
 
-class UninstallCommand extends Command {
+class StatusCommand extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Describe the command here
+  static description = `System checks to make sure Hyperdrive can operate correctly.
 
-  Extra documentation goes here
-  `;
+  - Docker Desktop Installed yes/no
+  - Docker Desktop Version supported/unsupported
+  - Can I run Docker commands?
+  - Checking health of Docker Desktop install: RAM/CPU allocations, storage available, etc.`;
   // static hidden - false;
 
   static usage = 'stuff';

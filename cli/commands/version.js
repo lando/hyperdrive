@@ -1,12 +1,12 @@
 const {flags} = require('@oclif/command');
 const {BaseCommand} = require('../lib/command');
 
-class RemoveCommand extends BaseCommand {
+class VersionCommand extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Remove a plugin or dependency from your Lando installation.
+  static description = `Return the version of Hyperdrive. CHECK IF OCLIF HAS DEFAULT?
 
   Extra documentation goes here
   `;
@@ -16,7 +16,7 @@ class RemoveCommand extends BaseCommand {
 
   static help = 'stuff';
 
-  // Check the OCLIF 2 standard static aliases = ['uninstall'];
+  // static aliases = ['uninstall'];
 
   // static strict = false;
   // static parse = true;
@@ -31,10 +31,10 @@ class RemoveCommand extends BaseCommand {
   // static
 
   async run() {
-    const {flags} = this.parse(RemoveCommand);
-    const name = flags.name || 'unin';
-    this.log(`erg ${name} from ./src/commands/hello.js`);
+    const {flags} = this.parse(UninstallCommand);
+    const name = flags.name || 'world';
+    this.log(`hello ${name} from ./src/commands/hello.js`);
   }
 }
 
-module.exports = RemoveCommand;
+module.exports = UninstallCommand;

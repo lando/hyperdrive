@@ -1,21 +1,19 @@
-const {Command, flags} = require('@oclif/command');
+const {flags} = require('@oclif/command');
+const {BaseCommand} = require('../lib/command');
 
-class UninstallCommand extends Command {
+class ListCommand extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Describe the command here
-
-  Extra documentation goes here
-  `;
+  static description = `Shows all loaded dependencies for your current context, including their version, where they're being loaded from, and their context (app vs. global).
+  Have options for global and namespace.
+  Have option --no-deps to remove Lando/Docker Desktop from the list.`;
   // static hidden - false;
 
   static usage = 'stuff';
 
   static help = 'stuff';
-
-  // static aliases = ['uninstall'];
 
   // static strict = false;
   // static parse = true;

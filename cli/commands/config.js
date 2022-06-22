@@ -1,13 +1,22 @@
-const {Command, flags} = require('@oclif/command');
+const {flags} = require('@oclif/command');
+const {BaseCommand} = require('../lib/command');
 
-class UninstallCommand extends Command {
+class ConfigCommand extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Describe the command here
+  static description = `Configure Hyperdrive options. Options include...
 
-  Extra documentation goes here
+  - Supported versions of Docker Desktop.
+  - Default installed version of Docker Desktop.
+  - Default version of Lando.
+  - Default version of Docker Compose.
+  - Whether you should install Docker Desktop at all.
+  - Default release channel.
+  - Specify a .npmrc file for global install.
+
+  Topic with "hyperdrive config get/set/list"
   `;
   // static hidden - false;
 
