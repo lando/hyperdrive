@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           which hyperdrive
-          hyperdrive version
+          hyperdrive test
 
       # This block should eventually become use lando/actions-leia@v2
       - name: Generate tests
