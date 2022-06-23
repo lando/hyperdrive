@@ -1,4 +1,4 @@
-const {PluginCommand} = require('../lib/plugin-command');
+const {PluginCommand} = require('../../lib/plugin-command');
 const {flags} = require('@oclif/core');
 
 class AddCommand extends PluginCommand {

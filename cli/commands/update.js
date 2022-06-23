@@ -1,5 +1,4 @@
-const {flags} = require('@oclif/command');
-const {BaseCommand} = require('./lib/command');
+const {BaseCommand} = require('../lib/command');
 
 class UpdateCommand extends BaseCommand {
   // static _base = 'thing';
@@ -20,9 +19,7 @@ class UpdateCommand extends BaseCommand {
 
   // static strict = false;
   // static parse = true;
-  static flags = {
-    name: flags.string({char: 'n', description: 'name to print'}),
-  }
+  static flags = {};
 
   // static args
   // static plugin

@@ -1,0 +1,46 @@
+name: Run Leia Tests
+
+on:
+  pull_request:
+
+jobs:
+  leia-tests:
+    runs-on: ${{ matrix.os }}
+    env:
+      TERM: xterm
+    strategy:
+      matrix:
+        leia-tests:
+          - examples/basics
+        os:
+          - windows-2022
+          - ubuntu-20.04
+          - macos-11
+        node-version:
+          - '14'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install node ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: yarn
+      - name: Install Yarn dependencies
+        run: yarn install --prefer-offline --frozen-lockfile
+
+      - name: Build package and PATH it
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$PATH"
+          yarn build
+          mv ./dist/@lando/hyperdrive "$HOME/.local/bin/hyperdrive"
+          chmod +x "$HOME/.local/bin/hyperdrive"
+      - name: Verify package
+        shell: bash
+        run: hyperdrive test
+      - name: Run leia tests
+        shell: bash
+        run: yarn leia "./${{ matrix.leia-tests }}/README.md" -c --stdin --shell bash

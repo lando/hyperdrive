@@ -1,4 +1,4 @@
-const {PluginCommand} = require('../lib/plugin-command');
+const {PluginCommand} = require('../../lib/plugin-command');
 const {Flags} = require('@oclif/core');
 
 class AddLandoCommand extends PluginCommand {
