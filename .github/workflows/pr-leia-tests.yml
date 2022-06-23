@@ -10,62 +10,37 @@ jobs:
       TERM: xterm
     strategy:
       matrix:
+        leia-tests:
+          - examples/basics
         os:
-          - macos-10.15
+          - windows-2022
           - ubuntu-20.04
-          # - windows-2019
+          - macos-11
         node-version:
           - '14'
-        leia-tests:
-          - basics-example
     steps:
-
-      # Install deps and cache
-      # Eventually it would be great if these steps could live in a separate YAML file
-      # that could be included in line to avoid code duplication
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Install node ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Get Yarn cache directory
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - name: Use Yarn cache
-        uses: actions/cache@v2
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
+          cache: yarn
       - name: Install Yarn dependencies
         run: yarn install --prefer-offline --frozen-lockfile
 
-      # Package and verify CLI
-      - name: Package CLI
+      - name: Build package and PATH it
         shell: bash
         run: |
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$PATH"
           yarn build
-          ls -lsa dist/@lando
-      - name: Replace source CLI with packaged one
+          mv ./dist/@lando/hyperdrive "$HOME/.local/bin/hyperdrive"
+          chmod +x "$HOME/.local/bin/hyperdrive"
+      - name: Verify package
         shell: bash
-        run: |
-          # Set os specific vars
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            mv ./dist/@lando/hyperdrive.exe /usr/bin/hyperdrive.exe
-            chmod +x /usr/bin/hyperdrive.exe
-          else
-            mv ./dist/@lando/hyperdrive /usr/local/bin/hyperdrive
-            chmod +x /usr/local/bin/hyperdrive
-          fi
-      - name: Verify we can run the packaged CLI
+        run: hyperdrive test
+      - name: Run leia tests
         shell: bash
-        run: |
-          which hyperdrive
-          hyperdrive test
-
-      # This block should eventually become use lando/actions-leia@v2
-      - name: Generate tests
-        run: yarn generate:leia-tests
-      - name: Run ${{ matrix.leia-tests }} leia tests
-        run: yarn mocha --timeout 900000 ./test/leia/${{ matrix.leia-tests }}.func.js
+        run: yarn leia "./${{ matrix.leia-tests }}/README.md" -c --stdin --shell bash
