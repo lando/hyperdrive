@@ -1,7 +1,7 @@
 const {flags} = require('@oclif/command');
-const {BaseCommand} = require('../lib/command');
+const {BaseCommand} = require('./lib/command');
 
-class InfoCommand extends Command {
+class InfoCommand extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
@@ -28,10 +28,10 @@ class InfoCommand extends Command {
   // static
 
   async run() {
-    const {flags} = this.parse(UninstallCommand);
+    const {flags} = this.parse(InfoCommand);
     const name = flags.name || 'world';
     this.log(`hello ${name} from ./src/commands/hello.js`);
   }
 }
 
-module.exports = UninstallCommand;
+module.exports = InfoCommand;
