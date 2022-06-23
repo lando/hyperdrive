@@ -1,4 +1,4 @@
-const {flags} = require('@oclif/command');
+const {Flags} = require('@oclif/core');
 const {BaseCommand} = require('../lib/command');
 
 class ConfigCommand extends BaseCommand {
@@ -29,7 +29,7 @@ class ConfigCommand extends BaseCommand {
   // static strict = false;
   // static parse = true;
   static flags = {
-    name: flags.string({char: 'n', description: 'name to print'}),
+    name: Flags.string({char: 'n', description: 'name to print'}),
   }
 
   // static args
@@ -39,11 +39,11 @@ class ConfigCommand extends BaseCommand {
   // static
 
   async run() {
-    const {flags} = this.parse(UninstallCommand);
+    const {flags} = this.parse(ConfigCommand);
     const name = flags.name || 'world';
     this.log(`hello ${name} from ./src/commands/hello.js`);
     // Instantiate hyperd
   }
 }
 
-module.exports = UninstallCommand;
+module.exports = ConfigCommand;

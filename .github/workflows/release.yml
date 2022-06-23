@@ -1,4 +1,4 @@
-name: Create Releases
+name: Create CLI Releases
 
 on:
   release:
@@ -33,11 +33,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: yarn
       - name: Install Yarn dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Reset version if needed
-        run: |
-          node ./scripts/dev-version.js
-          node ./bin/hyperdrive version
+        run: yarn install --prefer-offline --frozen-lockfile --production
       - name: Package into node binary
         uses: lando/pkg-action@v2
         with:
@@ -130,8 +126,6 @@ jobs:
           fi
           chmod +x releases/*
           ls -lsa releases
-          cd releases
-          pwd
       - name: Configure S3 Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

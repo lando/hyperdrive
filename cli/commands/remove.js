@@ -1,4 +1,4 @@
-const {flags} = require('@oclif/command');
+const {Flags} = require('@oclif/core');
 const {BaseCommand} = require('../lib/command');
 
 class RemoveCommand extends BaseCommand {
@@ -21,7 +21,7 @@ class RemoveCommand extends BaseCommand {
   // static strict = false;
   // static parse = true;
   static flags = {
-    name: flags.string({char: 'n', description: 'name to print'}),
+    name: Flags.string({char: 'n', description: 'name to print'}),
   }
 
   // static args
