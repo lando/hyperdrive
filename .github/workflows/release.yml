@@ -1,4 +1,4 @@
-name: Create Releases
+name: Create CLI Releases
 
 on:
   release:
@@ -33,11 +33,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: yarn
       - name: Install Yarn dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
-      - name: Reset version if needed
-        run: |
-          node ./scripts/dev-version.js
-          node ./bin/hyperdrive version
+        run: yarn install --prefer-offline --frozen-lockfile --production
       - name: Package into node binary
         uses: lando/pkg-action@v2
         with:
@@ -77,7 +73,7 @@ jobs:
             apple-notary-user: APPLE_NOTARY_USER
             apple-notary-password: APPLE_NOTARY_PASSWORD
             options: --options runtime --entitlements entitlements.xml
-            result: hyperdrive-macos-x64-${{ github.ref_name }}
+            result: lando-macos-x64-${{ github.ref_name }}
           - os: macos-11
             key: hyperdrive-node14-macos-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
@@ -130,8 +126,6 @@ jobs:
           fi
           chmod +x releases/*
           ls -lsa releases
-          cd releases
-          pwd
       - name: Configure S3 Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

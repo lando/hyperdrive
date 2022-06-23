@@ -33,11 +33,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: yarn
       - name: Install Yarn dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+        run: yarn install --prefer-offline --frozen-lockfile --production
       - name: Reset version if needed
         run: |
-          node ./scripts/dev-version.js
-          node ./bin/hyperdrive version
+          git describe --tags --abbrev=1 && yarn bump "$(git describe --tags --abbrev=1 | cut -c2-)" package.json || echo "No tags yet. Skipping..."
+          node ./bin/hyperdrive
       - name: Package into node binary
         uses: lando/pkg-action@v2
         with:
@@ -123,6 +123,8 @@ jobs:
         run: |
           mkdir -p releases
           cp ${{ steps.code-sign-action.outputs.file }} releases/${{ matrix.result }}
+          cp releases/${{ matrix.result }} "releases/$(echo ${{ matrix.result }} | sed 's/${{ github.ref_name }}/latest/;')"
+          cp releases/${{ matrix.result }} "releases/$(echo ${{ matrix.result }} | sed 's/${{ github.ref_name }}/dev/;')"
           chmod +x releases/*
           ls -lsa releases
       - name: Configure S3 Credentials

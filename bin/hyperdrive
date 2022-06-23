@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
 const argv = require('@lando/argv');
+const oclif = require('@oclif/core');
 
 // Check for --debug and internally set DEBUG=* if its set
 if ((process.env.DEBUG === undefined || process.env.DEBUG === null || process.env.DEBUG === '') && argv.hasOption('--debug')) {
-  require('debug').enable(argv.getOption('--debug', {defaultValue: '*'})); // eslint-disable-line node/no-extraneous-require
+  require('debug').enable(argv.getOption('--debug', {defaultValue: '*'}));
+  process.env.NODE_ENV = 'development';
+  oclif.settings.debug = true;
 }
 
-require('@oclif/command')
-.run()
-.then(require('@oclif/command/flush'))
-// eslint-disable-next-line node/no-unpublished-require
-.catch(require('@oclif/errors/handle'));
+oclif.run().then(require('@oclif/core/flush')).catch(require('@oclif/core/handle'));

@@ -1,4 +1,4 @@
-name: Release Tests
+name: Test Deploy
 
 on:
   pull_request:
@@ -30,11 +30,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: yarn
       - name: Install Yarn dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+        run: yarn install --prefer-offline --frozen-lockfile --production
       - name: Reset version if needed
         run: |
-          node ./scripts/dev-version.js
-          node ./bin/hyperdrive version
+          git describe --tags --abbrev=1 && yarn bump "$(git describe --tags --abbrev=1 | cut -c2-)" package.json || echo "No tags yet. Skipping..."
+          node ./bin/hyperdrive
       - name: Package into node binary
         uses: lando/pkg-action@v2
         with:

@@ -1,4 +1,4 @@
-name: Basic Leia Tests
+name: Run Leia Tests
 
 on:
   pull_request:

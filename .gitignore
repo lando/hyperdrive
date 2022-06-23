@@ -30,3 +30,13 @@ test/*.func.js
 .nyc_output
 coverage/
 test/leia
+
+# Oclif=
+*-debug.log
+*-error.log
+/.nyc_output
+/dist
+/package-lock.json
+/tmp
+node_modules
+oclif.manifest.json
