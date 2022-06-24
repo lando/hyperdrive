@@ -5,7 +5,7 @@ class AddCommand extends PluginCommand {
   // @TODO: For individual apps, you can create a .npmrc file to specify private registry.
   // https://stackoverflow.com/questions/34652563/using-myproject-npmrc-with-registry
   // For global context, we should have a global config option for specifying a .npmrc file OR allow the user to put .npmrc in your Hyperdrive config. Need to figure out precedence.
-  static description = 'Add a plugin or dependency to your current Lando context, specify a --global flag.';
+  static description = 'Add a plugin or dependency to your current Lando context.';
   static usage = 'usage';
 
   static aliases = ['install'];

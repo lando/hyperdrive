@@ -19,6 +19,6 @@ module.exports = async() => {
   // test.description = 'whateve444r';
   // options.config._commands.set('config', test);
   // console.log(options.config._commands.get('config'));
-  debug('bootstrapping...');
+  debug('metrics');
   // await options.config.runHook('test', options);
 };

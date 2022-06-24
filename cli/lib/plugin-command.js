@@ -6,19 +6,19 @@ class PluginCommand extends BaseCommand {
     {
       name: 'plugin',
       required: true,
-      description: 'The plugin or dependency to install.',
+      description: 'The plugin or dependency to act on.',
     }
   ];
 
   static flags = {
     global: Flags.boolean({
       char: 'g',
-      description: 'Add dependency to the global Lando context (default plugin for all projects).',
+      description: 'Modify the global Lando context (defaults for all projects).',
       default: false,
     }),
     namespace: Flags.string({
       char: 'n',
-      description: 'Add dependency to the specified namespace context (default plugin for projects using the specified namespace).'
+      description: 'Modify the specified namespace context (defaults for projects using the namespace).'
     }),
     // @todo: do we need a version flag, or should that be specified in the plugin string if necessary?
   };

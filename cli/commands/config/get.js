@@ -1,24 +1,22 @@
 const {Flags} = require('@oclif/core');
-const {BaseCommand} = require('../lib/command');
+const {BaseCommand} = require('../../lib/command');
 
 class ConfigCommand extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Configure Hyperdrive options. Options include...
-
-  - Supported versions of Docker Desktop.
-  - Default installed version of Docker Desktop.
-  - Default version of Lando.
-  - Default version of Docker Compose.
-  - Whether you should install Docker Desktop at all.
-  - Default release channel.
-  - Specify a .npmrc file for global install.
-
-  Topic with "hyperdrive config get/set/list"
-  `;
+  static description = `Retrieve a specific config value.`;
   // static hidden - false;
+
+  static flags = [
+    ''
+  ];
+
+  static args = [
+    'value',
+  ];
+
 
   static usage = 'stuff';
 
@@ -40,9 +38,18 @@ class ConfigCommand extends BaseCommand {
 
   async run() {
     const {flags} = this.parse(ConfigCommand);
-    const name = flags.name || 'world';
-    this.log(`hello ${name} from ./src/commands/hello.js`);
-    // Instantiate hyperd
+    const {fs} = require('fs');
+    const {nconf} = require('nconf');
+    console.log(this.config);
+    // Fetch the default config.yml
+
+    // Fetch the userspace configDir (/Users/alec/.config/hyperdrive)
+    // eemeli/yaml should be our new YAML library
+
+    // Merge the config (nconf)
+
+    // Cache the combined config in oclif's cacheDir as JSON (nconf)
+
   }
 }
 
