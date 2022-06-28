@@ -1,0 +1,7 @@
+#!/bin/sh
+echo $1
+yarn init -y \
+  && yarn add $1 --production --flat --no-default-rc --no-lockfile --link-duplicates \
+  && yarn install --production --cwd /tmp/node_modules/$1 \
+  && mkdir -p /plugins/@lando \
+  && mv --force /tmp/node_modules/$1 /plugins/$1
