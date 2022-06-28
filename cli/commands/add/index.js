@@ -11,40 +11,58 @@ class AddCommand extends PluginCommand {
   static args = [
     ...PluginCommand.args,
   ];
+  static flags = {
+    ...PluginCommand.flags,
+  };
 
   static aliases = ['install'];
 
   static examples = [
-    'hyperdrive add apache --global',
-    'hyperdrive add apache@0.5.0'
+    'hyperdrive add @lando/apache --global',
+    'hyperdrive add @lando/apache@0.5.0'
   ];
 
   async run() {
     const {execa} = await import('execa');
     const utils = require('../../lib/utils');
-    // Check the args; if it's a "protected" dependency like Lando or Docker Desktop, then
-    // run the custom installation for those.
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
     const {flags, args} = await this.parse(AddCommand);
 
-    // @todo: should we parse the version here or in hyperdrive.js?
-    if (flags.global) console.log('global install');
     // Start the spinner
     CliUx.ux.action.start('Installing...');
-    // Move the scripts folder into the OCLIF data directory using fs copy-sync, do this on an OCLIF hook?
+
+    // Move the scripts folder into the OCLIF data directory.
     const scripts = path.join(this.config.dataDir, 'scripts');
     const home = this.config.home;
     utils.moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
-    // 1. @todo: improve Lando plugin handling to account for non-@lando namespaces, plugins without namespaces (no namespace folder created). mkdirp
-    // 2. @todo: accept multiple plugin arguments. Run in parallel with a Promise.all or something that runs multiple execa commands?
-    const {stdout} = await execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins:/plugins`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${args.plugin}`]);
-    CliUx.ux.action.stop();
-    //this.log(stdout);
-    // Some sort of nice error message? What can we cull?
-    // Log stdout to a file...does OCLIF have something helpful there? Just have --debug flag print stdout...the OCLIF debug module should help here.
-    // Can execa stream that information so you can see it in realtime?
+
+    // Split out plugin namespace.
+    const namespace = args.plugin.split('/')[0];
+
+    // @todo: context detection. If we're in a Lando app, we'll add the plugin
+    // to that app. We'll need to create a @lando/bootstrap package that will
+    // provide the functionality to...
+    //  - analyze/load Lando global config
+    //  - load a Lando app
+    // ...in our case this will be used to detect context and load the Landofile.
+
+    // App install logic.
+
+    // Namespace install logic.
+
+    // Global install logic.
+    if (flags.global) {
+      // Run docker commands to install plugins.
+      // @todo: accept multiple plugin arguments. Run in parallel with a Promise.all or something that runs multiple execa commands?
+      const {stdout} = await execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins:/plugins`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${args.plugin} ${namespace}`]);
+      CliUx.ux.action.stop();
+      this.log(stdout);
+      // Some sort of nice error message? What can we cull?
+      // Log stdout to a file...does OCLIF have something helpful there? Just have --debug flag print stdout...the OCLIF debug module should help here.
+      // Can execa stream that information so you can see it in realtime?
+    }
   }
 }
 

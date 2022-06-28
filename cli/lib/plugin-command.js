@@ -14,7 +14,7 @@ class PluginCommand extends BaseCommand {
     global: Flags.boolean({
       char: 'g',
       description: 'Modify the global Lando context (defaults for all projects).',
-      default: false,
+      default: true, //@todo: temporary until we get context detection working.
     }),
     namespace: Flags.string({
       char: 'n',

@@ -10,6 +10,10 @@ class AddLandoCommand extends PluginCommand {
     }),
   };
 
+  static examples = [
+    'hyperdrive install lando',
+  ];
+
   // Install  "protected" dependencies like Lando or Docker Desktop.
   async run() {
     const {Hyperdrive} = require('../../../lib/hyperdrive');
