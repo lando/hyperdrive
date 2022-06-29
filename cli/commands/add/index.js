@@ -22,9 +22,12 @@ class AddCommand extends PluginCommand {
     'hyperdrive add @lando/apache@0.5.0'
   ];
 
+  static strict = false;
+
   async run() {
     const {execa} = await import('execa');
     const utils = require('../../lib/utils');
+    const mkdirp = require('mkdirp');
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
@@ -38,9 +41,7 @@ class AddCommand extends PluginCommand {
     const home = this.config.home;
     utils.moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
 
-    // Split out plugin namespace.
-    const namespace = args.plugin.split('/')[0];
-
+    const pluginFolder = '/' + args.plugin;
     // @todo: context detection. If we're in a Lando app, we'll add the plugin
     // to that app. We'll need to create a @lando/bootstrap package that will
     // provide the functionality to...
@@ -52,11 +53,14 @@ class AddCommand extends PluginCommand {
 
     // Namespace install logic.
 
+
     // Global install logic.
     if (flags.global) {
       // Run docker commands to install plugins.
       // @todo: accept multiple plugin arguments. Run in parallel with a Promise.all or something that runs multiple execa commands?
-      const {stdout} = await execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins:/plugins`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${args.plugin} ${namespace}`]);
+      // execa outputs a process object with stdout with it, should be a buffer, convert to string and print with debugger package
+      mkdirp.sync(`${home}/.lando/plugins${pluginFolder}`);
+      const {stdout} = await execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins${pluginFolder}:/plugins${pluginFolder}`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${args.plugin}`]);
       CliUx.ux.action.stop();
       this.log(stdout);
       // Some sort of nice error message? What can we cull?
