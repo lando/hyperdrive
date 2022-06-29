@@ -28,10 +28,14 @@ class AddCommand extends PluginCommand {
     const {execa} = await import('execa');
     const utils = require('../../lib/utils');
     const mkdirp = require('mkdirp');
+    const debug = require('debug')('add:@lando/hyperdrive');
+    const minimist = require('minimist');
+
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
-    const {flags, args} = await this.parse(AddCommand);
+    const {flags, args, argv} = await this.parse(AddCommand);
+    const fargv = minimist(argv)._;
 
     // Start the spinner
     CliUx.ux.action.start('Installing...');
@@ -41,7 +45,6 @@ class AddCommand extends PluginCommand {
     const home = this.config.home;
     utils.moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
 
-    const pluginFolder = '/' + args.plugin;
     // @todo: context detection. If we're in a Lando app, we'll add the plugin
     // to that app. We'll need to create a @lando/bootstrap package that will
     // provide the functionality to...
@@ -57,12 +60,23 @@ class AddCommand extends PluginCommand {
     // Global install logic.
     if (flags.global) {
       // Run docker commands to install plugins.
-      // @todo: accept multiple plugin arguments. Run in parallel with a Promise.all or something that runs multiple execa commands?
+      // @todo: accept multiple plugin arguments. Run in parallel with a Promise.all Promise.map/each? or something that runs multiple execa commands?
       // execa outputs a process object with stdout with it, should be a buffer, convert to string and print with debugger package
-      mkdirp.sync(`${home}/.lando/plugins${pluginFolder}`);
-      const {stdout} = await execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins${pluginFolder}:/plugins${pluginFolder}`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${args.plugin}`]);
-      CliUx.ux.action.stop();
-      this.log(stdout);
+      try {
+        await utils.map(fargv, function(plugin) {
+          const pluginFolder = '/' + plugin;
+          mkdirp.sync(`${home}/.lando/plugins${pluginFolder}`);
+          const subprocess = execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins${pluginFolder}:/plugins${pluginFolder}`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${plugin}`]);
+          subprocess.stdout.on('data', buffer => {
+            debug(String(buffer));
+          });
+          return subprocess;
+        });
+        CliUx.ux.action.stop();
+      } catch (error) {
+        console.log(error);
+      }
+
       // Some sort of nice error message? What can we cull?
       // Log stdout to a file...does OCLIF have something helpful there? Just have --debug flag print stdout...the OCLIF debug module should help here.
       // Can execa stream that information so you can see it in realtime?
