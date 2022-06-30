@@ -28,7 +28,6 @@ class AddCommand extends PluginCommand {
     const {execa} = await import('execa');
     const utils = require('../../lib/utils');
     const mkdirp = require('mkdirp');
-    const debug = require('debug')('add:@lando/hyperdrive');
     const minimist = require('minimist');
 
 
@@ -60,26 +59,22 @@ class AddCommand extends PluginCommand {
     // Global install logic.
     if (flags.global) {
       // Run docker commands to install plugins.
-      // @todo: accept multiple plugin arguments. Run in parallel with a Promise.all Promise.map/each? or something that runs multiple execa commands?
-      // execa outputs a process object with stdout with it, should be a buffer, convert to string and print with debugger package
       try {
         await utils.map(fargv, function(plugin) {
           const pluginFolder = '/' + plugin;
           mkdirp.sync(`${home}/.lando/plugins${pluginFolder}`);
           const subprocess = execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins${pluginFolder}:/plugins${pluginFolder}`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${plugin}`]);
           subprocess.stdout.on('data', buffer => {
+            const debug = require('debug')(`add-${plugin}:@lando/hyperdrive`);
             debug(String(buffer));
           });
           return subprocess;
         });
         CliUx.ux.action.stop();
       } catch (error) {
+        // @TODO: Some sort of nice error message? What can we cull?
         console.log(error);
       }
-
-      // Some sort of nice error message? What can we cull?
-      // Log stdout to a file...does OCLIF have something helpful there? Just have --debug flag print stdout...the OCLIF debug module should help here.
-      // Can execa stream that information so you can see it in realtime?
     }
   }
 }
