@@ -29,6 +29,7 @@ class AddCommand extends PluginCommand {
     const utils = require('../../lib/utils');
     const mkdirp = require('mkdirp');
     const minimist = require('minimist');
+    const fs = require('fs');
 
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
@@ -62,7 +63,11 @@ class AddCommand extends PluginCommand {
       try {
         await utils.map(fargv, function(plugin) {
           const pluginFolder = '/' + plugin;
-          mkdirp.sync(`${home}/.lando/plugins${pluginFolder}`);
+          const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
+          if (fs.existsSync(pluginFolderPath)) {
+            fs.rmSync(pluginFolderPath, { recursive: true });
+          }
+          mkdirp.sync(pluginFolderPath);
           const subprocess = execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins${pluginFolder}:/plugins${pluginFolder}`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${plugin}`]);
           subprocess.stdout.on('data', buffer => {
             const debug = require('debug')(`add-${plugin}:@lando/hyperdrive`);
