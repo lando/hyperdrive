@@ -6,14 +6,14 @@ class InfoCommand extends BaseCommand {
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Shows information including downloaded version, latest available version, brief text description, etc. for the dependencies loaded dependencies for your current context, including their version, where they're being loaded from, and their context (app vs. global).`;
+  static description = 'Shows information including downloaded version, latest available version, brief text description, etc. for the dependencies loaded dependencies for your current context, including their version, where they\'re being loaded from, and their context (app vs. global).';
   // static hidden - false;
 
   static usage = [
     'lando info',
     'lando info --no-deps',
     'lando info -g',
-    'lando info -n my-namespace'
+    'lando info -n my-namespace',
   ];
 
   static args = [
@@ -21,7 +21,7 @@ class InfoCommand extends BaseCommand {
       name: 'plugin',
       required: true,
       description: 'The plugin or dependency to get info about.',
-    }
+    },
   ];
 
   // static strict = false;
@@ -38,8 +38,8 @@ class InfoCommand extends BaseCommand {
     }),
     namespace: Flags.string({
       char: 'n',
-      description: 'Show installed plugins in the specified namespace context (defaults used for projects using the namespace).'
-    })
+      description: 'Show installed plugins in the specified namespace context (defaults used for projects using the namespace).',
+    }),
   };
 
   // static args
@@ -50,13 +50,13 @@ class InfoCommand extends BaseCommand {
 
   async run() {
     const npmFetch = require('npm-registry-fetch');
-    const {args, flags} = await this.parse(InfoCommand);
+    const {args} = await this.parse(InfoCommand);
     const query = `/${args.plugin}`;
     const opts = {
       // Integrate config file npm section that allows you to define npmrc options to pass in to here/other npm-related commands.
       // npm-registry-fetch commands: https://www.npmjs.com/package/npm-registry-fetch
       // npm config: https://docs.npmjs.com/cli/v8/using-npm/config
-/*       registry: '',
+      /*       registry: '',
       agent: this.config['user-agent'],
       gzip: 'does not exist',
       headers: 'does not exist',
@@ -78,10 +78,10 @@ class InfoCommand extends BaseCommand {
       _authToken: this.config['_auth'],
       username: 'does not exist; believe basic auth is not supported in modern npm config',
  */
-      //This is the format required for authing with an authtoken...maybe put this in a demo config file.
+      // This is the format required for authing with an authtoken...maybe put this in a demo config file.
       '//<npm.pkg.github.com>/:_authToken': 'THE AUTH TOKEN',
-    }
-    const info = await npmFetch.json(query, opts)
+    };
+    const info = await npmFetch.json(query, opts);
     this.log(info);
   }
 }

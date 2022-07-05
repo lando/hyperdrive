@@ -11,6 +11,7 @@ class AddCommand extends PluginCommand {
   static args = [
     ...PluginCommand.args,
   ];
+
   static flags = {
     ...PluginCommand.flags,
   };
@@ -19,7 +20,7 @@ class AddCommand extends PluginCommand {
 
   static examples = [
     'hyperdrive add @lando/apache --global',
-    'hyperdrive add @lando/apache@0.5.0'
+    'hyperdrive add @lando/apache@0.5.0',
   ];
 
   static strict = false;
@@ -31,10 +32,9 @@ class AddCommand extends PluginCommand {
     const minimist = require('minimist');
     const fs = require('fs');
 
-
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
-    const {flags, args, argv} = await this.parse(AddCommand);
+    const {flags, argv} = await this.parse(AddCommand);
     const fargv = minimist(argv)._;
 
     // Start the spinner
@@ -56,7 +56,6 @@ class AddCommand extends PluginCommand {
 
     // Namespace install logic.
 
-
     // Global install logic.
     if (flags.global) {
       // Run docker commands to install plugins.
@@ -65,8 +64,9 @@ class AddCommand extends PluginCommand {
           const pluginFolder = '/' + plugin;
           const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
           if (fs.existsSync(pluginFolderPath)) {
-            fs.rmSync(pluginFolderPath, { recursive: true });
+            fs.rmSync(pluginFolderPath, {recursive: true});
           }
+
           mkdirp.sync(pluginFolderPath);
           const subprocess = execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins${pluginFolder}:/plugins${pluginFolder}`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${plugin}`]);
           subprocess.stdout.on('data', buffer => {
@@ -78,7 +78,7 @@ class AddCommand extends PluginCommand {
         CliUx.ux.action.stop();
       } catch (error) {
         // @TODO: Some sort of nice error message? What can we cull?
-        console.log(error);
+        this.error(error);
       }
     }
   }

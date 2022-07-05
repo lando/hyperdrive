@@ -4,9 +4,10 @@ const path = require('path');
 const _ = require('lodash');
 
 /*
- * Helper to move config from lando to a mountable directory
+ * Helper to move config from lando to a mountable directory.
+ * @todo: add a default dest like os.tmpdir()?
  */
-exports.moveConfig = (src, dest = os.tmpdir()) => {
+exports.moveConfig = (src, dest) => {
   const copydir = require('copy-dir');
   const mkdirp = require('mkdirp');
   // Copy opts and filter out all js files
@@ -19,8 +20,8 @@ exports.moveConfig = (src, dest = os.tmpdir()) => {
     // @todo: why doesn't the below work for PLD?
     copydir.sync(src, dest, filter);
     exports.makeExecutable(_(fs.readdirSync(dest))
-      .filter(file => path.extname(file) === '.sh')
-      .value()
+    .filter(file => path.extname(file) === '.sh')
+    .value()
     , dest);
   } catch (error) {
     const code = _.get(error, 'code');
@@ -28,7 +29,7 @@ exports.moveConfig = (src, dest = os.tmpdir()) => {
     const f = _.get(error, 'path');
 
     // Catch this so we can try to repair
-    if (code !== 'EISDIR' || syscall !== 'open' || !!mkdirp.sync(f)) {
+    if (code !== 'EISDIR' || syscall !== 'open' || Boolean(mkdirp.sync(f))) {
       throw new Error(error);
     }
 
@@ -36,10 +37,10 @@ exports.moveConfig = (src, dest = os.tmpdir()) => {
     fs.unlinkSync(f);
     copydir.sync(src, dest, filter);
     exports.makeExecutable(_(fs.readdirSync(dest))
-      .filter(file => path.extname(file) === '.sh')
-      .value()
+    .filter(file => path.extname(file) === '.sh')
+    .value()
     , dest);
-  };
+  }
 };
 
 /*
@@ -51,33 +52,33 @@ exports.makeExecutable = (files, base = process.cwd()) => {
   });
 };
 
-exports.map = function (iterable, mapper, options = {}) {
-  let concurrency = options.concurrency || Infinity
+exports.map = function(iterable, mapper, options = {}) {
+  let concurrency = options.concurrency || Number.POSITIVE_INFINITY;
 
-  let index = 0
-  const results = []
-  const pending = []
-  const iterator = iterable[Symbol.iterator]()
+  let index = 0;
+  const results = [];
+  const pending = [];
+  const iterator = iterable[Symbol.iterator]();
 
   while (concurrency-- > 0) {
-    const thread = wrappedMapper()
-    if (thread) pending.push(thread)
-    else break
+    const thread = wrappedMapper();
+    if (thread) pending.push(thread);
+    else break;
   }
 
-  return Promise.all(pending).then(() => results)
+  return Promise.all(pending).then(() => results);
 
-  function wrappedMapper () {
-    const next = iterator.next()
-    if (next.done) return null
-    const i = index++
-    const mapped = mapper(next.value, i)
+  function wrappedMapper() {
+    const next = iterator.next();
+    if (next.done) return null;
+    const i = index++;
+    const mapped = mapper(next.value, i);
     return Promise.resolve(mapped).then(resolved => {
-      results[i] = resolved
-      return wrappedMapper()
-    })
+      results[i] = resolved;
+      return wrappedMapper();
+    });
   }
-}
+};
 
 // Light wrapper around popular download module.
 exports.download = function(url, destination) {
@@ -92,18 +93,18 @@ exports.download = function(url, destination) {
       format: 'CLI Progress |' + _colors.magenta('{bar}') + '| {percentage}% || {value}/{total} Chunks || Speed: {speed}',
       barCompleteChar: '\u2588',
       barIncompleteChar: '\u2591',
-      hideCursor: true
-    }
+      hideCursor: true,
+    },
   );
 
   try {
     const file = fs.createWriteStream(destination);
     download(url)
-      .on('response', (response) => {
-        const totalBytes = response.headers['content-length'];
-        progressBar.start(totalBytes, 0);
+    .on('response', response => {
+      const totalBytes = response.headers['content-length'];
+      progressBar.start(totalBytes, 0);
     })
-    .on('data', (chunk) => {
+    .on('data', chunk => {
       receivedBytes += chunk.length;
       progressBar.update(receivedBytes);
     })
@@ -117,4 +118,4 @@ exports.download = function(url, destination) {
     progressBar.stop();
     console.log(error);
   }
-}
+};

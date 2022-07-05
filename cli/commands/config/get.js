@@ -6,17 +6,16 @@ class ConfigCommand extends BaseCommand {
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Retrieve a specific config value.`;
+  static description = 'Retrieve a specific config value.';
   // static hidden - false;
 
   static flags = [
-    ''
+    '',
   ];
 
   static args = [
     'value',
   ];
-
 
   static usage = 'stuff';
 
@@ -49,7 +48,6 @@ class ConfigCommand extends BaseCommand {
     // Merge the config (nconf)
 
     // Cache the combined config in oclif's cacheDir as JSON (nconf)
-
   }
 }
 
