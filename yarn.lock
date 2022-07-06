@@ -3000,7 +3000,7 @@ js-yaml@4.1.0:
   dependencies:
     argparse "^2.0.1"
 
-js-yaml@^3.13.0, js-yaml@^3.13.1, js-yaml@^3.14.1:
+js-yaml@^3.13.0, js-yaml@^3.13.1, js-yaml@^3.14.1, js-yaml@^3.2.3:
   version "3.14.1"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.14.1.tgz#dae812fdb3825fa306609a8717383c50c36a0537"
   integrity sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==
@@ -3553,6 +3553,13 @@ natural-orderby@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/natural-orderby/-/natural-orderby-2.0.3.tgz#8623bc518ba162f8ff1cdb8941d74deb0fdcc016"
   integrity sha512-p7KTHxU0CUrcOXe62Zfrb5Z13nLvPhSWR/so3kFulUQU0sgUll2Z0LwpsLN351eOOD+hRGu/F1g+6xDfPeD++Q==
+
+nconf-yaml@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/nconf-yaml/-/nconf-yaml-1.0.2.tgz#fea065333cf42b77a5e8060517969799d4156575"
+  integrity sha512-7tpnB+DnlAIcmAPz2IVgiNiz6gzigI0YWzF9peePj2mMbUzXBlIaezKoDwUnTPSIwEBtlacL6uvRKV5pufxGqA==
+  dependencies:
+    js-yaml "^3.2.3"
 
 nconf@^0.12.0:
   version "0.12.0"

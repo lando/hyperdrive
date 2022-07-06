@@ -1,5 +1,5 @@
 const {Flags} = require('@oclif/core');
-const {BaseCommand} = require('../lib/command');
+const {BaseCommand} = require('../lib/BaseCommand');
 
 class RemoveCommand extends BaseCommand {
   // static _base = 'thing';

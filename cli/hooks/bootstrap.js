@@ -1,24 +1,25 @@
-const debug = require('debug')('hyperdrive:@lando/docker-desktop:hooks:bootstrap');
+const debug = require('debug')('bootstrap:@lando/hyperdrive');
+const fs = require('fs');
+const nconf = require('nconf');
 
-module.exports = async() => {
-  // Fetch the default config.yml
+nconf.formats.yaml = require('nconf-yaml');
 
-  // Fetch the userspace configDir (/Users/alec/.config/hyperdrive)
+module.exports = async(thing) => {
+  // @TODO: do we need a clear cache option?
+  // @TODO: lets test to see whether its even worth caching this?
+  // check to see if we have a compiled config file?
+  // load and return that if we do?
+  debug('bootstrapping...');
+  console.log(thing)
 
-  // Merge the config (nconf)
 
-  // Cache the combined config in oclif's cacheDir as JSON (nconf)
+  // copy default config file to config dir so user can modify
 
-  // load bootstrap config?
-  // what is this exactly?
-  // we need a factory function to load the correct class?
-  // additional hooks?
-  // pre-command modifier?
-  // pre-command-THING modifier???
-  // const test = options.config._commands.get('config');
-  // test.description = 'whateve444r';
-  // options.config._commands.set('config', test);
-  // console.log(options.config._commands.get('config'));
+
+  // merge in all config sources and generate config file
+
+
+  process.exit(1);
   debug('bootstrapping...');
   // await options.config.runHook('test', options);
 };

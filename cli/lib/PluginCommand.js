@@ -1,5 +1,5 @@
 const {Flags} = require('@oclif/core');
-const {BaseCommand} = require('./command');
+const {BaseCommand} = require('./BaseCommand');
 
 class PluginCommand extends BaseCommand {
   static args = [
