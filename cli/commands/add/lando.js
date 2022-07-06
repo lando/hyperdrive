@@ -1,8 +1,10 @@
-const {PluginCommand} = require('../../lib/plugin-command');
+const {PluginCommand} = require('../lib/plugin-command');
 const {Flags} = require('@oclif/core');
-const utils = require('../../lib/utils');
+const utils = require('../lib/utils');
 
 class AddLandoCommand extends PluginCommand {
+  static id = 'add:lando';
+
   static flags = {
     'no-docker-desktop': Flags.boolean({
       description: 'Don\'t install Docker Desktop as part of installing Lando.',

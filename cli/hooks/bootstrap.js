@@ -19,7 +19,6 @@ module.exports = async(thing) => {
   // merge in all config sources and generate config file
 
 
-  process.exit(1);
   debug('bootstrapping...');
   // await options.config.runHook('test', options);
 };

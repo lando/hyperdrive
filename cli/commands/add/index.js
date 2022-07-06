@@ -1,4 +1,4 @@
-const {PluginCommand} = require('../../lib/plugin-command');
+const {PluginCommand} = require('../lib/plugin-command');
 const {CliUx} = require('@oclif/core');
 const path = require('path');
 
@@ -27,7 +27,7 @@ class AddCommand extends PluginCommand {
 
   async run() {
     const {execa} = await import('execa');
-    const utils = require('../../lib/utils');
+    const utils = require('../lib/utils');
     const mkdirp = require('mkdirp');
     const minimist = require('minimist');
     const fs = require('fs');
