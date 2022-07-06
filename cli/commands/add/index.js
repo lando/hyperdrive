@@ -26,7 +26,7 @@ class AddCommand extends PluginCommand {
   static strict = false;
 
   async run() {
-    const {execa} = await import('execa');
+    const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
     const utils = require('../../lib/utils');
     const mkdirp = require('mkdirp');
     const minimist = require('minimist');
@@ -60,7 +60,7 @@ class AddCommand extends PluginCommand {
     if (flags.global) {
       // Run docker commands to install plugins.
       try {
-        await utils.map(fargv, function(plugin) {
+        await utils.map(fargv, function(plugin) { // eslint-disable-line unicorn/no-array-method-this-argument
           const pluginFolder = '/' + plugin;
           const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
           if (fs.existsSync(pluginFolderPath)) {
