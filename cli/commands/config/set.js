@@ -21,7 +21,7 @@ class ConfigCommand extends BaseCommand {
   // static hidden - false;
 
   static flags = [
-    ''
+    '',
   ]
 
   static usage = 'stuff';
@@ -57,7 +57,6 @@ class ConfigCommand extends BaseCommand {
     // Merge the config (nconf)
 
     // Cache the combined config in oclif's cacheDir as JSON (nconf)
-
   }
 }
 

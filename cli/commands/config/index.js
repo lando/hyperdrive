@@ -21,7 +21,7 @@ class ConfigCommand extends BaseCommand {
   // static hidden - false;
 
   static flags = [
-    ''
+    '',
   ]
 
   static usage = 'stuff';
