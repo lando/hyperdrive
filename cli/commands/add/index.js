@@ -34,7 +34,10 @@ class AddCommand extends PluginCommand {
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
-    const {flags, argv} = await this.parse(AddCommand);
+    const command = await this.parse(AddCommand);
+    console.log(command);
+    console.log(flags);
+    process.exit(1)
     const fargv = minimist(argv)._;
 
     // Start the spinner
