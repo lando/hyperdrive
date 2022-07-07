@@ -27,7 +27,8 @@ class AddCommand extends PluginCommand {
 
   async run() {
     const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
-    const utils = require('../../lib/utils');
+    const map = require('../../../utils/map');
+    const moveConfig = require('../../../utils/move-config');
     const mkdirp = require('mkdirp');
     const fs = require('fs');
 
@@ -41,7 +42,7 @@ class AddCommand extends PluginCommand {
     // Move the scripts folder into the OCLIF data directory.
     const scripts = path.join(this.config.dataDir, 'scripts');
     const home = this.config.home;
-    utils.moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
+    moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
 
     // @todo: context detection. If we're in a Lando app, we'll add the plugin
     // to that app. We'll need to create a @lando/bootstrap package that will
@@ -58,7 +59,7 @@ class AddCommand extends PluginCommand {
     if (flags.global) {
       // Run docker commands to install plugins.
       try {
-        await utils.map(argv, function(plugin) { // eslint-disable-line unicorn/no-array-method-this-argument
+        await map(argv, function(plugin) { // eslint-disable-line unicorn/no-array-method-this-argument
           const pluginFolder = '/' + plugin;
           const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
           if (fs.existsSync(pluginFolderPath)) {
