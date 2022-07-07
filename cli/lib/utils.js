@@ -1,7 +1,10 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const _ = require('lodash');
+const {chain, get, forEach} = require('lodash');
+// Copy opts and filter out all js files
+// We don't want to give the false impression that you can edit the JS
+const filter = (stat, filepath, filename) => (path.extname(filename) !== '.js');
 
 /*
  * Helper to move config from lando to a mountable directory.
@@ -10,23 +13,20 @@ const _ = require('lodash');
 exports.moveConfig = (src, dest) => {
   const copydir = require('copy-dir');
   const mkdirp = require('mkdirp');
-  // Copy opts and filter out all js files
-  // We don't want to give the false impression that you can edit the JS
-  const filter = (stat, filepath, filename) => (path.extname(filename) !== '.js');
   // Ensure to exists
   mkdirp.sync(dest);
   // Try to copy the assets over
   try {
     // @todo: why doesn't the below work for PLD?
     copydir.sync(src, dest, filter);
-    exports.makeExecutable(_(fs.readdirSync(dest))
+    exports.makeExecutable(chain(fs.readdirSync(dest))
     .filter(file => path.extname(file) === '.sh')
     .value()
     , dest);
   } catch (error) {
-    const code = _.get(error, 'code');
-    const syscall = _.get(error, 'syscall');
-    const f = _.get(error, 'path');
+    const code = get(error, 'code');
+    const syscall = get(error, 'syscall');
+    const f = get(error, 'path');
 
     // Catch this so we can try to repair
     if (code !== 'EISDIR' || syscall !== 'open' || Boolean(mkdirp.sync(f))) {
@@ -36,7 +36,7 @@ exports.moveConfig = (src, dest) => {
     // Try to take corrective action
     fs.unlinkSync(f);
     copydir.sync(src, dest, filter);
-    exports.makeExecutable(_(fs.readdirSync(dest))
+    exports.makeExecutable(chain(fs.readdirSync(dest))
     .filter(file => path.extname(file) === '.sh')
     .value()
     , dest);
@@ -47,7 +47,7 @@ exports.moveConfig = (src, dest) => {
  * Helper to make a file executable
  */
 exports.makeExecutable = (files, base = process.cwd()) => {
-  _.forEach(files, file => {
+  forEach(files, file => {
     fs.chmodSync(path.join(base, file), '755');
   });
 };
