@@ -26,10 +26,7 @@ class BaseCommand extends Command {
       helpGroup: 'GLOBAL',
     }),
   };
-
-  async init() {
-    // console.log('INIT')
-  }
+  static strict = false;
 }
 
 module.exports = {BaseCommand};
