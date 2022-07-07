@@ -1,28 +1,14 @@
 const {Flags} = require('@oclif/core');
-const {BaseCommand} = require('../lib/command');
+const { PluginCommand } = require('../lib/plugin-command');
 
-class RemoveCommand extends BaseCommand {
-  // static _base = 'thing';
-  // static id = 'thing';
-  // static title = 'title';
+class RemoveCommand extends PluginCommand {
+  static description = `Remove a plugin or dependency from your Lando installation.`;
 
-  static description = `Remove a plugin or dependency from your Lando installation.
+  static usage = 'lando remove @lando/apache';
 
-  Extra documentation goes here
-  `;
-  // static hidden - false;
+  static aliases = ['uninstall'];
 
-  static usage = 'stuff';
-
-  static help = 'stuff';
-
-  // Check the OCLIF 2 standard static aliases = ['uninstall'];
-
-  // static strict = false;
-  // static parse = true;
-  static flags = {
-    name: Flags.string({char: 'n', description: 'name to print'}),
-  }
+  static strict = false;
 
   // static args
   // static plugin
@@ -31,9 +17,27 @@ class RemoveCommand extends BaseCommand {
   // static
 
   async run() {
-    const {flags} = this.parse(RemoveCommand);
-    const name = flags.name || 'unin';
-    this.log(`erg ${name} from ./src/commands/hello.js`);
+    const fs = require('fs');
+    const utils = require('../lib/utils');
+    const {flags, argv} = await this.parse(RemoveCommand);
+    const {CliUx} = require('@oclif/core');
+    const home = this.config.home;
+
+    // Start the spinner
+    CliUx.ux.action.start('Uninstalling...');
+
+    try {
+      console.log(argv);
+      await utils.map(argv, function(plugin) { // eslint-disable-line unicorn/no-array-method-this-argument
+        const pluginFolder = '/' + plugin;
+        const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
+        fs.rmSync(pluginFolderPath, {recursive: true});
+      });
+      CliUx.ux.action.stop('Uninstall successful.');
+    } catch (error) {
+      CliUx.ux.action.stop('Uninstall failed.');
+      this.error(error);
+    }
   }
 }
 

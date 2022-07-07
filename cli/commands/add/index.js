@@ -29,13 +29,11 @@ class AddCommand extends PluginCommand {
     const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
     const utils = require('../../lib/utils');
     const mkdirp = require('mkdirp');
-    const minimist = require('minimist');
     const fs = require('fs');
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
     const {flags, argv} = await this.parse(AddCommand);
-    const fargv = minimist(argv)._;
 
     // Start the spinner
     CliUx.ux.action.start('Installing...');
@@ -60,7 +58,7 @@ class AddCommand extends PluginCommand {
     if (flags.global) {
       // Run docker commands to install plugins.
       try {
-        await utils.map(fargv, function(plugin) { // eslint-disable-line unicorn/no-array-method-this-argument
+        await utils.map(argv, function(plugin) { // eslint-disable-line unicorn/no-array-method-this-argument
           const pluginFolder = '/' + plugin;
           const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
           if (fs.existsSync(pluginFolderPath)) {
@@ -75,9 +73,10 @@ class AddCommand extends PluginCommand {
           });
           return subprocess;
         });
-        CliUx.ux.action.stop();
+        CliUx.ux.action.stop('Install successful.');
       } catch (error) {
         // @TODO: Some sort of nice error message? What can we cull?
+        CliUx.ux.action.stop('Install failed.');
         this.error(error);
       }
     }

@@ -37,7 +37,6 @@
     "download": "^8.0.0",
     "execa": "^6.1.0",
     "lodash": "^4.17.21",
-    "minimist": "^1.2.6",
     "mkdirp": "^1.0.4",
     "nconf": "^0.12.0",
     "npm-registry-fetch": "^13.1.1",
