@@ -75,9 +75,6 @@
       ],
       "minstrap": [
         "./cli/hooks/minstrap.js"
-      ],
-      "prerun": [
-        "./cli/hooks/telemetry.js"
       ]
     },
     "plugins": [],

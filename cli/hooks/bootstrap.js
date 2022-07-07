@@ -3,28 +3,38 @@ const debug = require('debug')('init:@lando/hyperdrive');
 const fs = require('fs');
 const path = require('path');
 
+const {BaseCommand} = require('./../lib/base-command');
+const {Parser} = require('@oclif/core');
+
 module.exports = async({id, argv, config}) => {
   // start by highlighting the basic input
   debug('running %s with %o', chalk.magenta(id), argv);
+  // preemptively do a basic check for the config flag
+  const {flags} = await Parser.parse(argv, {strict: false, flags: BaseCommand.globalFlags});
 
-  // start the hyperdrive config by setting the default bootstrapper
-  const hyperdrive = {boostrapper: path.join(__dirname, '..', '..', 'core', 'bootstrapper.js')};
-  // check to see if we have a custom config file?
-
-  // process.exit(1)
-
-  console.log(Parser)
-  console.log(await Parser.parse(argv, {
-    flags: {
-      config: Parser.flags.string({
-        char: 'c',
-        description: 'Uses configuration from specified file',
-        env: 'HYPERDRIVE_CONFIG_FILE',
-        default: undefined,
-        helpGroup: 'GLOBAL',
-      })
+  // start the hyperdrive config by setting the default bootstrapper and its config
+  const template = path.join(__dirname, '..', '..', 'config.yaml');
+  const minstrapper = {
+    // config: {},
+    loader: path.join(__dirname, '..', '..', 'core', 'bootstrapper.js'),
+    config: {
+      dest: path.join(config.cacheDir, 'config.json'),
+      env: 'HYPERDRIVE',
+      product: 'hyperdrive',
+      sources: {
+        defaults: path.join(__dirname, '..', '..', 'config.yaml'),
+        system: path.join(config.dataDir, 'config.json'),
+        user: path.join(config.configDir, 'config.yaml'),
+        override: flags.config ? path.resolve(flags.config) : undefined,
+      },
+      templates: {
+        system: {source: template, dest: path.join(config.dataDir, 'config.json')},
+        user: {source: template, dest: path.join(config.configDir, 'config.yaml')},
+      },
     }
-  }));
+  };
+
+  // check to see if we have a custom config file?
 
   // minstrap hook
   //
@@ -35,13 +45,23 @@ module.exports = async({id, argv, config}) => {
   // to that end you will want to add an OCLIF plugin and hook into the "minstrapper" event. you can replace the
   // minstrapper there. note that your even twill have access to both config and hyperdrive
   //
-  await config.runHook('minstrap', {config, hyperdrive});
-  debug('minstrap complete, using %s as bootstrapper', hyperdrive.boostrapper);
+  await config.runHook('minstrap', {minstrapper, config});
+  debug('minstrap complete, using %s as bootstrapper', minstrapper.loader);
 
   // get the boostrapper and run it
-  const Bootstrapper = require(hyperdrive.boostrapper);
-  const bootstrapper = new Bootstrapper({id, argv, config});
+  const Bootstrapper = require(minstrapper.loader);
+  const bootstrapper = new Bootstrapper(minstrapper.config);
 
+  // INiit bootstrap
+  try {
+    await bootstrapper.init();
+  } catch (error) {
+    // @TODO: figure out how to use OCLIF error handling to print a message here?
+    console.log(error)
+    process.exit(1)
+  }
+
+  // Get the config
   const thing = await bootstrapper.run();
 
 
@@ -60,7 +80,7 @@ module.exports = async({id, argv, config}) => {
   debug('bootstrapping...');
   // await options.config.runHook('test', options);
 
-  await config.runHook('config', hyperdrive);
+  // await config.runHook('config', hyperdrive);
 
   // debug final hyperdrive config?
   // debug final config?

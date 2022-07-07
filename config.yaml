@@ -45,3 +45,5 @@ plugins:
 updates:
   release-channel: stable
   notify: true
+
+telemetry: true
