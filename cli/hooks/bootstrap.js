@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const {BaseCommand} = require('./../lib/base-command');
-const {Parser} = require('@oclif/core');
+const {Command, Parser} = require('@oclif/core');
 
 module.exports = async({id, argv, config}) => {
   // start by highlighting the basic input
@@ -25,7 +25,7 @@ module.exports = async({id, argv, config}) => {
         defaults: path.join(__dirname, '..', '..', 'config.yaml'),
         system: path.join(config.dataDir, 'config.json'),
         user: path.join(config.configDir, 'config.yaml'),
-        override: flags.config ? path.resolve(flags.config) : undefined,
+        overrides: flags.config ? path.resolve(flags.config) : undefined,
       },
       templates: {
         system: {source: template, dest: path.join(config.dataDir, 'config.json')},
@@ -52,18 +52,20 @@ module.exports = async({id, argv, config}) => {
   const Bootstrapper = require(minstrapper.loader);
   const bootstrapper = new Bootstrapper(minstrapper.config);
 
-  // INiit bootstrap
+  // Initialize
+  // @TODO: eventually this will live in config.init and config.init will live in bootstrap.run()?
   try {
     await bootstrapper.init();
   } catch (error) {
     // @TODO: figure out how to use OCLIF error handling to print a message here?
-    console.log(error)
-    process.exit(1)
+    console.error(Error('Bootstrap failed! See error below'));
+    console.error(error);
+    process.exit(666);
   }
 
   // Get the config
   const thing = await bootstrapper.run();
-
+  console.log('segseg')
 
 
 

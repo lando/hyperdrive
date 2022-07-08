@@ -1,8 +1,13 @@
 const debug = require('debug')('bootstrap:@lando/hyperdrive');
 const fs = require('fs');
+const mkdirp = require('mkdirp');
+const nconf = require('nconf');
 const os = require('os');
 const path = require('path');
 const yaml = require('js-yaml');
+
+// add custom yaml format
+nconf.formats.yaml = require('nconf-yaml')
 
 class Bootstrapper {
   constructor(options) {
@@ -29,104 +34,115 @@ class Bootstrapper {
   }
 
   // check to see if YAML or JSON
-  #read(file) {
+  #readFile(file) {
     switch (path.extname(file)) {
       case '.yaml':
-        return 'yaml';
       case '.yml':
-        return 'yaml';
+        return yaml.load(fs.readFileSync(file, 'utf8'));
       case '.json':
-        return 'json';
+        return require(file);
     }
   }
 
   // check to see if YAML or JSON
-  #dump(data, file) {
+  #writeFile(data, file) {
     switch (path.extname(file)) {
       case '.yaml':
-        return 'yaml';
+        return fs.writeFileSync(file, yaml.dump(data));
       case '.yml':
-        return 'yaml';
+        return fs.writeFileSync(file, yaml.dump(data));
       case '.json':
-        return 'json';
+        return fs.writeFileSync(file, JSON.stringify(data, null, 2));
     }
   }
 
   // do setup and validation
   // basically do what you have to do to make sure run() will complete succesfully
   async init() {
+    // ensure dest directory exists
+    mkdirp.sync(path.dirname(this.dest));
+
+    // run through sources and create their directories
+    // @NOTE: we dont do this on templates.dest because we assume template destinations will be sources
+    // otherwise what is the point?
+    for (const key of Object.keys(this.sources)) {
+      if (this.sources[key]) {
+        mkdirp.sync(path.dirname(this.sources[key]));
+        debug('ensured directory %s exists', path.dirname(this.sources[key]));
+      }
+    }
+
     // move templates over if we need to
     for (const template in this.templates) {
       const source = this.templates[template].source;
       const dest = this.templates[template].dest;
 
       // if destination already exists then bail
-      // @TODO: uncomment when we are done dev
-      // if (fs.existsSync(dest)) continue;
+      if (fs.existsSync(dest)) continue;
 
-      // or copy source to destination if they are the same format
-      // console.log(this.#getFormat(source), this.#getFormat(dest))
-      // or read in source and write to destination if source and destionation are different formats
+      // if we get here then we are generating a config file from a template
+      debug('generating %s from template %s', dest, source);
 
-      // console.log(source, dest);
+      // copy source to destination if they are the same format
+      if (this.#getFormat(source) === this.#getFormat(dest)) {
+        try {
+          fs.copyFileSync(source, dest);
+        } catch (error) {
+          throw new Error(error);
+        }
+
+      // or read/write from correct input format to correct output format
+      } else {
+        try {
+          const data = this.#readFile(source);
+          this.#writeFile(data, dest);
+        } catch (error) {
+          throw new Error(error);
+        }
+      }
+
+      // finish
+      debug('generated user config file to %s', dest);
     }
-    // throw Error('seg')
   }
 
 
   async run() {
-    // ensure all source directories exist?
-    // const mkdirp = require('mkdirp');
-    // for (const dir of [config.cacheDir, config.dataDir, config.configDir]) {
-    //   mkdirp.sync(dir);
-    // }
-    // process.exit()
+    // if we have a CLI provided config source then assert its dominance
+    if (this.sources.overrides) nconf.overrides(this.#readFile(this.sources.overrides));
 
+    // environment is next in line
+    // @TODO: make separator configuration
+    const separator = '_';
+    const rootKey = `${this.env}${separator}`;
+    nconf.env({
+      separator,
+      lowerCase: true,
+      parseValues: true,
+      transform: obj => {
+        if (obj.key.startsWith(rootKey.toLowerCase())) {
+          obj.key = obj.key.replace(rootKey.toLowerCase(), '');
+          return obj;
+        }
+      },
+    });
 
-    // move templates over?
-      // handle different formats?
+    // load additional file sources that exist, skip overrides and defaults since those
+    // are handled elsewhere
+    for (const source of Object.keys(this.sources).reverse()) {
+      if (source !== 'overrides' && source !== 'defaults' && this.sources[source]) {
+        nconf.file(source, {
+          file: this.sources[source],
+          format: this.#getFormat(this.sources[source]) === 'yaml' ? nconf.formats.yaml : nconf.formats.json,
+        });
+      }
+    }
 
-    //
+    // finally set some defaults
+    if (this.sources.defaults) nconf.defaults(this.#readFile(this.sources.defaults));
 
-
-
-    // if we dont have a system config file then create one with the defaults
-    // @TODO: put guard back once this is working properly?
-    // if (!fs.existsSync(this.sources.system) || true) {
-    //   debug('could not find system config file!');
-    //   try {
-    //     fs.writeFileSync(this.sources.system, JSON.stringify(this.defaults, null, 2));
-    //     debug('generated system config file to %s', this.sources.system);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }
-
-    // // if we dont have a user config file then copy the template over
-    // // @TODO: put guard back once this is working properly?
-    // if (!fs.existsSync(this.sources.user) || true) {
-    //   debug('could not find user config file!');
-    //   try {
-    //     fs.copyFileSync(this.template, this.sources.user);
-    //     debug('generated user config file to %s', this.sources.user);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }
-
-    // build out the config and return it
-
-    return {thing: 'stuff'};
-
-    // if global doesn't exist then create it from defaults?
-    // this should not be in the cache?
-
-    // if template file doesnt exist then over to userconf root
-
-    // merge in config from all sources
-    // @TODO: handle config arg here?
-
-    // return config?
+    // Return the config
+    return ncong.get();
   }
 }
 
