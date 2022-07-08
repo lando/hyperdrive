@@ -10,7 +10,7 @@ class PluginCommand extends BaseCommand {
     },
   ];
 
-  static flags = {...BaseCommand.globalFlags, ...{
+  static flags = {...BaseCommand.globalFlags,
     global: Flags.boolean({
       char: 'g',
       description: 'Modify the global Lando context (defaults for all projects).',
@@ -21,7 +21,7 @@ class PluginCommand extends BaseCommand {
       description: 'Modify the specified namespace context (defaults for projects using the namespace).',
     }),
     // @todo: do we need a version flag, or should that be specified in the plugin string if necessary?
-  }};
+  };
 
   async init() {
     // console.log('INIT')

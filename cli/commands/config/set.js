@@ -1,7 +1,7 @@
 const {Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
 
-class ConfigCommand extends BaseCommand {
+class ConfigSetCommand extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
@@ -60,4 +60,4 @@ class ConfigCommand extends BaseCommand {
   }
 }
 
-module.exports = ConfigCommand;
+module.exports = ConfigSetCommand;
