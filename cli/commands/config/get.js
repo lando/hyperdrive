@@ -36,10 +36,14 @@ class ConfigCommand extends BaseCommand {
   // static
 
   async run() {
+
+    // store option?
+    // list of paths to load?
+
     const {flags} = this.parse(ConfigCommand);
     const {fs} = require('fs');
     const {nconf} = require('nconf');
-    console.log(this.config);
+    console.log(this.config.hyperdrive.get());
     // Fetch the default config.yml
 
     // Fetch the userspace configDir (/Users/alec/.config/hyperdrive)

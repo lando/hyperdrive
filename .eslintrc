@@ -13,7 +13,8 @@
       "named": "never",
       "asyncArrow": "never"
     }],
-    "unicorn/prefer-module": "off"
+    "unicorn/prefer-module": "off",
+    "unicorn/no-process-exit": "off"
   },
   "env": {
     "mocha": true

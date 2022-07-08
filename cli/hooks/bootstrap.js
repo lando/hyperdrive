@@ -1,10 +1,9 @@
 const chalk = require('chalk');
 const debug = require('debug')('init:@lando/hyperdrive');
-const fs = require('fs');
 const path = require('path');
 
 const {BaseCommand} = require('./../lib/base-command');
-const {Command, Parser} = require('@oclif/core');
+const {Parser} = require('@oclif/core');
 
 module.exports = async({id, argv, config}) => {
   // start by highlighting the basic input
@@ -16,9 +15,9 @@ module.exports = async({id, argv, config}) => {
   const template = path.join(__dirname, '..', '..', 'config.yaml');
   const minstrapper = {
     // config: {},
-    loader: path.join(__dirname, '..', '..', 'core', 'bootstrapper.js'),
+    loader: path.join(__dirname, '..', '..', 'core', 'bootstrap.js'),
     config: {
-      dest: path.join(config.cacheDir, 'config.json'),
+      cached: path.join(config.cacheDir, 'config.json'),
       env: 'HYPERDRIVE',
       product: 'hyperdrive',
       sources: {
@@ -31,7 +30,7 @@ module.exports = async({id, argv, config}) => {
         system: {source: template, dest: path.join(config.dataDir, 'config.json')},
         user: {source: template, dest: path.join(config.configDir, 'config.yaml')},
       },
-    }
+    },
   };
 
   // check to see if we have a custom config file?
@@ -55,35 +54,15 @@ module.exports = async({id, argv, config}) => {
   // Initialize
   // @TODO: eventually this will live in config.init and config.init will live in bootstrap.run()?
   try {
-    await bootstrapper.init();
+    config.hyperdrive = await bootstrapper.run();
+    debug('bootstrap completed succesfully with config %o', config.hyperdrive.get());
   } catch (error) {
     // @TODO: figure out how to use OCLIF error handling to print a message here?
-    console.error(Error('Bootstrap failed! See error below'));
-    console.error(error);
-    process.exit(666);
+    console.error(new Error('Bootstrap failed! See error below')); // eslint-disable-line no-console
+    console.error(error); // eslint-disable-line no-console
+    process.exit(666); // eslint-disable-line no-process-exit
   }
 
-  // Get the config
-  const thing = await bootstrapper.run();
-  console.log('segseg')
-
-
-
-  // copy template file over to user conf directory
-
-  // minstrapper:
-  // bootstrapper?
-
-
-
-  // merge in all config sources and generate config file
-
-
-  debug('bootstrapping...');
-  // await options.config.runHook('test', options);
-
-  // await config.runHook('config', hyperdrive);
-
-  // debug final hyperdrive config?
-  // debug final config?
+  // final hook to modify the config
+  await config.runHook('config', config);
 };
