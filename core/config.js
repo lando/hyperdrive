@@ -1,6 +1,6 @@
 // debug should be on this?
 const fs = require('fs');
-const get = require('lodash.get');
+const get = require('lodash/get');
 const mkdirp = require('mkdirp');
 const nconf = require('nconf');
 const os = require('os');

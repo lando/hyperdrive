@@ -2,7 +2,7 @@ const copydir = require('copy-dir');
 const mkdirp = require('mkdirp');
 const fs = require('fs');
 const path = require('path');
-const {get, chain, forEach} = require('lodash');
+const _ = require('lodash');
 
 /*
  * Helper to move config from lando to a mountable directory.
@@ -18,14 +18,14 @@ function moveConfig(src, dest) {
   try {
     // @todo: why doesn't the below work for PLD?
     copydir.sync(src, dest, filter);
-    makeExecutable(chain(fs.readdirSync(dest))
+    makeExecutable(_(fs.readdirSync(dest))
     .filter(file => path.extname(file) === '.sh')
     .value()
     , dest);
   } catch (error) {
-    const code = get(error, 'code');
-    const syscall = get(error, 'syscall');
-    const f = get(error, 'path');
+    const code = _.get(error, 'code');
+    const syscall = _.get(error, 'syscall');
+    const f = _.get(error, 'path');
 
     // Catch this so we can try to repair
     if (code !== 'EISDIR' || syscall !== 'open' || Boolean(mkdirp.sync(f))) {
@@ -43,7 +43,7 @@ function moveConfig(src, dest) {
 };
 
 function makeExecutable(files, base = process.cwd()) {
-  forEach(files, file => {
+  _.forEach(files, file => {
     fs.chmodSync(path.join(base, file), '755');
   });
 };

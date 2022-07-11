@@ -18,7 +18,7 @@ class RemoveCommand extends PluginCommand {
 
   async run() {
     const fs = require('fs');
-    const utils = require('../lib/utils');
+    const map = require('../../utils/map');
     const {flags, argv} = await this.parse(RemoveCommand);
     const {CliUx} = require('@oclif/core');
     const home = this.config.home;
@@ -28,7 +28,7 @@ class RemoveCommand extends PluginCommand {
 
     try {
       console.log(argv);
-      await utils.map(argv, function(plugin) { // eslint-disable-line unicorn/no-array-method-this-argument
+      await map(argv, function(plugin) { // eslint-disable-line unicorn/no-array-method-this-argument
         const pluginFolder = '/' + plugin;
         const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
         fs.rmSync(pluginFolderPath, {recursive: true});
