@@ -1,8 +1,8 @@
-const {Flags, loadHelpClass} = require('@oclif/core');
+const {loadHelpClass} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommand extends BaseCommand {
-  static description = 'manage hyperdrive configuration';
+  static description = 'manages hyperdrive configuration';
   static flags = {
     ...BaseCommand.globalFlags,
   };

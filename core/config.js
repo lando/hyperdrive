@@ -1,6 +1,7 @@
 // debug should be on this?
 const fs = require('fs');
 const get = require('lodash.get');
+const keys = require('all-object-keys');
 const mkdirp = require('mkdirp');
 const nconf = require('nconf');
 const os = require('os');
@@ -14,12 +15,12 @@ class Config extends nconf.Provider {
   constructor(options) {
     // get parent stuff
     super();
-    // get the product first since we need this for downstream things
-    this.product = options.product || path.basename(process.argv[1]);
+    // get the id first since we need this for downstream things
+    this.id = options.id || path.basename(process.argv[1]);
     // properties
     this.managed = options.managed || 'system';
     // namespaces utils
-    this.debug = require('debug')(`config:${this.product}`);
+    this.debug = require('debug')(`config:${this.id}`);
     // Then run our own init
     this.#init(options);
   }
@@ -70,8 +71,8 @@ class Config extends nconf.Provider {
   // do setup and validation
   // basically do what you have to do to make sure run() will complete succesfully
   #init(options) {
-    const cached = options.cached || path.join(path.join(os.homedir(), `.${this.product}`), 'cache', 'config.json');
-    const env = options.env || this.product.toUpperCase();
+    const cached = options.cached || path.join(path.join(os.homedir(), `.${this.id}`), 'cache', 'config.json');
+    const env = options.env || this.id.toUpperCase();
     const sources = options.sources || {};
     const templates = options.templates || {};
 
@@ -172,6 +173,11 @@ class Config extends nconf.Provider {
   get(path) {
     if (path) return get(super.get(), path);
     return super.get();
+  }
+
+  // helper to get an array of all config paths
+  getPaths(store) {
+    return store ? keys(this.stores[store].get()) : keys(this.get());
   }
 
   // overriden save method
