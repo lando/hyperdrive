@@ -2,34 +2,31 @@ const {Command, Flags} = require('@oclif/core');
 
 class BaseCommand extends Command {
   static enableJsonFlag = true;
+  static strict = false;
   static globalFlags = {
     config: Flags.string({
       char: 'c',
-      description: 'Uses configuration from specified file',
+      description: 'uses configuration from specified file',
       env: 'HYPERDRIVE_CONFIG_FILE',
       default: undefined,
       helpGroup: 'GLOBAL',
     }),
     debug: Flags.boolean({
       default: false,
-      description: 'Prints debugging information',
+      description: 'prints debugging information',
       helpGroup: 'GLOBAL',
     }),
     help: Flags.boolean({
       default: false,
-      description: 'Prints help information',
+      description: 'prints help information',
       helpGroup: 'GLOBAL',
     }),
     json: Flags.boolean({
       default: false,
-      description: 'Prints output in JSON',
+      description: 'prints output in JSON',
       helpGroup: 'GLOBAL',
     }),
   };
-
-  async init() {
-    // console.log('INIT')
-  }
 }
 
 module.exports = {BaseCommand};

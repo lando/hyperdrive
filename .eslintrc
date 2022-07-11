@@ -5,6 +5,7 @@
     "requireConfigFile": false
   },
   "rules": {
+    "guard-for-in": ["warn"],
     "no-console": ["warn"],
     "semi": ["error", "always"],
     "semi-style": ["error", "last"],
@@ -13,7 +14,8 @@
       "named": "never",
       "asyncArrow": "never"
     }],
-    "unicorn/prefer-module": "off"
+    "unicorn/prefer-module": "off",
+    "unicorn/no-process-exit": "off"
   },
   "env": {
     "mocha": true

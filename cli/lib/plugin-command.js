@@ -1,5 +1,5 @@
 const {Flags} = require('@oclif/core');
-const {BaseCommand} = require('./command');
+const {BaseCommand} = require('./base-command');
 
 class PluginCommand extends BaseCommand {
   static args = [
@@ -10,7 +10,7 @@ class PluginCommand extends BaseCommand {
     },
   ];
 
-  static flags = {
+  static flags = {...BaseCommand.globalFlags,
     global: Flags.boolean({
       char: 'g',
       description: 'Modify the global Lando context (defaults for all projects).',

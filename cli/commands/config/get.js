@@ -1,54 +1,77 @@
-const {Flags} = require('@oclif/core');
-const {BaseCommand} = require('../../lib/command');
+const chalk = require('chalk');
+const fs = require('fs');
+const path = require('path');
 
-class ConfigCommand extends BaseCommand {
-  // static _base = 'thing';
-  // static id = 'thing';
-  // static title = 'title';
+const {CliUx, Flags} = require('@oclif/core');
+const {BaseCommand} = require('../../lib/base-command');
 
-  static description = 'Retrieve a specific config value.';
-  // static hidden - false;
+class ConfigCommandGet extends BaseCommand {
+  static description = 'retrieves hyperdrive configuration';
 
-  static flags = [
-    '',
-  ];
+  static args = [{
+    name: 'key',
+    description: 'config key(s) to get',
+    required: false,
+  }];
 
-  static args = [
-    'value',
-  ];
+  static examples = [
+    'hyperdrive config get',
+    'hyperdrive config get core.telemetry --json',
+    'hyperdrive config get core.telemetry updates.notify --space=user',
+    'hyperdrive config get -c config.yaml',
+    'hyperdrive config get --store user',
+  ]
 
-  static usage = 'stuff';
-
-  static help = 'stuff';
-
-  // static aliases = ['uninstall'];
-
-  // static strict = false;
-  // static parse = true;
   static flags = {
-    name: Flags.string({char: 'n', description: 'name to print'}),
-  }
+    ...BaseCommand.globalFlags,
+    store: Flags.string({
+      description: 'gets a specific config store',
+      options: ['system', 'user'],
+    }),
+  };
 
-  // static args
-  // static plugin
-  // static examples
-  // static parserOptions
-  // static
+  static strict = false;
+  static usage = 'config get [<KEY> [<KEY> ...]] [-c <value>] [--debug] [--help] [--json]';
 
   async run() {
-    const {flags} = this.parse(ConfigCommand);
-    const {fs} = require('fs');
-    const {nconf} = require('nconf');
-    console.log(this.config);
-    // Fetch the default config.yml
+    // load slower modules
+    const _ = require('lodash');
+    // get args and flags
+    const {argv, flags} = await this.parse(ConfigCommandGet);
+    // get the hyperdrive config object
+    const config = this.config.hyperdrive;
 
-    // Fetch the userspace configDir (/Users/alec/.config/hyperdrive)
-    // eemeli/yaml should be our new YAML library
+    // throw warning (or is error better?) if config file does not exist
+    // @NOTE: do we even get here or does it fail in bootstrap?
+    if (flags.config && !fs.existsSync(path.resolve(flags.config))) {
+      this.warn(`could not locate config file at ${flags.config}`);
+    }
 
-    // Merge the config (nconf)
+    // start with the total data set
+    const data = flags.space ? config.stores[flags.space].get() : config.get();
 
-    // Cache the combined config in oclif's cacheDir as JSON (nconf)
+    // if the user wants json then just return the data
+    if (flags.json) return _.isEmpty(argv) ? data : _.pick(data, argv);
+
+    // otherwise print a CLI table
+    const keys = _.isEmpty(argv) ? config.getPaths(flags.space) : argv;
+    const rows = _(config.getPaths(flags.space))
+    .filter(path => _.includes(keys, path))
+    .map(path => ({key: path, value: _.get(data, path)}))
+    .sortBy('key', 'DESC')
+    .value();
+
+    // if we end up with nothing lets error
+    if (_.isEmpty(rows)) {
+      this.error(`could not locate properties: ${chalk.red(argv.join(' '))}`);
+      this.exit(2);
+    }
+
+    this.log();
+    // @TODO: add support for table flags
+    CliUx.ux.table(rows, {key: {}, value: {}});
+    this.log();
   }
 }
 
-module.exports = ConfigCommand;
+module.exports = ConfigCommandGet;

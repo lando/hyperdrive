@@ -1,0 +1,44 @@
+#
+# This is the default config used to instantiate hyperdrive if it is instantiated programmtically with no options eg:
+#
+# const hyperdrive = new Hyperdrive();
+#
+
+deps:
+  packages:
+    docker-compose:
+      versions:
+        default:
+        #https://www.npmjs.com/package/semver.satisfies
+        preferred:
+        required:
+
+    docker-desktop:
+      versions:
+        default:
+        #https://www.npmjs.com/package/semver.satisfies
+        preferred:
+        required:
+
+    lando:
+      # disable auto docker-desktop and docker-compose?
+      versions:
+        default: latest
+        #https://www.npmjs.com/package/semver.satisfies
+        preferred:
+        required:
+      requires:
+        docker-desktop: true
+        docker-compose: true
+
+# https://github.com/npm/npm-registry-fetch
+# @NOTE: check if the options are same for this and .npmrc
+npm:
+
+plugins:
+
+updates:
+  notify: true
+core:
+  telemetry: true
+  release-channel: stable
