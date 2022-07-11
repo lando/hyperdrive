@@ -1,63 +1,60 @@
-const {Flags} = require('@oclif/core');
+const fs = require('fs');
+const path = require('path');
+
 const {BaseCommand} = require('../../lib/base-command');
 
-class ConfigSetCommand extends BaseCommand {
-  // static _base = 'thing';
-  // static id = 'thing';
-  // static title = 'title';
+class ConfigCommandSet extends BaseCommand {
+  static description = 'sets hyperdrive configuration';
 
-  static description = `Configure Hyperdrive options. Options include...
+  static args = [{
+    name: 'key',
+    description: 'config key(s) and their value(s) to set',
+    required: false,
+  }];
 
-  - Supported versions of Docker Desktop.
-  - Default installed version of Docker Desktop.
-  - Default version of Lando.
-  - Default version of Docker Compose.
-  - Whether you should install Docker Desktop at all.
-  - Default release channel.
-  - Specify a .npmrc file for global install.
+  static examples = [
+    'hyperdrive config set core.telemetry=false',
+    'hyperdrive config set core.telemetry=false updates.notify=false',
+    'hyperdrive config set -c test.yaml',
+  ];
 
-  Topic with "hyperdrive config get/set/list"
-  `;
-  // static hidden - false;
-
-  static flags = [
-    '',
-  ]
-
-  static usage = 'stuff';
-
-  static help = 'stuff';
-
-  // static aliases = ['uninstall'];
-
-  // static strict = false;
-  // static parse = true;
   static flags = {
-    name: Flags.string({char: 'n', description: 'name to print'}),
-  }
+    ...BaseCommand.globalFlags,
+  };
 
-  // static args
-  // static plugin
-  // static examples
-  // static parserOptions
-  // static
+  static strict = false;
+
+  static usage = 'config set [<KEY=VALUE> [<KEY=VALUE> ...]] [-c <value>] [--debug] [--help] [--json]';
 
   async run() {
-    const {flags} = this.parse(ConfigCommand);
-    const {fs} = require('fs');
-    const {nconf} = require('nconf');
-    const {yaml} = require('yaml');
-    // Is there a
-    console.log(this.config);
-    // Fetch the default config.yml
+    // load slower modules
+    const _ = require('lodash');
+    // get args and flags
+    const {argv, flags} = await this.parse(ConfigCommandSet);
+    // get the hyperdrive config object
+    const config = this.config.hyperdrive;
 
-    // Fetch the userspace configDir (/Users/alec/.config/hyperdrive)
-    // eemeli/yaml should be our new YAML library
+    // throw warning (or is error better?) if config file does not exist
+    // @NOTE: do we even get here or does it fail in bootstrap?
+    if (flags.config && !fs.existsSync(path.resolve(flags.config))) {
+      this.warn(`could not locate config file at ${flags.config}`);
+    }
 
-    // Merge the config (nconf)
+    // start with data from file or empty
+    const data = config.stores.overrides ? config.stores.overrides.get() : {};
+    // mix in argv if they have paths and values
+    for (const arg of argv) {
+      const path = arg.split('=')[0];
+      const value = arg.split('=')[1];
+      if (arg.split('=').length === 2) _.set(data, path, value);
+    }
 
-    // Cache the combined config in oclif's cacheDir as JSON (nconf)
+    // save result
+    config.save(data);
+
+    // if json then return the saved result
+    if (flags.json) return data;
   }
 }
 
-module.exports = ConfigSetCommand;
+module.exports = ConfigCommandSet;

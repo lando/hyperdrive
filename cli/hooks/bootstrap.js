@@ -19,7 +19,7 @@ module.exports = async({id, argv, config}) => {
     config: {
       cached: path.join(config.cacheDir, 'config.json'),
       env: 'HYPERDRIVE',
-      product: 'hyperdrive',
+      id: 'hyperdrive',
       sources: {
         defaults: path.join(__dirname, '..', '..', 'config.yaml'),
         system: path.join(config.dataDir, 'config.json'),

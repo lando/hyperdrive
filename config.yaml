@@ -4,37 +4,32 @@
 # const hyperdrive = new Hyperdrive();
 #
 
-docker-compose-v1:
-  versions:
-    default:
-    #https://www.npmjs.com/package/semver.satisfies
-    preferred:
-    required:
+deps:
+  packages:
+    docker-compose:
+      versions:
+        default:
+        #https://www.npmjs.com/package/semver.satisfies
+        preferred:
+        required:
 
-docker-compose-v2:
-  versions:
-    default:
-    #https://www.npmjs.com/package/semver.satisfies
-    preferred:
-    required:
+    docker-desktop:
+      versions:
+        default:
+        #https://www.npmjs.com/package/semver.satisfies
+        preferred:
+        required:
 
-docker-desktop:
-  versions:
-    default:
-    #https://www.npmjs.com/package/semver.satisfies
-    preferred:
-    required:
-
-lando:
-  # disable auto docker-desktop and docker-compose?
-  versions:
-    default: latest
-    #https://www.npmjs.com/package/semver.satisfies
-    preferred:
-    required:
-  requires:
-    docker-desktop: true
-    docker-compose-v1: true
+    lando:
+      # disable auto docker-desktop and docker-compose?
+      versions:
+        default: latest
+        #https://www.npmjs.com/package/semver.satisfies
+        preferred:
+        required:
+      requires:
+        docker-desktop: true
+        docker-compose: true
 
 # https://github.com/npm/npm-registry-fetch
 # @NOTE: check if the options are same for this and .npmrc
@@ -43,7 +38,7 @@ npm:
 plugins:
 
 updates:
-  release-channel: stable
   notify: true
-
-telemetry: true
+core:
+  telemetry: true
+  release-channel: stable
