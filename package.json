@@ -21,6 +21,7 @@
   "files": [
     "/bin",
     "/cli",
+    "/core",
     "/lib",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json",

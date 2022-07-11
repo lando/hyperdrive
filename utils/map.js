@@ -25,6 +25,6 @@ function map(iterable, mapper, options = {}) {
       return wrappedMapper();
     });
   }
-};
+}
 
 module.exports = map;

@@ -1,8 +1,7 @@
-const {Flags} = require('@oclif/core');
-const { PluginCommand } = require('../lib/plugin-command');
+const {PluginCommand} = require('../lib/plugin-command');
 
 class RemoveCommand extends PluginCommand {
-  static description = `Remove a plugin or dependency from your Lando installation.`;
+  static description = 'Remove a plugin or dependency from your Lando installation.';
 
   static usage = 'lando remove @lando/apache';
 
@@ -19,7 +18,7 @@ class RemoveCommand extends PluginCommand {
   async run() {
     const fs = require('fs');
     const map = require('../../utils/map');
-    const {flags, argv} = await this.parse(RemoveCommand);
+    const {argv} = await this.parse(RemoveCommand);
     const {CliUx} = require('@oclif/core');
     const home = this.config.home;
 
@@ -28,7 +27,7 @@ class RemoveCommand extends PluginCommand {
 
     try {
       console.log(argv);
-      await map(argv, function(plugin) { // eslint-disable-line unicorn/no-array-method-this-argument
+      await map(argv, function(plugin) {
         const pluginFolder = '/' + plugin;
         const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
         fs.rmSync(pluginFolderPath, {recursive: true});

@@ -7,15 +7,18 @@ const mkdirp = require('mkdirp');
 class Plugin {
   /**
    *
-   * @param {string} plugin  The plugin to install.
+   * @param {string} plugin  The name of the plugin to install.
    * @param {string} root    Location of the plugin on my computer...will differ based on context.
-   * @param {string} org     The plugin to install.
+   * @param {string} org     The desired namespace of the plugin.
    * @param {string} version Version of the plugin to install (optional).
+   * @param {string} scripts Location of the scripts directory on your local computer.
    */
   constructor(plugin, root, org = null, version = 'latest', scripts = '../scripts') {
     // Probably a bunch of stuff to bootstrap config.
 
     this.pluginName = plugin;
+    this.namespace = org;
+    this.version = version;
     this.scripts = scripts;
     // @todo: must pass in the best default for user's release channel for `version` variable.
     // Set needsUpdate accordingly.
@@ -42,7 +45,7 @@ class Plugin {
     }
 
     mkdirp.sync(this.path);
-    const run = execa('docker', ['run', '--rm', '-v', `${this.path}:/plugins/${this.pluginName}`, '-v', `${this.scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${this.pluginName}`])
+    const run = execa('docker', ['run', '--rm', '-v', `${this.path}:/plugins/${this.pluginName}`, '-v', `${this.scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${this.pluginName}`]);
     run.stdout.on('data', buffer => {
       const debug = require('debug')(`add-${this.pluginName}:@lando/hyperdrive`);
       debug(String(buffer));
@@ -69,6 +72,6 @@ class Plugin {
   load() {
     // Should return a combined package/config json object.
   }
-};
+}
 
 module.exports = Plugin;

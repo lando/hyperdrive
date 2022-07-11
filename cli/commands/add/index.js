@@ -58,7 +58,7 @@ class AddCommand extends PluginCommand {
     if (flags.global) {
       // Run docker commands to install plugins.
       try {
-        await map(argv, function(pluginName) { // eslint-disable-line unicorn/no-array-method-this-argument
+        await map(argv, function(pluginName) {
           const plugin = new Plugin(pluginName, pluginsFolder, null, 'latest', scripts);
           return plugin.add();
         });
