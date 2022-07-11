@@ -1,6 +1,7 @@
 const {PluginCommand} = require('../../lib/plugin-command');
 const {CliUx} = require('@oclif/core');
 const path = require('path');
+const Plugin = require('../../../core/plugin');
 
 class AddCommand extends PluginCommand {
   // @TODO: For individual apps, you can create a .npmrc file to specify private registry.
@@ -26,16 +27,12 @@ class AddCommand extends PluginCommand {
   static strict = false;
 
   async run() {
-    const {execa} = await import('execa');
-    const utils = require('../../lib/utils');
-    const mkdirp = require('mkdirp');
-    const minimist = require('minimist');
-    const fs = require('fs');
+    const map = require('../../../utils/map');
+    const moveConfig = require('../../../utils/move-config');
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
     const {flags, argv} = await this.parse(AddCommand);
-    const fargv = minimist(argv)._;
 
     // Start the spinner
     CliUx.ux.action.start('Installing...');
@@ -43,7 +40,8 @@ class AddCommand extends PluginCommand {
     // Move the scripts folder into the OCLIF data directory.
     const scripts = path.join(this.config.dataDir, 'scripts');
     const home = this.config.home;
-    utils.moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
+    moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
+    const pluginsFolder = `${home}/.lando/plugins`;
 
     // @todo: context detection. If we're in a Lando app, we'll add the plugin
     // to that app. We'll need to create a @lando/bootstrap package that will
@@ -60,24 +58,14 @@ class AddCommand extends PluginCommand {
     if (flags.global) {
       // Run docker commands to install plugins.
       try {
-        await utils.map(fargv, function(plugin) {
-          const pluginFolder = '/' + plugin;
-          const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
-          if (fs.existsSync(pluginFolderPath)) {
-            fs.rmSync(pluginFolderPath, {recursive: true});
-          }
-
-          mkdirp.sync(pluginFolderPath);
-          const subprocess = execa('docker', ['run', '--rm', '-v', `${home}/.lando/plugins${pluginFolder}:/plugins${pluginFolder}`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${plugin}`]);
-          subprocess.stdout.on('data', buffer => {
-            const debug = require('debug')(`add-${plugin}:@lando/hyperdrive`);
-            debug(String(buffer));
-          });
-          return subprocess;
+        await map(argv, function(pluginName) {
+          const plugin = new Plugin(pluginName, pluginsFolder, null, 'latest', scripts);
+          return plugin.add();
         });
-        CliUx.ux.action.stop();
+        CliUx.ux.action.stop('Install successful.');
       } catch (error) {
         // @TODO: Some sort of nice error message? What can we cull?
+        CliUx.ux.action.stop('Install failed.');
         this.error(error);
       }
     }
