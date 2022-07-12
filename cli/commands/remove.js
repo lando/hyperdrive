@@ -1,4 +1,5 @@
 const {PluginCommand} = require('../lib/plugin-command');
+const Plugin = require('../../core/plugin');
 
 class RemoveCommand extends PluginCommand {
   static description = 'Remove a plugin or dependency from your Lando installation.';
@@ -16,21 +17,21 @@ class RemoveCommand extends PluginCommand {
   // static
 
   async run() {
-    const fs = require('fs');
     const map = require('../../utils/map');
+    const path = require('path');
     const {argv} = await this.parse(RemoveCommand);
     const {CliUx} = require('@oclif/core');
     const home = this.config.home;
+    const pluginsFolder = `${home}/.lando/plugins`;
+    const scripts = path.join(this.config.dataDir, 'scripts');
 
     // Start the spinner
     CliUx.ux.action.start('Uninstalling...');
 
     try {
-      console.log(argv);
-      await map(argv, function(plugin) {
-        const pluginFolder = '/' + plugin;
-        const pluginFolderPath = `${home}/.lando/plugins${pluginFolder}`;
-        fs.rmSync(pluginFolderPath, {recursive: true});
+      await map(argv, function(pluginName) {
+        const plugin = new Plugin(pluginName, pluginsFolder, null, 'latest', scripts);
+        return plugin.remove();
       });
       CliUx.ux.action.stop('Uninstall successful.');
     } catch (error) {

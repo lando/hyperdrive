@@ -57,7 +57,9 @@ class Plugin {
    * Remove a plugin.
    *
    */
-  remove() {}
+  remove() {
+    return fs.rmSync(this.path, {recursive: true});
+  }
 
   /**
    * Get metadata on a plugin.
