@@ -17,7 +17,7 @@ class ConfigCommandGet extends BaseCommand {
   static examples = [
     'hyperdrive config get',
     'hyperdrive config get core.telemetry --json',
-    'hyperdrive config get core.telemetry updates.notify --space=user',
+    'hyperdrive config get core.telemetry updates.notify --store=user',
     'hyperdrive config get -c config.yaml',
     'hyperdrive config get --store user',
   ]
@@ -48,14 +48,14 @@ class ConfigCommandGet extends BaseCommand {
     }
 
     // start with the total data set
-    const data = flags.space ? config.stores[flags.space].get() : config.get();
+    const data = flags.store ? config.stores[flags.store].get() : config.get();
 
     // if the user wants json then just return the data
     if (flags.json) return _.isEmpty(argv) ? data : _.pick(data, argv);
 
     // otherwise print a CLI table
-    const keys = _.isEmpty(argv) ? config.getPaths(flags.space) : argv;
-    const rows = _(config.getPaths(flags.space))
+    const keys = _.isEmpty(argv) ? config.getPaths(flags.store) : argv;
+    const rows = _(config.getPaths(flags.store))
     .filter(path => _.includes(keys, path))
     .map(path => ({key: path, value: _.get(data, path)}))
     .sortBy('key', 'DESC')

@@ -167,6 +167,10 @@ class Config extends nconf.Provider {
       super.add('cached', {type: 'file', file: cached});
       this.debug('dumped compiled and cached config file to %s', cached);
     }
+
+    // The YAML spec returns null for an empty yaml document but for merging purposes we want this to be an empty
+    // object so lets transform that here
+    if (this.stores.user.store === null) this.stores.user.store = {};
   }
 
   // overridden get method for easier deep path selection

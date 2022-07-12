@@ -1,8 +1,7 @@
-#
+
 # This is the default config used to instantiate hyperdrive if it is instantiated programmtically with no options eg:
-#
+
 # const hyperdrive = new Hyperdrive();
-#
 
 deps:
   packages:
