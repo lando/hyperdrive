@@ -62,6 +62,8 @@ class ConfigCommandGet extends BaseCommand {
     .value();
 
     // if we end up with nothing lets error
+    // @TODO: improve this error eg there are a few different things that can happen
+    // @TODO: lets also try to use some of the "advanced" error options eg suggestion/ref
     if (_.isEmpty(rows)) {
       this.error(`could not locate properties: ${chalk.red(argv.join(' '))}`);
       this.exit(2);

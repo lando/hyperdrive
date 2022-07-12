@@ -73,6 +73,9 @@
     "dirname": "hyperdrive",
     "commands": "./cli/commands",
     "hooks": {
+      "config": [
+        "./cli/hooks/config.js"
+      ],
       "init": [
         "./cli/hooks/bootstrap.js"
       ],
