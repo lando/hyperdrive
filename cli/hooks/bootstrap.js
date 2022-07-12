@@ -12,7 +12,8 @@ module.exports = async({id, argv, config}) => {
   const {flags} = await Parser.parse(argv, {strict: false, flags: BaseCommand.globalFlags});
 
   // start the hyperdrive config by setting the default bootstrapper and its config
-  const template = path.join(__dirname, '..', '..', 'config.yaml');
+  const systemTemplate = path.join(__dirname, '..', '..', 'config', 'defaults.yaml');
+  const userTemplate = path.join(__dirname, '..', '..', 'config', 'user.yaml');
   const minstrapper = {
     // config: {},
     loader: path.join(__dirname, '..', '..', 'core', 'bootstrap.js'),
@@ -21,14 +22,14 @@ module.exports = async({id, argv, config}) => {
       env: 'HYPERDRIVE',
       id: 'hyperdrive',
       sources: {
-        defaults: path.join(__dirname, '..', '..', 'config.yaml'),
+        defaults: path.join(__dirname, '..', '..', 'config', 'defaults.yaml'),
         system: path.join(config.dataDir, 'config.json'),
         user: path.join(config.configDir, 'config.yaml'),
         overrides: flags.config ? path.resolve(flags.config) : undefined,
       },
       templates: {
-        system: {source: template, dest: path.join(config.dataDir, 'config.json')},
-        user: {source: template, dest: path.join(config.configDir, 'config.yaml')},
+        system: {source: systemTemplate, dest: path.join(config.dataDir, 'config.json')},
+        user: {source: userTemplate, dest: path.join(config.configDir, 'config.yaml')},
       },
     },
   };
