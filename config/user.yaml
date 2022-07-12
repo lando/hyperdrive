@@ -1,44 +1,67 @@
+##
 #
-# This is the default config used to instantiate hyperdrive if it is instantiated programmtically with no options eg:
+# User configuration file
 #
-# const hyperdrive = new Hyperdrive();
+# This is a template-generated user configuration file with some comments to help you modify it to your needs.
+# Uncomment the relevant lines and hyperdrive will use your values instead of the system ones.
+#
+# See docs.lando.dev/hyperdrive/cli/config.html for more information.
 #
 
+##
+#
+# core configuration
+#
+# core:
+#   telemetry: true | false
+#    release-channel: stable | edge
+#
+
+##
+# updates configuration
+#
+# updates:
+#   notify: true | false
+
+##
+# npm config
+#
+# npm:
+#   @org1:registry=https://npm.pkg.github.com
+#   @org2:registry=https://npm.pkg.github.com
+#   npm.pkg.github.com/:_authToken=MYTOKEN
+
+##
+# plugins config
+#
+# plugins:
+
+##
+# deps config
+#
 # deps:
+
+# Most packages have the following options versions.default, versions.preferred, versions.required and requires.
+#
+#
+# version
+
 #   packages:
 #     docker-compose:
-#       versions:
-#         default:
-#         #https://www.npmjs.com/package/semver.satisfies
-#         preferred:
-#         required:
-
+#       versions
+#         default: 1.29.2
+#         preferred: ">=1.29.x && <2.x"
+#         required: ">=1.x && <2.x"
 #     docker-desktop:
 #       versions:
-#         default:
-#         #https://www.npmjs.com/package/semver.satisfies
-#         preferred:
-#         required:
-
+#         default: 4.10.1
+#         preferred: ">=4.x && <5.x"
+#         required: ">=3.x && <5.x"
 #     lando:
-#       # disable auto docker-desktop and docker-compose?
 #       versions:
-#         default: latest
-#         #https://www.npmjs.com/package/semver.satisfies
-#         preferred:
-#         required:
+#         default: 4.0.0-alpha.1
+#         preferred: ">=4.x"
+#         required: ">=4.x"
 #       requires:
 #         docker-desktop: true
 #         docker-compose: true
-
-# # https://github.com/npm/npm-registry-fetch
-# # @NOTE: check if the options are same for this and .npmrc
-# npm:
-
-# plugins:
-
-# updates:
-#   notify: true
-# core:
-#   telemetry: true
-#   release-channel: stable
