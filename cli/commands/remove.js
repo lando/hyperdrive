@@ -14,7 +14,6 @@ class RemoveCommand extends PluginCommand {
   // static plugin
   // static examples
   // static parserOptions
-  // static
 
   async run() {
     const map = require('../../utils/map');
