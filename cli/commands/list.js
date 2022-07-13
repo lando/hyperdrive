@@ -6,7 +6,7 @@ class ListCommand extends BaseCommand {
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Shows all loaded dependencies for your current context, including their version, where they're being loaded from, and their context (app vs. global).
+  static description = `Shows all loaded dependencies for your current context, including their versions, whether they are locally installed, and if so where they're being loaded from.
   Have options for global and namespace.
   Have option --no-deps to remove Lando/Docker Desktop from the list.`;
   // static hidden - false;

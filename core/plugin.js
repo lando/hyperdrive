@@ -1,5 +1,6 @@
 const fs = require('fs');
 const mkdirp = require('mkdirp');
+const { exit } = require('process');
 
 /**
  *
@@ -16,19 +17,29 @@ class Plugin {
   constructor(plugin, root, org = null, version = 'latest', scripts = '../scripts') {
     // Probably a bunch of stuff to bootstrap config.
 
-    this.pluginName = plugin;
+    const pluginSplit = plugin.split('@');
+    this.pluginName = pluginSplit[0] === '' ? `@${pluginSplit[1]}` : pluginSplit[0];
     this.namespace = org;
-    this.version = version;
     this.scripts = scripts;
     // @todo: must pass in the best default for user's release channel for `version` variable.
     // Set needsUpdate accordingly.
     this.needsUpdate = false;
 
     // Load the package.json (if available).
-    // @todo: see if package.json exists, set isInstalled on that basis/load package.json.
     this.path = `${root}/${plugin}`;
-    this.isInstalled = fs.existsSync(`${this.path}/package.json`);
+    const pjsonPath = `${this.path}/package.json`;
+    this.isInstalled = fs.existsSync(pjsonPath);
     this.pjson = this.isInstalled ? this.load() : {};
+    // Was version passed as part of the package name?
+    if (plugin.substring(1).match('/([^\@]+$)/') !== null) {
+      this.version = plugin.substring(1).match('/([^\@]+$)/');
+    // Or should we use the installed version?
+    } else if (this.isInstalled) {
+      this.version = this.pjson.version;
+    // of should we default to the release channel?
+    } else {
+      this.version = version;
+    }
 
     // Does this seem like a legit Lando plugin? Use this.load() output.
     this.valid = true;
@@ -66,7 +77,7 @@ class Plugin {
    *
    */
   async info() {
-    const npmFetch = require('npm-registry-fetch');
+    const {manifest} = require('pacote');
     const opts = {
       // Integrate config file npm section that allows you to define npmrc options to pass in to here/other npm-related commands.
       // npm-registry-fetch commands: https://www.npmjs.com/package/npm-registry-fetch
@@ -96,7 +107,27 @@ class Plugin {
       // This is the format required for authing with an authtoken...maybe put this in a demo config file.
       '//<npm.pkg.github.com>/:_authToken': 'THE AUTH TOKEN',
     };
-    return npmFetch.json(this.pluginName, opts);
+    const query = `${this.pluginName}@${this.version}`;
+    //const info = await npmFetch.json(query, opts);
+    const config = {
+      fullMetadata: true,
+      preferOnline: true,
+    }
+    const info = await manifest(query, config);
+
+    return {
+      // MVP plugin.yml
+      name: this.pluginName,
+      description: info.description,
+      releaseNotesUrl: 'https://URL/to/CHANGELOG.yml',
+      // @todo: should we query for this?
+      //installedVersion: this.isInstalled ? this.version : 'Not Installed',
+      version: info.version,
+      repositoryUrl: info.repository,
+      author: info.author,
+      contributors: info.maintainers,
+      keywords: info.keywords,
+    };
   }
 
   /**
@@ -105,6 +136,11 @@ class Plugin {
    */
   load() {
     // Should return a combined package/config json object.
+    const pjsonPath = `${this.path}/package.json`;
+    const pjson = require(pjsonPath);
+    return pjson;
+    // Load package.json.
+
   }
 }
 
