@@ -57,7 +57,7 @@ class InfoCommand extends BaseCommand {
     const home = this.config.home;
     const pluginsFolder = `${home}/.lando/plugins`;
     const config = this.config.hyperdrive.get();
-    const plugin = new Plugin(args.plugin, pluginsFolder, null, config['core']['release-channel']);
+    const plugin = new Plugin(args.plugin, pluginsFolder, null, config.core['release-channel']);
     const data = await plugin.info();
     if (flags.json) return data;
 
