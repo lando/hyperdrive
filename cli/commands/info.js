@@ -28,6 +28,7 @@ class InfoCommand extends BaseCommand {
   // static strict = false;
   // static parse = true;
   static flags = {
+    ...BaseCommand.globalFlags,
     'no-deps': Flags.boolean({
       description: 'Remove non-plugin dependencies (IE Lando core and Docker Desktop) from the list.',
       default: false,
@@ -53,10 +54,10 @@ class InfoCommand extends BaseCommand {
     const _ = require('lodash');
     const keys = require('all-object-keys');
     const {args, flags} = await this.parse(InfoCommand);
-    const pluginName = `/${args.plugin}`;
     const home = this.config.home;
     const pluginsFolder = `${home}/.lando/plugins`;
-    const plugin = new Plugin(pluginName, pluginsFolder);
+    const config = this.config.hyperdrive.get();
+    const plugin = new Plugin(args.plugin, pluginsFolder, null, config.core['release-channel']);
     const data = await plugin.info();
     if (flags.json) return data;
 
@@ -65,7 +66,6 @@ class InfoCommand extends BaseCommand {
     const tableRows = _(tableKeys)
     .filter(path => _.includes(tableKeys, path))
     .map(path => ({key: path, value: _.get(data, path)}))
-    .sortBy('key', 'DESC')
     .value();
 
     CliUx.ux.table(tableRows, {key: {}, value: {}});
