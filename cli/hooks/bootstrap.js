@@ -49,14 +49,14 @@ module.exports = async({id, argv, config}) => {
   debug('minstrap complete, using %s as bootstrapper', minstrapper.loader);
 
   // get the boostrapper and run it
-  const Bootstrapper = require(minstrapper.loader);
-  const bootstrapper = new Bootstrapper(minstrapper.config);
+  config.Bootstrapper = require(minstrapper.loader);
+  config.bootstrap = new config.Bootstrapper(minstrapper.config);
 
   // Initialize
-  // @TODO: eventually this will live in config.init and config.init will live in bootstrap.run()?
+  // @TODO: could it be better to merge the result of bootstrapper.run() into config so we can load in other stuff?
   try {
-    config.hyperdrive = await bootstrapper.run();
-    debug('bootstrap completed succesfully with config %o', config.hyperdrive.get());
+    await config.bootstrap.run(config);
+    debug('bootstrap completed successfully!');
   } catch (error) {
     // @TODO: figure out how to use OCLIF error handling to print a message here?
     console.error(new Error('Bootstrap failed! See error below')); // eslint-disable-line no-console
