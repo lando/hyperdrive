@@ -7,32 +7,20 @@ const yaml = require('js-yaml');
  */
 class Plugin {
   /**
-   *
    * @TODO: scripts shoudl be moved into the engine constructor
-   * @TODO: what goes in options? release channel?
-   * @TODO: add debugger?
    */
   constructor(dir, options = {}) {
-    // @TODO: check if directory(ies) exists?
-    // @TODO: do we need an internal load() basically just to make this look nicer?
+    // @TODO: should we break this.options up into relevant things eg this.channel = options.channel || 'stable'?
+    // core props
+    this.location = dir;
+    this.options = options;
+    // config props
     this.pjson = require(path.join(dir, 'package.json'));
-    this.config = this.pjson.lando || {};
-    console.log(options);
-
-    // if plugin.js exists then merge result into config
-    if (fs.existsSync(path.join(dir, 'plugin.js'))) {
-      this.config = {...this.config, ...require(path.join(dir, 'plugin.js'))};
-    // or if plugin.ymal exists  merge that instead
-    } else if (fs.existsSync(path.join(dir, 'plugin.yaml'))) {
-      this.config = {...this.config, ...yaml.load(fs.readFileSync(path.join(dir, 'plugin.yaml'), 'utf8'))};
-    // or plugin.yml exist merge that instead
-    } else if (fs.existsSync(path.join(dir, 'plugin.yml'))) {
-      this.config = {...this.config, ...yaml.load(fs.readFileSync(path.join(dir, 'plugin.yml'), 'utf8'))};
-    }
-
+    this.config = {...this.pjson.lando, ...this.#load()};
     // set top level things
     this.name = this.config.name || this.pjson.name;
-    this.location = dir;
+    this.debug = require('debug')(`plugin:${this.name}`);
+    this.package = this.pjson.name;
     this.version = this.pjson.version;
     // add some computed properties
     this.isInstalled = true;
@@ -40,7 +28,22 @@ class Plugin {
     this.updateAvailable = undefined;
     // @TODO: do we need this still
     // this.namespace
-    // @TODO: debug if invalid?
+    this.debug('instantiated plugin from %s with options %o', this.location, options);
+  }
+
+  // Internal method to help load config
+  // @TODO: we might want to put more stuff in here at some point.
+  // @NOTE: this will differ from "init" which should require in all needed files?
+  #load() {
+    const {location, options} = this;
+    // return the plugin.js return first
+    if (fs.existsSync(path.join(location, 'plugin.js'))) return require(path.join(location, 'plugin.js'))(options);
+    // otherwise return the plugin.yaml content
+    if (fs.existsSync(path.join(location, 'plugin.yaml'))) return yaml.load(fs.readFileSync(path.join(location, 'plugin.yaml'), 'utf8'));
+    // otherwise return the plugin.yml content
+    if (fs.existsSync(path.join(location, 'plugin.yml'))) return yaml.load(fs.readFileSync(path.join(location, 'plugin.yml'), 'utf8'));
+    // otherwise return uh, nothing?
+    return {};
   }
 
   // static async add(name, dest) {

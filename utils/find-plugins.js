@@ -15,13 +15,10 @@ module.exports = (dir, depth = 1) => {
   return readdirSyncAbsDir(dir)
   .map(dir => {
     // return if path contains a plugin
-    if (pConfigFiles.some(file => fs.existsSync(path.join(dir, file)))) {
-      return dir;
+    if (pConfigFiles.some(file => fs.existsSync(path.join(dir, file)))) return dir;
     // otherwise recurse if depth allows
-    } else if (depth > 1) { // eslint-disable-line no-else-return
-      return module.exports(dir, depth - 1);
-    }
-
+    if (depth > 1) return module.exports(dir, depth - 1);
+    // otherwise null
     return null;
   })
   // flatten

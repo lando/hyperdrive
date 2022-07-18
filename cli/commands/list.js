@@ -32,36 +32,34 @@ class ListCommand extends BaseCommand {
   // static strict = false;
 
   async run() {
-    // const {flags} = await this.parse(ListCommand);
+    // const groupBy = require('lodash/groupBy');
 
+    // const {flags} = await this.parse(ListCommand);
     // @TODO: move this into lando class
     // @TODO: if lando is installed then get its config
     const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
     const {stdout} = await execa('lando', ['hyperdrive']);
-    console.log(stdout)
     const landoConfig = JSON.parse(stdout);
     this.debug('acquired lando configuration %o', landoConfig);
 
     // scan any lando provided global directories for additional plugins
-    const globalPlugins = landoConfig.pluginDirs
+    const globalPluginDirs = landoConfig.pluginDirs
     .filter((dir => dir.type === 'global'))
     .map(dir => this.config.Bootstrapper.findPlugins(dir.dir, dir.depth))
     .flat(Number.POSITIVE_INFINITY);
-    this.debug('found additional globally installed plugins in %o', globalPlugins);
+    this.debug('found additional globally installed plugins in %o', globalPluginDirs);
 
-    console.log(landoConfig);
-    console.log(globalPlugins);
-
-    const pluginConfig = {
-      channel: this.config.hyperdrive.get('core.release-channel'),
-    };
+    // grab our plugin config
+    // @NOTE: format and settings TBH still
+    const channel = this.config.hyperdrive.get('core.release-channel');
+    const pluginConfig = {channel, ...this.config.hyperdrive.get('plugins')};
     // @TODO: iterate through globalPlugins and instantiate them
-    const plugins = globalPlugins
-    .map(dir => new Plugin(dir, pluginConfig));
-
-
-    console.log(plugins)
-    process.exit(1)
+    const globalPlugins = globalPluginDirs
+    .map(dir => new Plugin(dir, pluginConfig))
+    .map(plugin => ({...plugin, type: 'global'}));
+    // concat our plugins together
+    const plugins = [...landoConfig, ...globalPlugins];
+    console.log(plugins);
 
     // @TODO: organize the plugins to reflect hierarchy
     //
