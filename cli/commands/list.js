@@ -2,18 +2,7 @@ const {BaseCommand} = require('../lib/base-command');
 const {Flags} = require('@oclif/core');
 
 class ListCommand extends BaseCommand {
-<<<<<<< HEAD
   static description = 'gets plugins for given context';
-=======
-  // static _base = 'thing';
-  // static id = 'thing';
-  // static title = 'title';
-
-  static description = `Shows all loaded dependencies for your current context, including their versions, whether they are locally installed, and if so where they're being loaded from.
-  Have options for global and namespace.
-  Have option --no-deps to remove Lando/Docker Desktop from the list.`;
-  // static hidden - false;
->>>>>>> c64ef3432af23f3cbcfb8b0cb481fecddcede7fc
 
   // @TODO: global flag to force loading hte global context?
   // static args = [{
