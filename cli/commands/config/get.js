@@ -6,7 +6,7 @@ const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommandGet extends BaseCommand {
-  static description = 'retrieves hyperdrive configuration';
+  static description = 'gets hyperdrive configuration';
 
   static args = [{
     name: 'key',

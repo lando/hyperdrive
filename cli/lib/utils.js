@@ -36,6 +36,6 @@ exports.download = function(url, destination) {
     });
   } catch (error) {
     progressBar.stop();
-    console.log(error);
+    console.error(error);
   }
 };
