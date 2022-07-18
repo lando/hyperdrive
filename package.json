@@ -63,7 +63,7 @@
   },
   "babel": {},
   "scripts": {
-    "build": "shx rm -rf dist && pkg -c package.json -t node14 bin/hyperdrive",
+    "build": "shx rm -rf dist && pkg -c package.json -t node16 bin/hyperdrive",
     "lint": "eslint bin/hyperdrive . --ext .js --config .eslintrc",
     "test": "mocha --forbid-only \"test/**/*.test.js\"",
     "release": "bump --prompt --tag --all --push"
