@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const { exit } = require('process');
 
 /**
  *
@@ -46,9 +47,49 @@ class Plugin {
     return {};
   }
 
-  // static async add(name, dest) {
+  /**
+   *
+   * Install a plugin.
+   *
+   * @todo: Some (or all) of this may belong in the engine object.
+   * @todo: Get rid of scripts...bootstrapped config?
+   *
+   * @param {string} name Valid name/version string for NPM to fetch the plugin.
+   * @param {string} dest The plugin directory to install the plugin in.
+   * @returns
+   */
+  static async add(name, dest, scripts) {
+    const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
+    const mkdirp = require('mkdirp');
+    const nameVersion = this.mungeVersion(name);
+    const pluginPath = `${dest}/${nameVersion.name}`;
 
-  // }
+    // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
+    if (fs.existsSync(pluginPath)) {
+      fs.rmSync(pluginPath, {recursive: true});
+    }
+
+    mkdirp.sync(pluginPath);
+    const run = execa('docker', ['run', '--rm', '-v', `${pluginPath}:/plugins/${nameVersion.name}`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${nameVersion.name} ${nameVersion.version}`]);
+    run.stdout.on('data', buffer => {
+      const debug = require('debug')(`add-${nameVersion.name}:@lando/hyperdrive`);
+      debug(String(buffer));
+    });
+    return run;
+  }
+
+  /**
+   *
+   * Separate a provided plugin's name and version strings.
+   *
+   * @param {string} name A string containing the name and optional version info for a plugin.
+   */
+  static mungeVersion(name) {
+    let nameVersion = {};
+    nameVersion.version = name.slice(1).match('([^@]+$)')[0];
+    nameVersion.name = name.replace(`@${nameVersion.version}`, '');
+    return nameVersion;
+  }
 
   // static async info(name) {
 
@@ -60,25 +101,6 @@ class Plugin {
 
   // update(version) {
 
-  // }
-
-  // /*
-  //  * Install a plugin.
-  //  */
-  // async add() {
-  //   const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
-  //   // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
-  //   if (fs.existsSync(this.path)) {
-  //     fs.rmSync(this.path, {recursive: true});
-  //   }
-
-  //   mkdirp.sync(this.path);
-  //   const run = execa('docker', ['run', '--rm', '-v', `${this.path}:/plugins/${this.pluginName}`, '-v', `${this.scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${this.pluginName}`]);
-  //   run.stdout.on('data', buffer => {
-  //     const debug = require('debug')(`add-${this.pluginName}:@lando/hyperdrive`);
-  //     debug(String(buffer));
-  //   });
-  //   return run;
   // }
 
   /**
