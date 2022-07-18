@@ -1,5 +1,6 @@
 const {BaseCommand} = require('../lib/base-command');
 const {Flags} = require('@oclif/core');
+const Plugin = require('./../../core/plugin');
 
 class ListCommand extends BaseCommand {
   static description = 'gets plugins for given context';
@@ -37,6 +38,7 @@ class ListCommand extends BaseCommand {
     // @TODO: if lando is installed then get its config
     const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
     const {stdout} = await execa('lando', ['hyperdrive']);
+    console.log(stdout)
     const landoConfig = JSON.parse(stdout);
     this.debug('acquired lando configuration %o', landoConfig);
 
@@ -46,6 +48,22 @@ class ListCommand extends BaseCommand {
     .map(dir => this.config.Bootstrapper.findPlugins(dir.dir, dir.depth))
     .flat(Number.POSITIVE_INFINITY);
     this.debug('found additional globally installed plugins in %o', globalPlugins);
+
+    console.log(landoConfig);
+    console.log(globalPlugins);
+
+    const pluginConfig = {
+      channel: this.config.hyperdrive.get('core.release-channel'),
+    };
+    // @TODO: iterate through globalPlugins and instantiate them
+    const plugins = globalPlugins
+    .map(dir => new Plugin(dir, pluginConfig));
+
+
+    console.log(plugins)
+    process.exit(1)
+
+    // @TODO: organize the plugins to reflect hierarchy
     //
     // .flatten()
     // @TODO filter out files like .DS_STORE
@@ -65,6 +83,9 @@ class ListCommand extends BaseCommand {
     // the landofile config?
     // merge in app plugin stuff?
     // @TODO: --json formatters etc
+
+    // @TODO: after output just one line warn about invalid plugins
+    // this would be a good place to make sure of the ref/suggestion stuff
   }
 }
 

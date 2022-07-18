@@ -5,6 +5,7 @@
     "requireConfigFile": false
   },
   "rules": {
+    "complexity": ["warn", 25],
     "guard-for-in": ["warn"],
     "no-console": ["warn"],
     "semi": ["error", "always"],
