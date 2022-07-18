@@ -56,19 +56,19 @@ jobs:
       matrix:
         include:
           - os: windows-2022
-            key: hyperdrive-node14-win-x64-${{ github.sha }}
+            key: hyperdrive-${{ matrix.node-version }}-win-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
             result: hyperdrive-win-x64-${{ github.ref_name }}.exe
           - os: windows-2022
-            key: hyperdrive-node14-win-arm64-${{ github.sha }}
+            key: hyperdrive-${{ matrix.node-version }}-win-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
             result: hyperdrive-win-arm64-${{ github.ref_name }}.exe
           - os: macos-11
-            key: hyperdrive-node14-macos-x64-${{ github.sha }}
+            key: hyperdrive-${{ matrix.node-version }}-macos-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             certificate-data: APPLE_CERT_DATA
             certificate-password: APPLE_CERT_PASSWORD
@@ -79,7 +79,7 @@ jobs:
             options: --options runtime --entitlements entitlements.xml
             result: hyperdrive-macos-x64-${{ github.ref_name }}
           - os: macos-11
-            key: hyperdrive-node14-macos-arm64-${{ github.sha }}
+            key: hyperdrive-${{ matrix.node-version }}-macos-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             certificate-data: APPLE_CERT_DATA
             certificate-password: APPLE_CERT_PASSWORD
@@ -90,11 +90,11 @@ jobs:
             options: --options runtime --entitlements entitlements.xml
             result: hyperdrive-macos-arm64-${{ github.ref_name }}
           - os: ubuntu-20.04
-            key: hyperdrive-node14-linux-x64-${{ github.sha }}
+            key: hyperdrive-${{ matrix.node-version }}-linux-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             result: hyperdrive-linux-x64-${{ github.ref_name }}
           - os: ubuntu-20.04
-            key: hyperdrive-node14-linux-arm64-${{ github.sha }}
+            key: hyperdrive-${{ matrix.node-version }}-linux-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             result: hyperdrive-linux-arm64-${{ github.ref_name }}
 
