@@ -16,8 +16,8 @@ class Plugin {
   constructor(plugin, root, org = null, version = 'latest', scripts = '../scripts') {
     // Probably a bunch of stuff to bootstrap config.
 
-    const pluginSplit = plugin.split('@');
-    this.pluginName = pluginSplit[0] === '' ? `@${pluginSplit[1]}` : pluginSplit[0];
+    const nameVersion = this.mungeVersion(plugin);
+    this.pluginName = nameVersion.name;
     this.namespace = org;
     this.scripts = scripts;
     // @todo: must pass in the best default for user's release channel for `version` variable.
@@ -29,9 +29,10 @@ class Plugin {
     const pjsonPath = `${this.path}/package.json`;
     this.isInstalled = fs.existsSync(pjsonPath);
     this.pjson = this.isInstalled ? this.load() : {};
+
     // Was version passed as part of the package name?
-    if (plugin.slice(1).match('/([^@]+$)/') !== null) {
-      this.version = plugin.slice(1).match('/([^@]+$)/');
+    if (nameVersion.version) {
+      this.version = nameVersion.version;
     // Or should we use the installed version?
     } else if (this.isInstalled) {
       this.version = this.pjson.version;
@@ -64,58 +65,51 @@ class Plugin {
   }
 
   /**
-   * Remove a plugin.
    *
+   * Separate a provided plugin's name and version strings.
+   *
+   * @param {string} name A string containing the name and optional version info for a plugin.
    */
-  remove() {
-    return fs.rmSync(this.path, {recursive: true});
+  static mungeVersion(name) {
+    let nameVersion = {};
+    nameVersion.version = name.slice(1).match('([^@]+$)')[0];
+    nameVersion.name = name.replace(`@${nameVersion.version}`, '');
+    return nameVersion;
   }
 
-  /**
-   * Get metadata on a plugin.
-   *
-   */
+  static async info(name) {
+    const {manifest} = require('pacote');
+    const nameVersion = this.mungeVersion(name);
+    const config = {
+      fullMetadata: true,
+      preferOnline: true,
+    };
+    const info = await manifest(name, config);
+    return this.formatInfo(nameVersion.name, info);
+  }
+
   async info() {
     const {manifest} = require('pacote');
-    // const opts = {
-    // Integrate config file npm section that allows you to define npmrc options to pass in to here/other npm-related commands.
-    // npm-registry-fetch commands: https://www.npmjs.com/package/npm-registry-fetch
-    // npm config: https://docs.npmjs.com/cli/v8/using-npm/config
-    /*       registry: '',
-    agent: this.config['user-agent'],
-    gzip: 'does not exist',
-    headers: 'does not exist',
-    ignoreBody: 'does not exist',
-    integrity: 'does not exist',
-    mapJSON: 'does not exist',
-    maxSockets: this.config['maxsockets'],
-    method: 'does not exist',
-    npmSession: 'does not exist',
-    npmCommand: 'does not exist',
-    otpPrompt: 'does not exist; maybe want a default function here?',
-    // Basic auth password...I'm not sure if this is supported in modern npm config
-    password: this.config['_auth'],
-    query: 'does not exist',
-    retry: 'does not exist; this is just an object-value alternative to pass in values provided a single properties by config...not needed',
-    spec: 'does not exist',
-    timeout: this.config['fetch-timeout'],
-    // I think this is the correct mapping
-    _authToken: this.config['_auth'],
-    username: 'does not exist; believe basic auth is not supported in modern npm config',
-    */
-    // This is the format required for authing with an authtoken...maybe put this in a demo config file.
-    //  '//<npm.pkg.github.com>/:_authToken': 'THE AUTH TOKEN',
-    // };
     const query = `${this.pluginName}@${this.version}`;
     const config = {
       fullMetadata: true,
       preferOnline: true,
     };
     const info = await manifest(query, config);
+    return this.formatInfo(this.pluginName, info);
+  }
 
+  /**
+   * Format info returned from pacote to our desired info() elements.
+   *
+   * @param {string} name Name of the plugin.
+   * @param {object} info Return output from pacote.
+   * @returns {object}    Formatted plugin info.
+   */
+  static formatInfo(name, info) {
     return {
       // MVP plugin.yml
-      name: this.pluginName,
+      name: name,
       description: info.description,
       releaseNotesUrl: 'https://URL/to/CHANGELOG.yml',
       // @todo: should we query for this?
@@ -126,6 +120,18 @@ class Plugin {
       contributors: info.maintainers,
       keywords: info.keywords,
     };
+  }
+
+  // update(version) {
+
+  // }
+
+  /**
+   * Remove a plugin.
+   *
+   */
+  remove() {
+    return fs.rmSync(this.path, {recursive: true});
   }
 
   /**

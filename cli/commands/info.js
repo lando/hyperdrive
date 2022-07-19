@@ -54,14 +54,10 @@ class InfoCommand extends BaseCommand {
     const _ = require('lodash');
     const keys = require('all-object-keys');
     const {args, flags} = await this.parse(InfoCommand);
-    const home = this.config.home;
-    const pluginsFolder = `${home}/.lando/plugins`;
-    const config = this.config.hyperdrive.get();
-    const plugin = new Plugin(args.plugin, pluginsFolder, null, config.core['release-channel']);
-    const data = await plugin.info();
+    const data = await Plugin.info(args.plugin);
     if (flags.json) return data;
 
-    // Use key extraction logic from config.js
+    // Format data for table display.
     const tableKeys = keys(data);
     const tableRows = _(tableKeys)
     .filter(path => _.includes(tableKeys, path))
