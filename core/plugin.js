@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
@@ -28,7 +29,10 @@ class Plugin {
     this.updateAvailable = undefined;
     // @TODO: do we need this still
     // this.namespace
-    this.debug('instantiated plugin from %s with options %o', this.location, options);
+
+    // log
+    const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');
+    this.debug('instantiated %s plugin from %s with options %o', status, this.location, options);
   }
 
   // Internal method to help load config

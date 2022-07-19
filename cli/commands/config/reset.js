@@ -4,7 +4,6 @@ const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommandReset extends BaseCommand {
   static description = 'resets hyperdrive configuration to defaults';
-
   static hidden = true;
   static strict = false;
 

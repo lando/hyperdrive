@@ -10,7 +10,8 @@ class StatusCommand extends BaseCommand {
   - Docker Desktop Installed yes/no
   - Docker Desktop Version supported/unsupported
   - Can I run Docker commands?
-  - Checking health of Docker Desktop install: RAM/CPU allocations, storage available, etc.`;
+  - Checking health of Docker Desktop install: RAM/CPU allocations, storage available, etc.;
+  - Check needs update status`;
   // static hidden - false;
 
   static usage = 'stuff';

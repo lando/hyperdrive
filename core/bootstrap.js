@@ -1,5 +1,3 @@
-const findPlugins = require('./../utils/find-plugins');
-
 const Config = require('./config');
 
 class Bootstrapper {
@@ -9,12 +7,21 @@ class Bootstrapper {
   }
 
   static findPlugins(dir, depth = 1) {
-    return findPlugins(dir, depth);
+    return require('./../utils/find-plugins')(dir, depth);
+  }
+
+  static sortPlugins(plugins) {
+    return require('./../utils/sort-plugins')(plugins, {app: 1, team: 2, global: 3, core: 4});
   }
 
   // @TODO: does it make sense to also make this an instance method?
   findPlugins(dir, depth = 1) {
-    return findPlugins(dir, depth);
+    return require('./../utils/find-plugins')(dir, depth);
+  }
+
+  // @TODO: does it make sense to also make this an instance method?
+  sortPlugins(plugins) {
+    return require('./../utils/sort-plugins')(plugins, {app: 1, team: 2, global: 3, core: 4});
   }
 
   async run(config = {}) {

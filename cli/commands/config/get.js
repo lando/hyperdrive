@@ -7,13 +7,7 @@ const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommandGet extends BaseCommand {
   static description = 'gets hyperdrive configuration';
-
-  static args = [{
-    name: 'key',
-    description: 'config key(s) to get',
-    required: false,
-  }];
-
+  static usage = 'config get [<KEY> [<KEY> ...]] [-c <value>] [--debug] [--help] [--json]';
   static examples = [
     'hyperdrive config get',
     'hyperdrive config get core.telemetry --json',
@@ -21,6 +15,14 @@ class ConfigCommandGet extends BaseCommand {
     'hyperdrive config get -c config.yaml',
     'hyperdrive config get --store user',
   ]
+
+  static strict = false;
+
+  static args = [{
+    name: 'key',
+    description: 'config key(s) to get',
+    required: false,
+  }];
 
   static flags = {
     ...BaseCommand.globalFlags,
@@ -30,11 +32,9 @@ class ConfigCommandGet extends BaseCommand {
     }),
   };
 
-  static strict = false;
-  static usage = 'config get [<KEY> [<KEY> ...]] [-c <value>] [--debug] [--help] [--json]';
-
   async run() {
     // load slower modules
+    // @TODO: remove lodash in favor of mostly native
     const _ = require('lodash');
     // get args and flags
     const {argv, flags} = await this.parse(ConfigCommandGet);
