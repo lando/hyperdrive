@@ -16,7 +16,7 @@ class Plugin {
   constructor(plugin, root, org = null, version = 'latest', scripts = '../scripts') {
     // Probably a bunch of stuff to bootstrap config.
 
-    const nameVersion = this.mungeVersion(plugin);
+    const nameVersion = this.constructor.mungeVersion(plugin);
     this.pluginName = nameVersion.name;
     this.namespace = org;
     this.scripts = scripts;
@@ -50,6 +50,7 @@ class Plugin {
    */
   async add() {
     const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
+
     // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
     if (fs.existsSync(this.path)) {
       fs.rmSync(this.path, {recursive: true});
