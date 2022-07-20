@@ -1,6 +1,7 @@
 const camelcaseKeys = require('camelcase-keys');
 const fs = require('fs');
 const get = require('lodash/get');
+const has = require('lodash/has');
 const kebabcase = require('lodash/kebabCase');
 const kebabcaseKeys = require('kebabcase-keys');
 const mkdirp = require('mkdirp');
@@ -92,6 +93,7 @@ class Config extends nconf.Provider {
   // do setup and validation
   // basically do what you have to do to make sure run() will complete succesfully
   #init(options) {
+    this.debug('initializing config');
     const cached = options.cached || path.join(path.join(os.homedir(), `.${this.id}`), 'cache', 'config.json');
     const env = options.env || this.id.toUpperCase();
     const sources = options.sources || {};
@@ -196,6 +198,9 @@ class Config extends nconf.Provider {
 
   // overridden get method for easier deep path selection and key-case handling
   get(path, store, decode = true) {
+    // log the actions
+    this.debug('getting %o from %s store with decode %s', path, store ? store : 'default', decode);
+
     // start by grabbing the data set
     const data = store ? this.stores[store].get() : super.get();
     // no path, return the whole thing
@@ -211,7 +216,9 @@ class Config extends nconf.Provider {
     // otherwise return an object of many props
     const props = {};
     for (const key of this.#encode(path)) {
-      set(props, key, get(data, key));
+      if (has(data, key)) {
+        set(props, key, get(data, key));
+      }
     }
 
     // return
@@ -220,6 +227,7 @@ class Config extends nconf.Provider {
 
   // overriden save method
   save(data, store = this.managed) {
+    this.debug('saving %o to %s store', data, store);
     const dest = this.stores[store].file;
     this.#writeFile({...this.get(undefined, store, false), ...this.#encode(data)}, dest);
     this.debug('saved %o to %s', data, dest);

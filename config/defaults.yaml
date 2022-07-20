@@ -5,7 +5,9 @@ core:
 
 engines:
   # @TODO: how does this work loading wise? we need a way to translate these to absolute paths?
-  docker-desktop: core/docker-desktop
+  docker-colima: hyperdrive://core/docker-colima
+  docker-desktop: hyperdrive://core/docker-desktop
+  docker-engine: hyperdrive://core/docker-engine
 
 # @TODO: need to bump these to 3.6.6 once we release a lando with `lando hyperdrive`
 lando:

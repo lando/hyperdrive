@@ -1,4 +1,4 @@
-// const chalk = require('chalk');
+const chalk = require('chalk');
 const keys = require('all-object-keys');
 
 const {CliUx, Flags} = require('@oclif/core');
@@ -32,35 +32,38 @@ class ConfigCommandGet extends BaseCommand {
   };
 
   async run() {
-    // @TODO: what about a way to return just the value?
-    // @TODO: error if no result at all?
-    // @TODO: warning if no prop?
-
     // get args and flags
     const {argv, flags} = await this.parse(ConfigCommandGet);
     // get the hyperdrive config object
     const config = this.config.hyperdrive;
-    // get the data
-    const data = config.get(argv, flags.store, false);
+
+    // get the data, if argv has one element then use the string version
+    const paths = argv.length === 1 ? argv[0] : argv;
+    const data = config.get(paths, flags.store, false);
+
+    // if data is undefined then throw an error
+    if (argv.length > 0 && (data === undefined || data === {})) {
+      this.error('No configuration found for the given keys!', {
+        suggestions: [`Run ${chalk.magenta('hyperdrive config get')} for a full list of keys`],
+        ref: 'https://docs.lando.dev/hyperdrive/cli/config.html#get',
+        exit: 1,
+      });
+    }
 
     // if the user wants json then just return the data
     if (flags.json) return data;
 
-    // otherwise build rows for CLI table
-    const rows = keys(data).map(key => ({key, value: config.get(key, flags.store, false)}));
+    // if the data is not an object then just print the result
+    if (typeof data !== 'object' || data === null) {
+      this.log(data);
 
-    // // if we end up with nothing lets error
-    // // @TODO: improve this error eg there are a few different things that can happen
-    // // @TODO: lets also try to use some of the "advanced" error options eg suggestion/ref
-    // if (rows.length === 0) {
-    //   this.error(`could not locate properties: ${chalk.red(argv.join(' '))}`);
-    //   this.exit(2);
-    // }
-
-    this.log();
-    // @TODO: add support for table flags
-    CliUx.ux.table(rows, {key: {}, value: {}});
-    this.log();
+    // otherwise CLI table
+    } else {
+      const rows = keys(data).map(key => ({key, value: config.get(key, flags.store, false)}));
+      this.log();
+      CliUx.ux.table(rows, {key: {}, value: {}});
+      this.log();
+    }
   }
 }
 
