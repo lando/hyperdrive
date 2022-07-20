@@ -1,27 +1,19 @@
-deps:
-  packages:
-    docker-compose:
-      versions:
-        default: 1.29.2
-        preferred: ">=1.29.x && <2.x"
-        required: ">=1.x && <2.x"
-    docker-desktop:
-      versions:
-        default: 4.10.1
-        preferred: ">=4.x && <5.x"
-        required: ">=3.x && <5.x"
-    lando:
-      versions:
-        default: 4.0.0-alpha.1
-        preferred: ">=4.x"
-        required: ">=4.x"
-      requires:
-        docker-desktop: true
-        docker-compose: true
+core:
+  engine: docker-desktop
+  telemetry: true
+  release-channel: stable
+
+engines:
+  # @TODO: how does this work loading wise? we need a way to translate these to absolute paths?
+  docker-desktop: core/docker-desktop
+
+# @TODO: need to bump these to 3.6.6 once we release a lando with `lando hyperdrive`
+lando:
+  bin: lando
+  default: "3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
+  required: ">=3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
+
 npm:
 plugins:
 updates:
   notify: true
-core:
-  telemetry: true
-  release-channel: stable
