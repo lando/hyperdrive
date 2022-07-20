@@ -1,6 +1,5 @@
-const chalk = require('chalk');
-const fs = require('fs');
-const path = require('path');
+// const chalk = require('chalk');
+const keys = require('all-object-keys');
 
 const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
@@ -33,41 +32,30 @@ class ConfigCommandGet extends BaseCommand {
   };
 
   async run() {
-    // load slower modules
-    // @TODO: remove lodash in favor of mostly native
-    const _ = require('lodash');
+    // @TODO: what about a way to return just the value?
+    // @TODO: error if no result at all?
+    // @TODO: warning if no prop?
+
     // get args and flags
     const {argv, flags} = await this.parse(ConfigCommandGet);
     // get the hyperdrive config object
     const config = this.config.hyperdrive;
-
-    // throw warning (or is error better?) if config file does not exist
-    // @NOTE: do we even get here or does it fail in bootstrap?
-    if (flags.config && !fs.existsSync(path.resolve(flags.config))) {
-      this.warn(`could not locate config file at ${flags.config}`);
-    }
-
-    // start with the total data set
-    const data = flags.store ? config.stores[flags.store].get() : config.get();
+    // get the data
+    const data = config.get(argv, flags.store, false);
 
     // if the user wants json then just return the data
-    if (flags.json) return _.isEmpty(argv) ? data : _.pick(data, argv);
+    if (flags.json) return data;
 
-    // otherwise print a CLI table
-    const keys = _.isEmpty(argv) ? config.getPaths(flags.store) : argv;
-    const rows = _(config.getPaths(flags.store))
-    .filter(path => _.includes(keys, path))
-    .map(path => ({key: path, value: _.get(data, path)}))
-    .sortBy('key', 'DESC')
-    .value();
+    // otherwise build rows for CLI table
+    const rows = keys(data).map(key => ({key, value: config.get(key, flags.store, false)}));
 
-    // if we end up with nothing lets error
-    // @TODO: improve this error eg there are a few different things that can happen
-    // @TODO: lets also try to use some of the "advanced" error options eg suggestion/ref
-    if (_.isEmpty(rows)) {
-      this.error(`could not locate properties: ${chalk.red(argv.join(' '))}`);
-      this.exit(2);
-    }
+    // // if we end up with nothing lets error
+    // // @TODO: improve this error eg there are a few different things that can happen
+    // // @TODO: lets also try to use some of the "advanced" error options eg suggestion/ref
+    // if (rows.length === 0) {
+    //   this.error(`could not locate properties: ${chalk.red(argv.join(' '))}`);
+    //   this.exit(2);
+    // }
 
     this.log();
     // @TODO: add support for table flags

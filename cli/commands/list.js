@@ -1,6 +1,7 @@
 const {BaseCommand} = require('../lib/base-command');
 const {CliUx, Flags} = require('@oclif/core');
 const Plugin = require('./../../core/plugin');
+const Lando = require('./../../core/lando');
 
 class ListCommand extends BaseCommand {
   static description = 'gets plugins for given context';
@@ -26,18 +27,15 @@ class ListCommand extends BaseCommand {
     // get args and flags
     const {flags} = await this.parse(ListCommand);
     // get helpers
+    const config = this.config.hyperdrive;
     const {findPlugins, sortPlugins} = this.config.Bootstrapper;
+    const lando = new Lando({...config.get('core'), ...config.get('lando')});
 
-    // @TODO: move this into lando class
     // @TODO: if lando is installed then get its config
-    // @TODO: add try/catch in the lando class
-    const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
-    const {stdout} = await execa('lando', ['hyperdrive']);
-    const landoConfig = JSON.parse(stdout);
-    this.debug('acquired lando configuration %o', landoConfig);
+    this.debug('acquired lando configuration %o', lando.config);
 
     // scan any lando provided global directories for additional plugins
-    const globalPluginDirs = landoConfig.pluginDirs
+    const globalPluginDirs = lando.config.pluginDirs
     .filter((dir => dir.type === 'global'))
     .map(dir => findPlugins(dir.dir, dir.depth))
     .flat(Number.POSITIVE_INFINITY);
@@ -59,7 +57,7 @@ class ListCommand extends BaseCommand {
     // merge in app plugin stuff?
 
     // concat our plugins together, sort them and make them ready for display
-    const plugins = _(sortPlugins([...landoConfig.plugins, ...globalPlugins]))
+    const plugins = _(sortPlugins([...lando.config.plugins, ...globalPlugins]))
     .map((plugins, name) => ({...plugins[0], name}))
     .map(plugin => _.pick(plugin, ['name', 'package', 'type', 'location', 'version', 'isValid', 'isHidden', 'deprecated']))
     .sortBy('name')
