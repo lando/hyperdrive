@@ -5,6 +5,14 @@ const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommandSet extends BaseCommand {
   static description = 'sets hyperdrive configuration';
+  static usage = 'config set [<KEY=VALUE> [<KEY=VALUE> ...]] [-c <value>] [--debug] [--help] [--json]';
+  static examples = [
+    'hyperdrive config set core.telemetry=false',
+    'hyperdrive config set core.telemetry=false updates.notify=false',
+    'hyperdrive config set -c test.yaml',
+  ];
+
+  static strict = false;
 
   static args = [{
     name: 'key',
@@ -12,19 +20,9 @@ class ConfigCommandSet extends BaseCommand {
     required: false,
   }];
 
-  static examples = [
-    'hyperdrive config set core.telemetry=false',
-    'hyperdrive config set core.telemetry=false updates.notify=false',
-    'hyperdrive config set -c test.yaml',
-  ];
-
   static flags = {
     ...BaseCommand.globalFlags,
   };
-
-  static strict = false;
-
-  static usage = 'config set [<KEY=VALUE> [<KEY=VALUE> ...]] [-c <value>] [--debug] [--help] [--json]';
 
   async run() {
     // load slower modules

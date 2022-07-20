@@ -41,7 +41,7 @@ class AddCommand extends PluginCommand {
     const scripts = path.join(this.config.dataDir, 'scripts');
     const home = this.config.home;
     moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
-    const pluginsFolder = `${home}/.lando/plugins`;
+    const dest = `${home}/.lando/plugins`;
 
     // @todo: context detection. If we're in a Lando app, we'll add the plugin
     // to that app. We'll need to create a @lando/bootstrap package that will
@@ -59,8 +59,7 @@ class AddCommand extends PluginCommand {
       // Run docker commands to install plugins.
       try {
         await map(argv, function(pluginName) {
-          const plugin = new Plugin(pluginName, pluginsFolder, null, 'latest', scripts);
-          return plugin.add();
+          return Plugin.add(pluginName, dest, scripts);
         });
         CliUx.ux.action.stop('Install successful.');
       } catch (error) {
