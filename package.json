@@ -75,6 +75,7 @@
     "bin": "hyperdrive",
     "dirname": "hyperdrive",
     "commands": "./cli/commands",
+    "helpClass": "./core/help",
     "hooks": {
       "config": [
         "./cli/hooks/config.js"

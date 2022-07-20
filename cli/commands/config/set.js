@@ -1,6 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-
 const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommandSet extends BaseCommand {
@@ -25,18 +22,11 @@ class ConfigCommandSet extends BaseCommand {
   };
 
   async run() {
-    // load slower modules
-    const _ = require('lodash');
+    const set = require('lodash/set');
     // get args and flags
     const {argv, flags} = await this.parse(ConfigCommandSet);
     // get the hyperdrive config object
     const config = this.config.hyperdrive;
-
-    // throw warning (or is error better?) if config file does not exist
-    // @NOTE: do we even get here or does it fail in bootstrap?
-    if (flags.config && !fs.existsSync(path.resolve(flags.config))) {
-      this.warn(`could not locate config file at ${flags.config}`);
-    }
 
     // start with data from file or empty
     const data = config.stores.overrides ? config.stores.overrides.get() : {};
@@ -44,7 +34,7 @@ class ConfigCommandSet extends BaseCommand {
     for (const arg of argv) {
       const path = arg.split('=')[0];
       const value = arg.split('=')[1];
-      if (arg.split('=').length === 2) _.set(data, path, value);
+      if (arg.split('=').length === 2) set(data, path, value);
     }
 
     // save result

@@ -4,21 +4,17 @@ const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommandReset extends BaseCommand {
   static description = 'resets hyperdrive configuration to defaults';
-  static hidden = true;
+  static hidden = true
   static strict = false;
 
   async run() {
-    const _ = require('lodash');
-
-    // get list of files to remove
-    const files = _(this.config.hyperdrive.stores)
-    .filter(store => store.type === 'file')
-    .map(store => store.file)
-    .value();
-
-    // remove them
-    for (const file of files) {
-      fs.unlinkSync(file);
+    const stores = this.config.hyperdrive.stores;
+    for (const store in stores) {
+      if (stores[store] && stores[store].type === 'file') {
+        const file = stores[store].file;
+        this.debug('resetting config at %s', file);
+        fs.unlinkSync(file);
+      }
     }
   }
 }
