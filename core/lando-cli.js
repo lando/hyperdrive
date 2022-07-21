@@ -29,11 +29,13 @@ class LandoCLI {
 
     // props to determine status
     this.isInstalled = fs.existsSync(this.bin);
-    this.version = this.isInstalled ? this.#getVersion() : undefined;
-    this.isSupported = this.isInstalled &&  satisfies(this.version, this.requiredVersion);
 
-    // get config directly from lando if we can
-    const config = this.isSupported ? this.#load() : {};
+    // @TODO because lando 3.x is slow we are going to use this.#load() instead of the usual pattern of
+    // getting the version first and loading if we have a supported version
+    const config = this.isInstalled ? this.#load() : {};
+    this.version = config ? config.version : undefined;
+    this.isSupported = this.isInstalled && satisfies(this.version, this.requiredVersion);
+
     // set the relevant lando config hyperdrive needs
     this.landofile = config.landofile || '.lando';
     this.landofiles = config.landofiles ? config.landofiles.map(file => `${this.landofile}${file}`) : [this.landofile];

@@ -26,6 +26,7 @@ class ListCommand extends BaseCommand {
     const {flags} = await this.parse(ListCommand);
     // get helpers
     const config = this.config.hyperdrive;
+
     const lando = new LandoCLI({...config.get('core'), ...config.get('lando')});
 
     // @TODO: if lando is not installed or is unsupported then throw an error?
