@@ -21,7 +21,7 @@ class ListCommand extends BaseCommand {
 
   async run() {
     // modes
-    const sortBy = require('lodash/sortby');
+    const sortBy = require('lodash/sortBy');
     // get args and flags
     const {flags} = await this.parse(ListCommand);
     // get helpers
