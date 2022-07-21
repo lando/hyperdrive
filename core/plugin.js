@@ -62,10 +62,12 @@ class Plugin {
    * @returns
    */
   static async add(name, dest, scripts) {
-    const {execa} = await import('execa'); // eslint-disable-line node/no-unsupported-features/es-syntax
     const mkdirp = require('mkdirp');
     const nameVersion = this.mungeVersion(name);
     const pluginPath = `${dest}/${nameVersion.name}`;
+    // @todo: presumably we'll want to bootstrap an engine generically.
+    const DockerEngine = require('../core/docker-engine');
+    const engine = new DockerEngine();
 
     // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
     if (fs.existsSync(pluginPath)) {
@@ -73,10 +75,32 @@ class Plugin {
     }
 
     mkdirp.sync(pluginPath);
-    const run = execa('docker', ['run', '--rm', '-v', `${pluginPath}:/plugins/${nameVersion.name}`, '-v', `${scripts}:/scripts`, '-w', '/tmp', 'node:14-alpine', 'sh', '-c', `/scripts/add.sh ${nameVersion.name} ${nameVersion.version}`]);
-    run.stdout.on('data', buffer => {
-      const debug = require('debug')(`add-${nameVersion.name}:@lando/hyperdrive`);
-      debug(String(buffer));
+    const plugin = {
+      ...nameVersion,
+      scripts: scripts,
+      path: pluginPath
+    };
+    const run = engine.addPlugin(plugin);
+  }
+
+  async add() {
+    // @todo: presumably we'll want to bootstrap an engine generically.
+    const DockerEngine = require('../core/docker-engine');
+    const engine = new DockerEngine();
+
+    // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
+    if (fs.existsSync(pluginPath)) {
+      fs.rmSync(pluginPath, {recursive: true});
+    }
+
+    mkdirp.sync(this.path);
+    const run = engine.addPlugin(this);
+    run[1].attach({stream: true, stdout: true, stderr: true}, function (err, stream) {
+      console.log(err, stream);
+      stream.on('data', buffer => {
+        const debug = require('debug')(`add-${this.name}:@lando/hyperdrive`);
+        debug(String(buffer));
+      });
     });
     return run;
   }
@@ -89,8 +113,15 @@ class Plugin {
    */
   static mungeVersion(name) {
     let nameVersion = {};
-    nameVersion.version = name.slice(1).match('([^@]+$)')[0];
-    nameVersion.name = name.replace(`@${nameVersion.version}`, '');
+    nameVersion.version = name.match('(?:[^@]*@\s*){2}(.*)');
+    if (nameVersion.version === null) {
+      nameVersion.version = '';
+      nameVersion.name = name;
+    } else {
+      nameVersion.version = nameVersion.version[1];
+      nameVersion.name = name.replace(`@${nameVersion.version}`, '');
+    }
+    console.log(nameVersion);
     return nameVersion;
   }
 
@@ -107,13 +138,13 @@ class Plugin {
 
   async info() {
     const {manifest} = require('pacote');
-    const query = `${this.pluginName}@${this.version}`;
+    const query = `${this.name}@${this.version}`;
     const config = {
       fullMetadata: true,
       preferOnline: true,
     };
     const info = await manifest(query, config);
-    return this.formatInfo(this.pluginName, info);
+    return this.formatInfo(this.name, info);
   }
 
   /**
