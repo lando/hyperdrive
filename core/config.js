@@ -23,7 +23,7 @@ class Config extends nconf.Provider {
     // properties
     this.managed = options.managed || 'system';
     // namespaces utils
-    this.debug = require('debug')(`config:${this.id}`);
+    this.debug = require('debug')(`${this.id}:@lando/core:config`);
     // Then run our own init
     this.#init(options);
   }

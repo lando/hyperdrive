@@ -1,7 +1,13 @@
 core:
-  engine: docker-desktop
+  engine:
+    use: docker-desktop
+    config:
+  id: hyperdrive
+  product: hyperdrive
   telemetry: true
   release-channel: stable
+
+debug: false
 
 engines:
   # @TODO: how does this work loading wise? we need a way to translate these to absolute paths?
