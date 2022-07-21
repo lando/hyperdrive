@@ -1,6 +1,5 @@
 const chalk = require('chalk');
-const fs = require('fs');
-const path = require('path');
+const keys = require('all-object-keys');
 
 const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
@@ -33,46 +32,38 @@ class ConfigCommandGet extends BaseCommand {
   };
 
   async run() {
-    // load slower modules
-    // @TODO: remove lodash in favor of mostly native
-    const _ = require('lodash');
     // get args and flags
     const {argv, flags} = await this.parse(ConfigCommandGet);
     // get the hyperdrive config object
     const config = this.config.hyperdrive;
 
-    // throw warning (or is error better?) if config file does not exist
-    // @NOTE: do we even get here or does it fail in bootstrap?
-    if (flags.config && !fs.existsSync(path.resolve(flags.config))) {
-      this.warn(`could not locate config file at ${flags.config}`);
-    }
+    // get the data, if argv has one element then use the string version
+    const paths = argv.length === 1 ? argv[0] : argv;
+    const data = config.get(paths, flags.store, false);
 
-    // start with the total data set
-    const data = flags.store ? config.stores[flags.store].get() : config.get();
+    // if data is undefined then throw an error
+    if (argv.length > 0 && (data === undefined || data === {})) {
+      this.error('No configuration found for the given keys!', {
+        suggestions: [`Run ${chalk.magenta('hyperdrive config get')} for a full list of keys`],
+        ref: 'https://docs.lando.dev/hyperdrive/cli/config.html#get',
+        exit: 1,
+      });
+    }
 
     // if the user wants json then just return the data
-    if (flags.json) return _.isEmpty(argv) ? data : _.pick(data, argv);
+    if (flags.json) return data;
 
-    // otherwise print a CLI table
-    const keys = _.isEmpty(argv) ? config.getPaths(flags.store) : argv;
-    const rows = _(config.getPaths(flags.store))
-    .filter(path => _.includes(keys, path))
-    .map(path => ({key: path, value: _.get(data, path)}))
-    .sortBy('key', 'DESC')
-    .value();
+    // if the data is not an object then just print the result
+    if (typeof data !== 'object' || data === null) {
+      this.log(data);
 
-    // if we end up with nothing lets error
-    // @TODO: improve this error eg there are a few different things that can happen
-    // @TODO: lets also try to use some of the "advanced" error options eg suggestion/ref
-    if (_.isEmpty(rows)) {
-      this.error(`could not locate properties: ${chalk.red(argv.join(' '))}`);
-      this.exit(2);
+    // otherwise CLI table
+    } else {
+      const rows = keys(data).map(key => ({key, value: config.get(key, flags.store, false)}));
+      this.log();
+      CliUx.ux.table(rows, {key: {}, value: {}});
+      this.log();
     }
-
-    this.log();
-    // @TODO: add support for table flags
-    CliUx.ux.table(rows, {key: {}, value: {}});
-    this.log();
   }
 }
 

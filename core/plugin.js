@@ -10,11 +10,11 @@ class Plugin {
   /**
    * @TODO: scripts shoudl be moved into the engine constructor
    */
-  constructor(dir, options = {}) {
-    // @TODO: should we break this.options up into relevant things eg this.channel = options.channel || 'stable'?
+  constructor({dir, type = 'app', releaseChannel = 'stable'} = {}) {
     // core props
     this.location = dir;
-    this.options = options;
+    this.type = type;
+    this.channel = releaseChannel;
     // config props
     this.pjson = require(path.join(dir, 'package.json'));
     this.config = {...this.pjson.lando, ...this.#load()};
@@ -32,7 +32,7 @@ class Plugin {
 
     // log
     const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');
-    this.debug('instantiated %s plugin from %s with options %o', status, this.location, options);
+    this.debug('instantiated %s plugin from %s', status, this.location);
   }
 
   // Internal method to help load config
@@ -185,14 +185,6 @@ class Plugin {
   // update(version) {
 
   // }
-
-  /**
-   * Remove a plugin.
-   *
-   */
-  remove() {
-    return fs.rmSync(this.path, {recursive: true});
-  }
 
   /**
    * Get metadata on a plugin.

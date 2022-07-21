@@ -1,11 +1,14 @@
-// debug should be on this?
+const camelcaseKeys = require('camelcase-keys');
 const fs = require('fs');
 const get = require('lodash/get');
-const keys = require('all-object-keys');
+const has = require('lodash/has');
+const kebabcase = require('lodash/kebabCase');
+const kebabcaseKeys = require('kebabcase-keys');
 const mkdirp = require('mkdirp');
 const nconf = require('nconf');
 const os = require('os');
 const path = require('path');
+const set = require('lodash/set');
 const yaml = require('js-yaml');
 
 // add custom yaml format
@@ -23,6 +26,25 @@ class Config extends nconf.Provider {
     this.debug = require('debug')(`config:${this.id}`);
     // Then run our own init
     this.#init(options);
+  }
+
+  // this.#decode
+  #decode(data) {
+    return camelcaseKeys(data, {deep: true});
+  }
+
+  // this.#decode
+  #encode(data) {
+    // transform to array if string
+    if (typeof data === 'string') data = [data];
+
+    // if array then map and return
+    if (Array.isArray(data)) {
+      return data.map(prop => prop.split('.').map(part => kebabcase(part)).join('.'));
+    }
+
+    // else assume object and return
+    return kebabcaseKeys(data, {deep: true});
   }
 
   // check to see if YAML or JSON
@@ -71,6 +93,7 @@ class Config extends nconf.Provider {
   // do setup and validation
   // basically do what you have to do to make sure run() will complete succesfully
   #init(options) {
+    this.debug('initializing config');
     const cached = options.cached || path.join(path.join(os.homedir(), `.${this.id}`), 'cache', 'config.json');
     const env = options.env || this.id.toUpperCase();
     const sources = options.sources || {};
@@ -173,21 +196,40 @@ class Config extends nconf.Provider {
     if (this.stores.user.store === null) this.stores.user.store = {};
   }
 
-  // overridden get method for easier deep path selection
-  get(path) {
-    if (path) return get(super.get(), path);
-    return super.get();
-  }
+  // overridden get method for easier deep path selection and key-case handling
+  get(path, store, decode = true) {
+    // log the actions
+    this.debug('getting %o from %s store with decode %s', path, store ? store : 'default', decode);
 
-  // helper to get an array of all config paths
-  getPaths(store) {
-    return store ? keys(this.stores[store].get()) : keys(this.get());
+    // start by grabbing the data set
+    const data = store ? this.stores[store].get() : super.get();
+    // no path, return the whole thing
+    if (path === null || path === undefined || path.length === 0) {
+      return decode ? this.#decode(data) : data;
+    }
+
+    // if we have path that is a string then just return the value
+    if (typeof path === 'string') {
+      return decode ? this.#decode(get(data, path)) : get(data, path);
+    }
+
+    // otherwise return an object of many props
+    const props = {};
+    for (const key of this.#encode(path)) {
+      if (has(data, key)) {
+        set(props, key, get(data, key));
+      }
+    }
+
+    // return
+    return decode ? this.#decode(props) : props;
   }
 
   // overriden save method
   save(data, store = this.managed) {
+    this.debug('saving %o to %s store', data, store);
     const dest = this.stores[store].file;
-    this.#writeFile({...this.stores[store].get(), ...data}, dest);
+    this.#writeFile({...this.get(undefined, store, false), ...this.#encode(data)}, dest);
     this.debug('saved %o to %s', data, dest);
   }
 }

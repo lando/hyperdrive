@@ -6,9 +6,19 @@ class Bootstrapper {
     this.config = new Config(options);
   }
 
+  // recurse up from given directory until you find a given file?
+  // static findApp(dir, depth = 1) {
+
+  // }
+
   static findPlugins(dir, depth = 1) {
     return require('./../utils/find-plugins')(dir, depth);
   }
+
+  // assemble app configuration using ordered list of files
+  // static getAppConfig(dir, depth = 1) {
+
+  // }
 
   static sortPlugins(plugins) {
     return require('./../utils/sort-plugins')(plugins, {app: 1, team: 2, global: 3, core: 4});
