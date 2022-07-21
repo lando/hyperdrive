@@ -6,8 +6,8 @@ class Bootstrapper {
     this.config = new Config(options);
   }
 
-  // recurse up from given directory until you find a given file?
-  // static findApp(dir, depth = 1) {
+  // recurse up from given directory until you find a given landofile?
+  // static findApp(file = '.lando.yml') {
 
   // }
 
@@ -37,6 +37,8 @@ class Bootstrapper {
   async run(config = {}) {
     // add the main config class to the OCLIF config
     config.hyperdrive = this.config;
+    // set the core debug flag
+    config.debug = ['1', 'true'].includes(this.config.get('debug')) ? true : this.config.get('debug');
     // mix in some additional and helpful config
     // the environment we are running in
     config.env = Object.hasOwn(process, 'pkg') ? 'prod' : 'dev';
@@ -47,8 +49,13 @@ class Bootstrapper {
     // is running from a binary packaged up by @vercel/pkg
     config.packaged = Object.hasOwn(process, 'pkg');
     // just some other identifiers
-    config.id = 'hyperdrive';
-    config.product = 'hyperdrive';
+    config.id = this.config.get('core.id') || 'hyperdrive';
+    config.product = this.config.get('core.product') || 'hyperdrive';
+    config.namespace = this.config.get('core.namespace') || `${config.product}:${config.name}`;
+
+    // enable debugging if the config is set
+    // @NOTE: this is only for debug=true set via the configfile, the --debug turns debugging on before this
+    if (config.debug) require('debug').enable(config.debug === true ? '*' : config.debug);
   }
 }
 

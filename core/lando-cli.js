@@ -19,9 +19,9 @@ class LandoCLI {
   /**
    * @TODO: options? channel?
    */
-  constructor({bin = defaultBin, releaseChannel = 'stable', installDefault, requiredVersion} = {}) {
+  constructor({bin = defaultBin, releaseChannel = 'stable', id, installDefault, requiredVersion} = {}) {
     // set top level props
-    this.debug = require('debug')('deps:lando-cli');
+    this.debug = require('debug')(`${id}:@lando/core:deps:lando-cli`);
     this.bin = path.isAbsolute(bin) ? bin : which.sync('lando', {nothrow: true});
     this.channel = releaseChannel;
     this.installDefault = installDefault;
@@ -43,7 +43,7 @@ class LandoCLI {
     const otherPlugins = this.pluginDirs
     .filter(dir => dir.type !== 'core')
     .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
-    .map(dirs => dirs.dirs.map(dir => new Plugin({dir, type: dirs.type})))
+    .map(dirs => dirs.dirs.map(dir => new Plugin({dir, id: 'lando-cli', type: dirs.type})))
     .flat(Number.POSITIVE_INFINITY);
     // concat all plugins together
     this.plugins = [...config.plugins, ...otherPlugins];

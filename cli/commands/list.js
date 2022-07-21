@@ -42,6 +42,10 @@ class ListCommand extends BaseCommand {
     // remember that we need to load the main landofile first to get additional landofiles and hten bootsrap
     // the landofile config?
     // merge in app plugin stuff?
+    // console.log(lando.landofile)
+    // console.log(lando.landofiles)
+    // // @TODO: determine what the requirements are for "app found", any landofile? just .lando.yml?
+    // process.exit(1)
 
     // filter out invalid and hidden plugins
     const rows = sortBy(plugins.filter(plugin => plugin.isValid && !plugin.isHidden), 'name');

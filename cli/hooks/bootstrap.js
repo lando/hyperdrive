@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const debug = require('debug')('init:@lando/hyperdrive');
+const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:init');
 const path = require('path');
 
 const {BaseCommand} = require('./../lib/base-command');
