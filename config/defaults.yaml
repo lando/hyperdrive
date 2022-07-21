@@ -12,8 +12,9 @@ engines:
 # @TODO: need to bump these to 3.6.6 once we release a lando with `lando hyperdrive`
 lando:
   bin: lando
-  default: "3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
-  required: ">=3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
+  install-default: "3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
+  # @NOTE: below uses the satisfies syntax from https://www.npmjs.com/package/semver
+  required-version: ">=3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
 
 npm:
 plugins:

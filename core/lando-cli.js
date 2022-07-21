@@ -1,63 +1,85 @@
+const chalk = require('chalk');
+const findPlugins = require('./../utils/find-plugins');
 const fs = require('fs');
 const path = require('path');
 const which = require('which');
 
-const defaultBin = process.platform === 'win32' ? 'lando' : '/usr/local/bin/lando';
 const {execSync} = require('child_process');
+const {satisfies} = require('semver');
+
+const Plugin = require('./plugin');
+
+const defaultBin = process.platform === 'win32' ? 'lando' : '/usr/local/bin/lando';
+const execSyncOpts = {maxBuffer: 1024 * 1024 * 10, encoding: 'utf-8'};
 
 /**
  *
  */
-class Lando {
+class LandoCLI {
   /**
    * @TODO: options? channel?
    */
-  constructor({bin = defaultBin, releaseChannel = 'stable'} = {}) {
-    // independent props
-    this.debug = require('debug')('deps:lando');
-
-    // set top level options
+  constructor({bin = defaultBin, releaseChannel = 'stable', installDefault, requiredVersion} = {}) {
+    // set top level props
+    this.debug = require('debug')('deps:lando-cli');
     this.bin = path.isAbsolute(bin) ? bin : which.sync('lando', {nothrow: true});
     this.channel = releaseChannel;
-    // @TODO: options? channel?
-    // this.options = options;
+    this.installDefault = installDefault;
+    this.requiredVersion = requiredVersion;
 
-    // compute isInstalled and try to grab config
+    // props to determine status
     this.isInstalled = fs.existsSync(this.bin);
-    this.config = this.isInstalled ? this.#load() : {};
+    this.version = this.isInstalled ? this.#getVersion() : undefined;
+    this.isSupported = this.isInstalled &&  satisfies(this.version, this.requiredVersion);
 
-    // compute additional properties
-    // this.isSupportedVersion =
+    // get config directly from lando if we can
+    const config = this.isSupported ? this.#load() : {};
+    // set the relevant lando config hyperdrive needs
+    this.landofile = config.landofile || '.lando';
+    this.landofiles = config.landofiles ? config.landofiles.map(file => `${this.landofile}${file}`) : [this.landofile];
+    this.pluginDirs = config.pluginDirs || [];
 
-    // if this.config is not set then run execa to get it
+    // discover other plugins
+    const otherPlugins = this.pluginDirs
+    .filter(dir => dir.type !== 'core')
+    .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
+    .map(dirs => dirs.dirs.map(dir => new Plugin({dir, type: dirs.type})))
+    .flat(Number.POSITIVE_INFINITY);
+    // concat all plugins together
+    this.plugins = [...config.plugins, ...otherPlugins];
 
-    // then set other stuff with config
-    // this.version
-    // this.landofile
-    // this.landofiles
-    // this.pluginDirs
-    // this.plugins
-
-    // config props
-    // set top level things
-    // add some computed properties
+    // additional props
     this.updateAvailable = undefined;
-    // @TODO: do we need this still
-    // this.namespace
 
     // log
-    // const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');
-    // this.debug('instantiated %s plugin from %s with options %o', status, this.location);
+    const status = this.isSupported ? chalk.green('supported') : chalk.red('not supported');
+    this.debug('instantiated lando-cli version %s (%s), using %s', this.version, status, this.bin);
+  }
+
+  // Internal method to help load config
+  #getVersion() {
+    try {
+      return execSync(`${this.bin} version`, execSyncOpts).trim().slice(1);
+    } catch {
+      this.debug('could not parse output from "%s version" correctly');
+      return false;
+    }
   }
 
   // Internal method to help load config
   #load() {
     try {
-      return JSON.parse(execSync(`${this.bin} hyperdrive`, {maxBuffer: 1024 * 1024 * 10, encoding: 'utf-8'}));
+      return JSON.parse(execSync(`${this.bin} hyperdrive`, execSyncOpts));
     } catch {
       this.debug('could not parse output from "%s hyperdrive" correctly');
       return false;
     }
+  }
+
+  // helper to return plugins optionally by type
+  getPlugins(type) {
+    if (type) return this.plugins.filter(plugin => plugin.type === type);
+    return this.plugins;
   }
 
   /**
@@ -153,4 +175,4 @@ class Lando {
   // }
 }
 
-module.exports = Lando;
+module.exports = LandoCLI;
