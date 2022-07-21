@@ -1,3 +1,4 @@
+const { string } = require('@oclif/core/lib/flags');
 const { flagUsage } = require('@oclif/core/lib/parser/help');
 const Dockerode = require('dockerode');
 
@@ -38,15 +39,15 @@ class DockerEngine extends Dockerode {
       }).on('stream', function (stream) {
         stream.on('data', buffer => {
           // @todo: way to clean the output up?
-          const debug = require('debug')(`hyperdrive:engine:${plugin.name}`);
-          debug(String(buffer));
+          if (buffer.toString() !== "\u001b[1G\u001b[0K") {
+            const debug = require('debug')(`engine:@lando/hyperdrive`);
+            debug(String(buffer));
+          }
         });
       });
     } catch (error) {
       console.log(error);
     }
-
-    //super.run('node:14-alpine', ['sh', '-c', `/scripts/add.sh ${plugin.name}@${plugin.version} ${plugin.name}`], null, createOptions, function(data) {
   }
 
   /**
