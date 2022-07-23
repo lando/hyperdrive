@@ -70,7 +70,7 @@ class Config extends nconf.Provider {
     case '.yml':
       return yaml.load(fs.readFileSync(file, 'utf8'));
     case '.js':
-      return (typeof require(file) === 'function') ? require(file)(this.options) : require(file);
+      return (typeof require(file) === 'function') ? require(file)(this) : require(file);
     case '.json':
       return require(file);
     }
@@ -189,13 +189,13 @@ class Config extends nconf.Provider {
 
     // The YAML spec returns null for an empty yaml document but for merging purposes we want this to be an empty
     // object so lets transform that here
-    if (this.stores.user.store === null) this.stores.user.store = {};
+    if (this.stores.user && this.stores.user.store === null) this.stores.user.store = {};
   }
 
   // overridden get method for easier deep path selection and key-case handling
   get(path, store, decode = true) {
     // log the actions
-    this.debug('getting %o from %s store with decode %s', path, store ? store : 'default', decode);
+    this.debug('getting %o from %s store with decode %s', path || 'everything', store ? store : 'default', decode);
 
     // start by grabbing the data set
     const data = store ? this.stores[store].get() : super.get();
