@@ -35,10 +35,16 @@ class Bootstrapper {
   }
 
   async run(config = {}) {
-    // add the main config class to the OCLIF config
-    config.hyperdrive = this.config;
+    // just some other identifiers
+    config.id = this.config.get('core.id') || config.bin || config.dirname;
+    config.product = this.config.get('core.product') || config.bin || config.dirname;
+
     // set the core debug flag
-    config.debug = ['1', 'true'].includes(this.config.get('debug')) ? true : this.config.get('debug');
+    config.debug = ['1', 'true'].includes(this.config.get('core.debug')) ? true : this.config.get('core.debug');
+    // enable debugging if the config is set
+    // @NOTE: this is only for debug=true set via the configfile, the --debug turns debugging on before this
+    if (config.debug) require('debug').enable(config.debug === true ? '*' : config.debug);
+
     // mix in some additional and helpful config
     // the environment we are running in
     config.env = Object.hasOwn(process, 'pkg') ? 'prod' : 'dev';
@@ -48,14 +54,9 @@ class Bootstrapper {
     config.mode = 'cli';
     // is running from a binary packaged up by @vercel/pkg
     config.packaged = Object.hasOwn(process, 'pkg');
-    // just some other identifiers
-    config.id = this.config.get('core.id') || 'hyperdrive';
-    config.product = this.config.get('core.product') || 'hyperdrive';
-    config.namespace = this.config.get('core.namespace') || `${config.product}:${config.name}`;
 
-    // enable debugging if the config is set
-    // @NOTE: this is only for debug=true set via the configfile, the --debug turns debugging on before this
-    if (config.debug) require('debug').enable(config.debug === true ? '*' : config.debug);
+    // add the main config class to the OCLIF config
+    config[config.product] = this.config;
   }
 }
 

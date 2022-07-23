@@ -1,67 +1,47 @@
-##
-#
-# User configuration file
-#
-# This is a template-generated user configuration file with some comments to help you modify it to your needs.
-# Uncomment the relevant lines and hyperdrive will use your values instead of the system ones.
-#
-# See docs.lando.dev/hyperdrive/cli/config.html for more information.
-#
-
-##
-#
-# core configuration
-#
 # core:
-#   telemetry: true | false
-#    release-channel: stable | edge
-#
+#   debug: false
+#   engine: docker-desktop
+#   id: hyperdrive
+#   lando: lando-cli
+#   product: hyperdrive
+#   release-channel: stable
+#   telemetry: true
 
-##
-# updates configuration
-#
-# updates:
-#   notify: true | false
+#   # this will force hyperdrive to use updated config from lando on every run. normally hyperdrive will use a
+#   # cached config that is generated on every lando run for version/plugin/config information.
+#   # you can use the hidden `lando --hyperdrive` command to regenerate this file.
+#   #
+#   # GENERALLY THIS IS FINE FOR MOST USE CASES.
+#   #
+#   # However, if you are running lando from source and modifying config that
+#   # hyperdrive uses, core plugin, etc it might make sense to enable this setting. Note that it comes with a ~10-20ms
+#   # performance hit and will override any app/pluginDir config you've set in hyperdrive
+#   auto-sync: false
 
-##
-# npm config
-#
+# registry:
+#   engine:
+#     # @TODO: how does this work loading wise? we need a way to translate these to absolute paths?
+#     docker-colima: hyperdrive://core/docker-colima
+#     docker-desktop: hyperdrive://core/docker-desktop
+#     docker-engine: hyperdrive://core/docker-engine
+#   lando:
+#     lando-cli: hyperdrive://core/lando-cli
+
+# docker-desktop:
+#   required-version: ">=3.6.5 && <=5.0.0"
+#   supported-version: ">=3.6.5 && <=4.10.5"
+
+# # @TODO: need to bump these to 3.6.6 once we release a lando with `lando hyperdrive`
+# lando-cli:
+#   bin: lando
+#   install-default: "3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
+#   # @NOTE: below uses the satisfies syntax from https://www.npmjs.com/package/semver
+#   required-version: ">=3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
+
 # npm:
-#   @org1:registry=https://npm.pkg.github.com
-#   @org2:registry=https://npm.pkg.github.com
-#   npm.pkg.github.com/:_authToken=MYTOKEN
 
-##
-# plugins config
-#
+# # @TODO: what goes in here?
 # plugins:
 
-##
-# deps config
-#
-# deps:
-
-# Most packages have the following options versions.default, versions.preferred, versions.required and requires.
-#
-#
-# version
-
-#   packages:
-#     docker-compose:
-#       versions
-#         default: 1.29.2
-#         preferred: ">=1.29.x && <2.x"
-#         required: ">=1.x && <2.x"
-#     docker-desktop:
-#       versions:
-#         default: 4.10.1
-#         preferred: ">=4.x && <5.x"
-#         required: ">=3.x && <5.x"
-#     lando:
-#       versions:
-#         default: 4.0.0-alpha.1
-#         preferred: ">=4.x"
-#         required: ">=4.x"
-#       requires:
-#         docker-desktop: true
-#         docker-compose: true
+# updates:
+#   notify: true
