@@ -1,3 +1,4 @@
+
 const {BaseCommand} = require('../lib/base-command');
 const {CliUx, Flags} = require('@oclif/core');
 
@@ -30,9 +31,16 @@ class ListCommand extends BaseCommand {
     // create lando cli instance by merging together various config sources
     const landoCLI = new Component({...hyperdrive.get('core'), ...cc, ...lando.get(`${cc.bin}.lando`)});
 
-    // @TODO: if lando is not installed or is unsupported then throw an error?
-    if (!landoCLI.isInstalled || !landoCLI.isSupported) {
-      this.error('make this good later!');
+    // if lando is not installed or is unsupported then throw an error?
+    // @TODO: lando should use id to reflect changes?
+    if (landoCLI.isInstalled) {
+      this.error(`${Component.name} is not installed! or cannot be detected.`, Component.notInstalledError);
+    }
+
+    // unsupported error
+    // @TODO: lando should use id to reflect changes?
+    if (landoCLI.isSupported) {
+      this.error(`${Component.name} is installed but hyperdrive needs version 3.6.5 or higher`, Component.notSupportedError);
     }
 
     // start by getting lando provided plugins

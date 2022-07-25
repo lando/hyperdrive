@@ -74,6 +74,26 @@ class LandoCLI {
     this.debug('instantiated lando-cli version %s (%s), using %s', this.version, status, this.bin);
   }
 
+  static name = 'lando';
+  static notInstalledError = {
+    suggestions: [
+      `Run ${chalk.magenta('hyperdrive install lando')} and let us install lando for you.`,
+      'Move a version of lando that you have into $PATH to help us detect it',
+      `Run ${chalk.magenta('hyperdrive config set lando-cli.bin=/path/to/my/lando')}`,
+    ],
+    ref: 'https://docs.lando.dev/getting-started/installation.html',
+    exit: 1,
+  };
+
+  static notSupportedError = {
+    suggestions: [
+      `Run ${chalk.magenta('hyperdrive update lando')} and let us update lando for you.`,
+      'Manually install the latest version of lando.',
+    ],
+    ref: 'https://docs.lando.dev/getting-started/updating.html',
+    exit: 2,
+  };
+
   // Internal method to help load config
   #load() {
     try {
