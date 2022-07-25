@@ -1,6 +1,5 @@
 const {BaseCommand} = require('../lib/base-command');
 const {CliUx, Flags} = require('@oclif/core');
-const LandoCLI = require('../../core/lando-cli');
 
 class ListCommand extends BaseCommand {
   static description = 'gets plugins for given context';
@@ -24,18 +23,20 @@ class ListCommand extends BaseCommand {
     const sortBy = require('lodash/sortBy');
     // get args and flags
     const {flags} = await this.parse(ListCommand);
-    // get helpers
-    const config = this.config.hyperdrive;
-
-    const lando = new LandoCLI({...config.get('core'), ...config.get('lando')});
+    // get needed helpers things
+    const {bootstrap, hyperdrive, lando} = this.config;
+    // get lando CLI component and config from registry
+    const {Component, cc} = bootstrap.getComponent(`lando.${hyperdrive.get('core.lando')}`);
+    // create lando cli instance by merging together various config sources
+    const landoCLI = new Component({...hyperdrive.get('core'), ...cc, ...lando.get(`${cc.bin}.lando`)});
 
     // @TODO: if lando is not installed or is unsupported then throw an error?
-    if (!lando.isInstalled || !lando.isSupported) {
+    if (!landoCLI.isInstalled || !landoCLI.isSupported) {
       this.error('make this good later!');
     }
 
     // start by getting lando provided plugins
-    const plugins = lando.getPlugins();
+    const plugins = landoCLI.getPlugins();
     this.debug('acquired lando provided plugins %o', plugins.map(plugin => `${plugin.name}@${plugin.version}`));
 
     // determine app context or not, bootsrtrap method to load in complete landofile?
@@ -48,8 +49,11 @@ class ListCommand extends BaseCommand {
     // // @TODO: determine what the requirements are for "app found", any landofile? just .lando.yml?
     // process.exit(1)
 
+    // organize plugins so that load order is reflected
+    const organizedPlugins = bootstrap.collapsePlugins(bootstrap.groupPlugins(plugins));
+
     // filter out invalid and hidden plugins
-    const rows = sortBy(plugins.filter(plugin => plugin.isValid && !plugin.isHidden), 'name');
+    const rows = sortBy(organizedPlugins.filter(plugin => plugin.isValid && !plugin.isHidden), 'name');
 
     // if JSON then return here
     if (flags.json) return rows;

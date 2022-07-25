@@ -20,7 +20,7 @@ module.exports = () => {
       // @TODO: need to bump this once we release a lando with `lando hyperdrive`
       install: '3.6.5',
       // # @TODO: need to bump this once we release a lando with `lando hyperdrive`
-      'required-version': '>=3.6.5',
+      required: '>=3.6.5',
     },
   };
 };

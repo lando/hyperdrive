@@ -5,7 +5,6 @@ const has = require('lodash/has');
 const kebabcase = require('lodash/kebabCase');
 const kebabcaseKeys = require('kebabcase-keys');
 const nconf = require('nconf');
-const os = require('os');
 const path = require('path');
 const set = require('lodash/set');
 const yaml = require('js-yaml');
@@ -101,7 +100,7 @@ class Config extends nconf.Provider {
   // @TODO: reduce complexity?
   #init(options) {
     this.debug('initializing config');
-    const cached = options.cached || path.join(path.join(os.homedir(), `.${this.id}`), 'cache', 'config.json');
+    const cached = options.cached || false;
     const env = options.env || this.id.toUpperCase();
     const sources = options.sources || {};
     const templates = options.templates || {};
