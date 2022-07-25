@@ -10,10 +10,8 @@ module.exports = (plugins, weights = {}) => {
   // group the plugins
   const groupedPlugins = groupBy(weightedPlugins, 'name');
   // loop plugins to order them correctly
-  for (const name in groupedPlugins) {
-    if (groupedPlugins[name]) {
-      groupedPlugins[name] = orderBy(groupedPlugins[name], ['weight'], ['asc']);
-    }
+  for (const [plugin, list] of Object.entries(groupedPlugins)) {
+    groupedPlugins[plugin] = orderBy(list, ['weight'], ['asc']);
   }
 
   // return

@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const debug = require('debug')('init:@lando/hyperdrive');
+const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:init');
 const path = require('path');
 
 const {BaseCommand} = require('./../lib/base-command');
@@ -12,7 +12,7 @@ module.exports = async({id, argv, config}) => {
   const {flags} = await Parser.parse(argv, {strict: false, flags: BaseCommand.globalFlags});
 
   // start the hyperdrive config by setting the default bootstrapper and its config
-  const systemTemplate = path.join(__dirname, '..', '..', 'config', 'defaults.yaml');
+  const systemTemplate = path.join(__dirname, '..', '..', 'config', 'system.js');
   const userTemplate = path.join(__dirname, '..', '..', 'config', 'user.yaml');
   const minstrapper = {
     // config: {},
@@ -21,14 +21,18 @@ module.exports = async({id, argv, config}) => {
       cached: path.join(config.cacheDir, 'config.json'),
       env: 'HYPERDRIVE',
       id: 'hyperdrive',
+      // sources are loading in increasing priority into the main config
       sources: {
         defaults: path.join(__dirname, '..', '..', 'config', 'defaults.yaml'),
-        system: path.join(config.dataDir, 'config.json'),
+        system: path.join(config.dataDir, 'system.json'),
+        managed: path.join(config.dataDir, 'managed.json'),
         user: path.join(config.configDir, 'config.yaml'),
         overrides: flags.config ? path.resolve(flags.config) : undefined,
       },
+      // templates can prepopulate or override sources before they are loaded
       templates: {
-        system: {source: systemTemplate, dest: path.join(config.dataDir, 'config.json')},
+        system: {source: systemTemplate, dest: path.join(config.dataDir, 'system.json'), replace: true},
+        managed: {data: {}, dest: path.join(config.dataDir, 'managed.json')},
         user: {source: userTemplate, dest: path.join(config.configDir, 'config.yaml')},
       },
     },
