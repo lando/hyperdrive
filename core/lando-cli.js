@@ -74,6 +74,7 @@ class LandoCLI {
     this.debug('instantiated lando-cli version %s (%s), using %s', this.version, status, this.bin);
   }
 
+  // @NOTE: should these all be static?
   static name = 'lando';
   static notInstalledError = {
     suggestions: [

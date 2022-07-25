@@ -7,13 +7,12 @@ class Bootstrapper {
     this.registry = options.registry || 'registry';
   }
 
-  // recurse up from given directory until you find a given landofile?
-  // static findApp(file = '.lando.yml') {
-
-  // }
-
   static collapsePlugins(plugins) {
     return require('../utils/collapse-plugins')(plugins);
+  }
+
+  static findApp(files, startFrom) {
+    return require('../utils/find-app')(files, startFrom);
   }
 
   static findPlugins(dir, depth = 1) {
@@ -40,6 +39,10 @@ class Bootstrapper {
 
   collapsePlugins(plugins) {
     return require('../utils/collapse-plugins')(plugins);
+  }
+
+  findApp(files, startFrom) {
+    return require('../utils/find-app')(files, startFrom);
   }
 
   // @TODO: does it make sense to also make this an instance method?

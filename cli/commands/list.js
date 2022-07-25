@@ -33,13 +33,13 @@ class ListCommand extends BaseCommand {
 
     // if lando is not installed or is unsupported then throw an error?
     // @TODO: lando should use id to reflect changes?
-    if (landoCLI.isInstalled) {
+    if (!landoCLI.isInstalled) {
       this.error(`${Component.name} is not installed! or cannot be detected.`, Component.notInstalledError);
     }
 
     // unsupported error
     // @TODO: lando should use id to reflect changes?
-    if (landoCLI.isSupported) {
+    if (!landoCLI.isSupported) {
       this.error(`${Component.name} is installed but hyperdrive needs version 3.6.5 or higher`, Component.notSupportedError);
     }
 
@@ -73,7 +73,7 @@ class ListCommand extends BaseCommand {
     this.log();
     // also throw warnings if there are any invalid plugins
     for (const invalidPlugin of plugins.filter(plugin => !plugin.isValid)) {
-      this.warn(`${invalidPlugin.name} was located at ${invalidPlugin.location} but does not seem to be a valid plugin!`);
+      this.warn(`${invalidPlugin.name} was detected at ${invalidPlugin.location} but does not seem to be a valid plugin!`);
     }
 
     this.log();
