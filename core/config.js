@@ -4,6 +4,7 @@ const get = require('lodash/get');
 const has = require('lodash/has');
 const kebabcase = require('lodash/kebabCase');
 const kebabcaseKeys = require('kebabcase-keys');
+const keys = require('all-object-keys');
 const nconf = require('nconf');
 const path = require('path');
 const set = require('lodash/set');
@@ -222,6 +223,15 @@ class Config extends nconf.Provider {
 
   // overriden save method
   save(data, store = this.managed) {
+    // purposefully try to boolean type strings
+    // NOTE: is this a good idea?
+    for (const key of keys(data)) {
+      if (get(data, key)) {
+        if (get(data, key) === 'true' || get(data, key) === '1') set(data, key, true);
+        if (get(data, key) === 'false' || get(data, key) === '0') set(data, key, false);
+      }
+    }
+
     this.debug('saving %o to %s store', data, store);
     const dest = this.stores[store].file;
     this.#writeFile({...this.get(undefined, store, false), ...this.#encode(data)}, dest);

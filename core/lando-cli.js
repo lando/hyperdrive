@@ -31,7 +31,7 @@ class LandoCLI {
     releaseChannel = 'stable',
   } = {}) {
     // set top level props
-    this.autoSync = autoSync === true || autoSync === '1' || autoSync === 'true';
+    this.autoSync = autoSync;
     this.bin = path.isAbsolute(bin) ? bin : which.sync('lando', {nothrow: true});
     this.channel = releaseChannel;
     this.debug = require('debug')(`${id}:@lando/core:deps:lando-cli`);
