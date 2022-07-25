@@ -79,7 +79,7 @@
     "helpClass": "./core/help",
     "hooks": {
       "config": [
-        "./cli/hooks/config.js"
+        "./cli/hooks/hyperdrive.js"
       ],
       "init": [
         "./cli/hooks/bootstrap.js"

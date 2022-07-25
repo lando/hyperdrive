@@ -1,28 +1,29 @@
 core:
-  engine:
-    use: docker-desktop
-    config:
+  debug: false
+  engine: docker-desktop
   id: hyperdrive
+  lando: lando-cli
   product: hyperdrive
-  telemetry: true
   release-channel: stable
+  telemetry: true
 
-debug: false
+  # this will force hyperdrive to use updated config from lando on every run. normally hyperdrive will use a
+  # cached config that is generated on every lando run for version/plugin/config information.
+  # you can use the hidden `lando --hyperdrive` command to regenerate this file.
+  #
+  # GENERALLY THIS IS FINE FOR MOST USE CASES.
+  #
+  # However, if you are running lando from source and modifying config that
+  # hyperdrive uses, core plugin, etc it might make sense to enable this setting. Note that it comes with a ~10-20ms
+  # performance hit and will override any app/pluginDir config you've set in hyperdrive
+  auto-sync: false
 
-engines:
-  # @TODO: how does this work loading wise? we need a way to translate these to absolute paths?
-  docker-colima: hyperdrive://core/docker-colima
-  docker-desktop: hyperdrive://core/docker-desktop
-  docker-engine: hyperdrive://core/docker-engine
-
-# @TODO: need to bump these to 3.6.6 once we release a lando with `lando hyperdrive`
-lando:
-  bin: lando
-  install-default: "3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
-  # @NOTE: below uses the satisfies syntax from https://www.npmjs.com/package/semver
-  required-version: ">=3.6.5" # @TODO: need to bump this once we release a lando with `lando hyperdrive`
-
+# @TODO: what goes in here?
 npm:
+
+# @TODO: what goes in here?
 plugins:
+
+# @TODO: should this be in core?
 updates:
   notify: true
