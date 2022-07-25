@@ -16,10 +16,10 @@ module.exports = () => {
       },
     },
     'lando-cli': {
-      bin: process.platform === 'win32' ? which.sync('lando', {nothrow: true}) : '/usr/local/bin/lando',
-      // @TODO: need to bump this once we release a lando with `lando hyperdrive`
+      bin: which.sync('lando', {nothrow: true}),
+      // @TODO: need to bump this once we release a lando with `lando --hyperdrive`
       install: '3.6.5',
-      // # @TODO: need to bump this once we release a lando with `lando hyperdrive`
+      // # @TODO: need to bump this once we release a lando with `lando --hyperdrive`
       required: '>=3.6.5',
     },
   };
