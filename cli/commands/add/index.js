@@ -29,6 +29,10 @@ class AddCommand extends PluginCommand {
   async run() {
     const map = require('../../../utils/map');
     const moveConfig = require('../../../utils/move-config');
+    const {bootstrap, hyperdrive} = this.config;
+    const {Component, cc} = bootstrap.getComponent(`engine.${hyperdrive.get('core.engine')}`);
+    // @todo: pass something like core.engine.config for Dockerode initialization options?
+    const engine = new Component();
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
@@ -59,7 +63,7 @@ class AddCommand extends PluginCommand {
       // Run docker commands to install plugins.
       try {
         await map(argv, function(pluginName) {
-          return Plugin.add(pluginName, dest, scripts);
+          return Plugin.add(pluginName, dest, scripts, engine);
         });
         CliUx.ux.action.stop('Install successful.');
       } catch (error) {

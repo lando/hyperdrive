@@ -7,7 +7,20 @@ class DockerEngine extends Dockerode {
     super(options);
     this.name = 'docker';
     this.supportedOS = ['linux'];
-    //this.info = this.info();
+    this.version = this.getVersion();
+    this.isInstalled = this.isInstalled();
+  }
+
+  /**
+   * Add async info to the engine.
+   *
+   * @param {*} options
+   * @returns
+   */
+  async init(options) {
+    const engine = new DockerEngine(options);
+    engine.info = await this.info();
+    return engine;
   }
 
   /**
@@ -38,7 +51,7 @@ class DockerEngine extends Dockerode {
         //...
       }).on('stream', function (stream) {
         stream.on('data', buffer => {
-          // @todo: way to clean the output up?
+          // @todo: way to clean the output up better?
           if (buffer.toString() !== "\u001b[1G\u001b[0K") {
             const debug = require('debug')(`engine:@lando/hyperdrive`);
             debug(String(buffer));
@@ -54,6 +67,13 @@ class DockerEngine extends Dockerode {
    * Self install.
    */
   async install() {
+
+  }
+
+  /**
+   * Check for the existence of the app in expected location.
+   */
+  isInstalled() {
 
   }
 
@@ -75,6 +95,18 @@ class DockerEngine extends Dockerode {
    *
    */
   async info() {
+    if (this.isUp()) {
+      const info = await super.info();
+      // @todo: check to see if VM matches our expected this.name.
+
+      // @todo: check resource allocation within limits.
+
+      // @todo: storage check...need to figure out how to measure it.
+    }
+
+  }
+
+  getVersion() {
 
   }
 

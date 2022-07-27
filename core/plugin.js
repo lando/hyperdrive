@@ -29,6 +29,8 @@ class Plugin {
     this.updateAvailable = undefined;
     // @TODO: do we need this still
     // this.namespace
+    // this.config.core.engine
+    this.engine = this.config.bootstrap.getComponent('engine.docker-engine');
 
     // log
     const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');
@@ -61,13 +63,10 @@ class Plugin {
    * @param {string} dest The plugin directory to install the plugin in.
    * @returns
    */
-  static async add(name, dest, scripts) {
+  static async add(name, dest, scripts, engine) {
     const mkdirp = require('mkdirp');
     const nameVersion = this.mungeVersion(name);
     const pluginPath = `${dest}/${nameVersion.name}`;
-    // @todo: presumably we'll want to bootstrap an engine generically.
-    const DockerEngine = require('../core/docker-engine');
-    const engine = new DockerEngine();
 
     // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
     if (fs.existsSync(pluginPath)) {
@@ -84,17 +83,13 @@ class Plugin {
   }
 
   async add() {
-    // @todo: presumably we'll want to bootstrap an engine generically.
-    const DockerEngine = require('../core/docker-engine');
-    const engine = new DockerEngine();
-
     // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
     if (fs.existsSync(pluginPath)) {
       fs.rmSync(pluginPath, {recursive: true});
     }
 
     mkdirp.sync(this.path);
-    const run = engine.addPlugin(this);
+    const run = this.engine.addPlugin(this);
     run[1].attach({stream: true, stdout: true, stderr: true}, function (err, stream) {
       console.log(err, stream);
       stream.on('data', buffer => {
@@ -121,7 +116,6 @@ class Plugin {
       nameVersion.version = nameVersion.version[1];
       nameVersion.name = name.replace(`@${nameVersion.version}`, '');
     }
-    console.log(nameVersion);
     return nameVersion;
   }
 
