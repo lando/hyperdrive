@@ -2,6 +2,7 @@ const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const mkdirp = require('mkdirp');
 
 /**
  *
@@ -64,7 +65,6 @@ class Plugin {
    * @returns
    */
   static async add(name, dest, scripts, engine) {
-    const mkdirp = require('mkdirp');
     const nameVersion = this.mungeVersion(name);
     const pluginPath = `${dest}/${nameVersion.name}`;
 
@@ -77,20 +77,20 @@ class Plugin {
     const plugin = {
       ...nameVersion,
       scripts: scripts,
-      path: pluginPath
+      path: pluginPath,
     };
-    const run = engine.addPlugin(plugin);
+    return engine.addPlugin(plugin);
   }
 
   async add() {
     // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
-    if (fs.existsSync(pluginPath)) {
-      fs.rmSync(pluginPath, {recursive: true});
+    if (fs.existsSync(this.location)) {
+      fs.rmSync(this.location, {recursive: true});
     }
 
-    mkdirp.sync(this.path);
+    mkdirp.sync(this.location);
     const run = this.engine.addPlugin(this);
-    run[1].attach({stream: true, stdout: true, stderr: true}, function (err, stream) {
+    run[1].attach({stream: true, stdout: true, stderr: true}, function(err, stream) {
       console.log(err, stream);
       stream.on('data', buffer => {
         const debug = require('debug')(`add-${this.name}:@lando/hyperdrive`);
@@ -108,7 +108,7 @@ class Plugin {
    */
   static mungeVersion(name) {
     let nameVersion = {};
-    nameVersion.version = name.match('(?:[^@]*@\s*){2}(.*)');
+    nameVersion.version = name.match('(?:[^@]*@\s*){2}(.*)'); // eslint-disable-line no-useless-escape
     if (nameVersion.version === null) {
       nameVersion.version = '';
       nameVersion.name = name;
@@ -116,6 +116,7 @@ class Plugin {
       nameVersion.version = nameVersion.version[1];
       nameVersion.name = name.replace(`@${nameVersion.version}`, '');
     }
+
     return nameVersion;
   }
 
@@ -173,7 +174,7 @@ class Plugin {
    *
    */
   remove() {
-    return fs.rmSync(this.path, {recursive: true});
+    return fs.rmSync(this.location, {recursive: true});
   }
 
   // update(version) {

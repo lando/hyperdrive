@@ -30,7 +30,7 @@ class AddCommand extends PluginCommand {
     const map = require('../../../utils/map');
     const moveConfig = require('../../../utils/move-config');
     const {bootstrap, hyperdrive} = this.config;
-    const {Component, cc} = bootstrap.getComponent(`engine.${hyperdrive.get('core.engine')}`);
+    const {Component} = bootstrap.getComponent(`engine.${hyperdrive.get('core.engine')}`);
     // @todo: pass something like core.engine.config for Dockerode initialization options?
     const engine = new Component();
 
@@ -42,8 +42,8 @@ class AddCommand extends PluginCommand {
     CliUx.ux.action.start('Installing...');
 
     // Move the scripts folder into the OCLIF data directory.
-    const scripts = path.join(this.config.dataDir, 'scripts');
-    const home = this.config.home;
+    const {home, dataDir} = this.config;
+    const scripts = path.join(dataDir, 'scripts');
     moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
     const dest = `${home}/.lando/plugins`;
 
