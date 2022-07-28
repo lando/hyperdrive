@@ -6,6 +6,9 @@ module.exports = () => {
   return {
     core: {root},
     registry: {
+      app: {
+        minapp: path.resolve(root, 'core/minapp'),
+      },
       engine: {
         'docker-colima': path.resolve(root, 'core/docker-colima'),
         'docker-desktop': path.resolve(root, 'core/docker-desktop'),

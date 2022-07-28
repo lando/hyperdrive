@@ -30,11 +30,19 @@ class Bootstrapper {
 
   // helper to get a component (and config?) from the registry
   getComponent(component, {registry = this.registry, config} = {}) {
-    // @TODO try/catch here? for better error stuff
-    // @TODO use a move this into utils and ref like others
+    // @TODO try/catch here? for better error stuff +++
+    // @TODO move this into utils and ref like others
+
+    // first provide some nice handling around "core" components
+    // this lets you do stuff like getComponent('core.engine') and get whatever that is set to
+    if (component.split('.')[0] === 'core' && component.split('.').length === 2) {
+      component = [component.split('.')[1], this.config.get(component)].join('.');
+    }
+
+    // @TODO: it would be better to return a more legit name than Component?
     const Component = require(this.config.get(`${registry}.${component}`));
     const cckey = config || component.split('.')[component.split('.').length - 1];
-    return {Component, cc: this.config.get(cckey) || {}};
+    return [Component, this.config.get(cckey)];
   }
 
   collapsePlugins(plugins) {

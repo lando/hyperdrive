@@ -1,4 +1,5 @@
 core:
+  app: minapp
   debug: false
   engine: docker-desktop
   id: hyperdrive
