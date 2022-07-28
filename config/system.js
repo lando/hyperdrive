@@ -25,11 +25,11 @@ module.exports = () => {
       // # @TODO: need to bump this once we release a lando with `lando --hyperdrive`
       required: '>=3.6.5',
     },
+    'docker-desktop': {
+      'required-version': '>=3.6.5 && <=5.0.0',
+      'supported-version': '>=3.6.5 && <=4.10.5',
+    },
+    // Allows you to pass env value to Docker, Docker Compose, etc.
+    env: {},
   };
 };
-
-/*
-docker-desktop:
-  required-version: ">=3.6.5 && <=5.0.0"
-  supported-version: ">=3.6.5 && <=4.10.5"
-*/

@@ -28,3 +28,5 @@ plugins:
 # @TODO: should this be in core?
 updates:
   notify: true
+#docker-engine:
+#  socketPath: '/my/custom/docker.sock'
