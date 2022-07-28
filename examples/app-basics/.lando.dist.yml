@@ -1,6 +1,2 @@
-name: lando-base-dist
-env_file:
-  - defaults.env
-compose:
-  - compose.yml
-
+plugins:
+  "@pirog/php": pirog/php#main
