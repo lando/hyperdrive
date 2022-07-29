@@ -6,7 +6,7 @@ class DockerEngine extends Dockerode {
     this.name = 'docker';
     this.supportedOS = ['linux'];
     this.version = this.getVersion();
-    this.isInstalled = this.isInstalled();
+    this.isInstalled = this.getInstalled();
   }
 
   /**
@@ -67,7 +67,7 @@ class DockerEngine extends Dockerode {
   /**
    * Check for the existence of the app in expected location.
    */
-  isInstalled() {}
+  getInstalled() {}
 
   async up() {}
 

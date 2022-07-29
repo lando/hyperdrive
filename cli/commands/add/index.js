@@ -32,7 +32,6 @@ class AddCommand extends PluginCommand {
     const {bootstrap} = this.config;
     const [Component, componentConfig] = bootstrap.getComponent('core.engine');
     // @todo: pass something like core.engine.config for Dockerode initialization options?
-    console.log('resulting component config', componentConfig);
     const engine = new Component(componentConfig);
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
