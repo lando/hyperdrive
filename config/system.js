@@ -20,6 +20,7 @@ module.exports = () => {
     },
     'lando-cli': {
       bin: which.sync('lando', {nothrow: true}),
+      name: 'lando',
       // @TODO: need to bump this once we release a lando with `lando --hyperdrive`
       install: '3.6.5',
       // # @TODO: need to bump this once we release a lando with `lando --hyperdrive`

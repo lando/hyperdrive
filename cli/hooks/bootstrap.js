@@ -21,6 +21,7 @@ module.exports = async({id, argv, config}) => {
       cached: path.join(config.cacheDir, 'config.json'),
       env: 'HYPERDRIVE',
       id: 'hyperdrive',
+      // oclif: config,
       // sources are loading in increasing priority into the main config
       sources: {
         defaults: path.join(__dirname, '..', '..', 'config', 'defaults.yaml'),
