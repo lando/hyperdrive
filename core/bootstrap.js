@@ -1,3 +1,5 @@
+const path = require('path');
+
 const Config = require('./config');
 
 class Bootstrapper {
@@ -30,11 +32,19 @@ class Bootstrapper {
 
   // helper to get a component (and config?) from the registry
   getComponent(component, {registry = this.registry, config} = {}) {
-    // @TODO try/catch here? for better error stuff
-    // @TODO use a move this into utils and ref like others
+    // @TODO try/catch here? for better error stuff +++
+    // @TODO move this into utils and ref like others
+
+    // first provide some nice handling around "core" components
+    // this lets you do stuff like getComponent('core.engine') and get whatever that is set to
+    if (component.split('.')[0] === 'core' && component.split('.').length === 2) {
+      component = [component.split('.')[1], this.config.get(component)].join('.');
+    }
+
+    // @TODO: it would be better to return a more legit name than Component?
     const Component = require(this.config.get(`${registry}.${component}`));
     const cckey = config || component.split('.')[component.split('.').length - 1];
-    return {Component, cc: this.config.get(cckey) || {}};
+    return [Component, this.config.get(cckey)];
   }
 
   collapsePlugins(plugins) {
@@ -57,11 +67,13 @@ class Bootstrapper {
 
   async run(config = {}) {
     // just some other identifiers
-    config.id = this.config.get('core.id') || config.bin || config.dirname;
-    config.product = this.config.get('core.product') || config.bin || config.dirname;
+    config.id = this.config.get('core.id') || config.bin || config.dirname || path.basename(process.argv[1]);
+    config.product = this.config.get('core.product') || config.bin || config.dirname || path.basename(process.argv[1]);
 
     // set the core debug flag
     config.debug = this.config.get('core.debug');
+    config.debugspace = this.config.get('core.debugspace') || config.id || config.product || 'lando';
+
     // enable debugging if the config is set
     // @NOTE: this is only for debug=true set via the configfile, the --debug turns debugging on before this
     if (config.debug) require('debug').enable(config.debug === true ? '*' : config.debug);
@@ -77,7 +89,10 @@ class Bootstrapper {
     config.packaged = Object.hasOwn(process, 'pkg');
 
     // add the main config class to the OCLIF config
-    config.hyperdrive = this.config;
+    // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
+    config[config.id] = this.config;
+
+    // add some other useful things
   }
 }
 

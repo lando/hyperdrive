@@ -1,0 +1,6 @@
+# pluginDirs:
+#   - plugins
+
+config:
+  core:
+    debug: 1

@@ -18,7 +18,7 @@ class Config extends nconf.Provider {
     // get parent stuff
     super();
     // get the id first since we need this for downstream things
-    this.id = options.id || path.basename(process.argv[1]);
+    this.id = options.id || options.product || path.basename(process.argv[1]);
     // properties
     this.managed = options.managed || 'managed';
     // namespaces utils
@@ -112,7 +112,7 @@ class Config extends nconf.Provider {
     for (const [source, file] of Object.entries(sources)) {
       if (file) {
         fs.mkdirSync(path.dirname(file), {recursive: true});
-        this.debug('ensured %s directory %s exists', source, path.dirname(file));
+        this.debug('ensured %o directory %o exists', source, path.dirname(file));
       }
     }
 
@@ -132,11 +132,11 @@ class Config extends nconf.Provider {
       // or read/write from correct input format to correct output format
       } else {
         const data = options.source ? this.#readFile(options.source) : options.data;
-        this.#writeFile(data, options.dest);
+        this.#writeFile(this.#encode(data), options.dest);
       }
 
       // if we get here then we are generating a config file from a template
-      this.debug('generated %s file %s from template %o', store, options.dest, options.source || options.data);
+      this.debug('generated %o file %o from template %o', store, options.dest, options.source || options.data);
     }
 
     // if we have a CLI provided config source then assert its dominance
@@ -160,21 +160,21 @@ class Config extends nconf.Provider {
         }
       },
     });
-    this.debug('loaded config from %s env namespace', rootKey);
+    this.debug('loaded config from %o env namespace', rootKey);
 
     // load additional file sources that exist, skip overrides and defaults since those
     // are handled elsewhere
     for (const [source, file] of Object.entries(sources).reverse()) {
       if (source !== 'overrides' && source !== 'defaults' && file) {
         super.file(source, {file, format: nconf.formats[this.#getFormat(file)]});
-        this.debug('loaded %s config from %s', source, file);
+        this.debug('loaded %s config from %o', source, file);
       }
     }
 
     // set some defaults
     if (sources.defaults) {
       super.defaults(this.#readFile(sources.defaults));
-      this.debug('loaded %s default config from %s', sources.defaults);
+      this.debug('loaded %o default config from %o', sources.defaults);
     }
 
     // add a "cached" source if possible and save the compiled result there
@@ -182,9 +182,9 @@ class Config extends nconf.Provider {
     // ensure dest directory exists
     if (cached) {
       fs.mkdirSync(path.dirname(cached), {recursive: true});
-      this.#writeFile(super.get(), cached);
+      this.#writeFile(this.#encode(super.get()), cached);
       super.add('cached', {type: 'file', file: cached});
-      this.debug('dumped compiled and cached config file to %s', cached);
+      this.debug('dumped compiled and cached config file to %o', cached);
     }
 
     // The YAML spec returns null for an empty yaml document but for merging purposes we want this to be an empty
@@ -195,7 +195,7 @@ class Config extends nconf.Provider {
   // overridden get method for easier deep path selection and key-case handling
   get(path, store, decode = true) {
     // log the actions
-    this.debug('getting %o from %s store with decode %s', path || 'everything', store ? store : 'default', decode);
+    this.debug('getting %o from %o store with decode %o', path || 'everything', store ? store : 'default', decode);
 
     // start by grabbing the data set
     const data = store ? this.stores[store].get() : super.get();
@@ -232,7 +232,7 @@ class Config extends nconf.Provider {
       }
     }
 
-    this.debug('saving %o to %s store', data, store);
+    this.debug('saving %o to %o store', data, store);
     const dest = this.stores[store].file;
     this.#writeFile({...this.get(undefined, store, false), ...this.#encode(data)}, dest);
     this.debug('saved %o to %s', data, dest);

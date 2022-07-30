@@ -17,51 +17,62 @@ const execSyncOpts = {maxBuffer: 1024 * 1024 * 10, encoding: 'utf-8'};
  */
 class LandoCLI {
   /**
-   * @TODO: options? channel?
+   * @TODO: do we need any private properties?
    */
   constructor({
     bin,
+    debugspace,
+    id,
+    landofile,
+    product,
     version,
-    install = 'stable',
     autoSync = false,
+    install = 'stable',
     plugins = [],
     pluginDirs = [],
     required = '>=3.6.5',
-    id = 'hyperdrive',
     releaseChannel = 'stable',
   } = {}) {
     // set top level props
     this.autoSync = autoSync;
     this.bin = path.isAbsolute(bin) ? bin : which.sync('lando', {nothrow: true});
+    this.name = path.basename(this.bin);
     this.channel = releaseChannel;
-    this.debug = require('debug')(`${id}:@lando/core:deps:lando-cli`);
+    this.id = id || product || path.basename(process.argv[1]) || 'hyperdrive';
     this.install = install;
+    this.landofile = landofile;
     this.required = required;
     this.version = version;
     // computed props
     this.isInstalled = fs.existsSync(this.bin);
-    this.configCommand = `${this.bin} --${id}`;
+    this.configCommand = `${this.bin} --${this.id}`;
+    this.debug = require('debug')(`${debugspace}:@lando/core:deps:lando-cli`);
 
     // attempt to refresh info if we can
     // NOTE: this will not work if the actual version is less than the required 3.6.5
-    if ((this.autoSync || !this.version) && this.isInstalled) {
-      this.lando = this.#load() || undefined;
-      if (this.lando) this.version = get(this.lando, `${this.bin}.lando.version`);
+    if ((this.autoSync || !this.version || !this.name || !this.landofile) && this.isInstalled) {
+      this.config = this.#load() || undefined;
+      if (this.config) {
+        this.version = get(this.config, `${this.bin}.lando.version`);
+        this.name = get(this.config, `${this.bin}.lando.name`);
+        this.landofile = get(this.config, `${this.bin}.app.landofile`);
+      }
     }
 
     // props to determine status
     this.isHyperdrived = this.isInstalled && satisfies(this.version, '>=3.6.5');
     this.isSupported = this.isInstalled && satisfies(this.version, this.required);
 
-    // get our plyugin stuff
-    this.plugins = get(this.lando, `${this.bin}.lando.plugins`, plugins);
-    this.pluginDirs = get(this.lando, `${this.bin}.lando.pluginDirs`, pluginDirs);
+    // get props we need from the lando config
+    this.plugins = get(this.config, `${this.bin}.lando.plugins`, plugins);
+    this.pluginDirs = get(this.config, `${this.bin}.lando.pluginDirs`, pluginDirs);
+    const globalDirs = this.pluginDirs.filter(dir => dir.type === 'global');
+    this.globalPluginDir = get(this.config, `${this.bin}.lando.globalPluginDir`, globalDirs[0].dir);
 
     // discover other plugins
-    const globalPlugins = this.pluginDirs
-    .filter(dir => dir.type === 'global')
+    const globalPlugins = globalDirs
     .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
-    .map(dirs => dirs.dirs.map(dir => new Plugin({dir, id: 'lando-cli', type: dirs.type})))
+    .map(dirs => dirs.dirs.map(dir => new Plugin({dir, debugspace, id: 'lando-cli', type: dirs.type})))
     .flat(Number.POSITIVE_INFINITY);
     // concat all plugins together
     this.plugins = [...this.plugins, ...globalPlugins];
@@ -71,7 +82,7 @@ class LandoCLI {
 
     // log
     const status = this.isSupported ? chalk.green('supported') : chalk.red('not supported');
-    this.debug('instantiated lando-cli version %s (%s), using %s', this.version, status, this.bin);
+    this.debug('instantiated lando-cli version %o (%s), using %o', this.version, status, this.bin);
   }
 
   // @NOTE: should these all be static?
@@ -96,19 +107,16 @@ class LandoCLI {
   };
 
   // Internal method to help load config
+  // @TODO load config from binpath here?
   #load() {
     try {
-      this.debug('missing needed lando config, getting it from %s', this.configCommand);
+      this.debug('missing needed lando config, getting it from %o', this.configCommand);
       return JSON.parse(execSync(this.configCommand, execSyncOpts));
     } catch {
-      this.debug('could not parse output from "%s hyperdrive" correctly');
+      // @TODO need name?
+      this.debug('could not parse output from "%o" correctly', this.configCommand);
       return false;
     }
-  }
-
-  // helper to dump fetched config
-  getConfig() {
-    return get(this.lando, `${this.bin}`);
   }
 
   // helper to return plugins optionally by type

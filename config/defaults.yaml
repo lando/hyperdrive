@@ -1,4 +1,6 @@
 core:
+  app: minapp
+  debugspace: hyperdrive
   debug: false
   engine: docker-desktop
   id: hyperdrive
@@ -23,6 +25,8 @@ npm:
 
 # @TODO: what goes in here?
 plugins:
+  # @NOTE: we will try to get this crom core.lando but you can override it here.
+  # globalDir:
 
 # @TODO: should this be in core?
 updates:

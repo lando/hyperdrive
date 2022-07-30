@@ -25,37 +25,39 @@ class ListCommand extends BaseCommand {
     // get args and flags
     const {flags} = await this.parse(ListCommand);
     // get needed helpers things
-    const {bootstrap, hyperdrive, lando} = this.config;
+    const {landofile, bootstrap, hyperdrive, lando} = this.config;
     // get lando CLI component and config from registry
-    const {Component, cc} = bootstrap.getComponent(`lando.${hyperdrive.get('core.lando')}`);
+    const [LandoCLI, landoCLIConfig] = bootstrap.getComponent('core.lando');
     // create lando cli instance by merging together various config sources
-    const landoCLI = new Component({...hyperdrive.get('core'), ...cc, ...lando.get(`${cc.bin}.lando`)});
+    const landoCLI = new LandoCLI({
+      ...hyperdrive.get('core'),
+      ...landoCLIConfig,
+      ...lando.get(`${landoCLIConfig.bin}.lando`),
+      ...lando.get(`${landoCLIConfig.bin}.app`),
+    });
 
     // if lando is not installed or is unsupported then throw an error?
     // @TODO: lando should use id to reflect changes?
     if (!landoCLI.isInstalled) {
-      this.error(`${Component.name} is not installed! or cannot be detected.`, Component.notInstalledError);
+      this.error(`${LandoCLI.name} is not installed! or cannot be detected.`, LandoCLI.notInstalledError);
     }
 
     // unsupported error
     // @TODO: lando should use id to reflect changes?
     if (!landoCLI.isSupported) {
-      this.error(`${Component.name} is installed but hyperdrive needs version 3.6.5 or higher`, Component.notSupportedError);
+      this.error(`${LandoCLI.name} is installed but hyperdrive needs version 3.6.5 or higher`, LandoCLI.notSupportedError);
     }
 
     // start by getting lando provided plugins
     const plugins = landoCLI.getPlugins();
     this.debug('acquired lando provided plugins %o', plugins.map(plugin => `${plugin.name}@${plugin.version}`));
 
-    // determine app context or not, bootsrtrap method to load in complete landofile?
-    // if app context then load in the landofiles using a bootstrap method?
-    // remember that we need to load the main landofile first to get additional landofiles and hten bootsrap
-    // the landofile config?
-    // merge in app plugin stuff?
-    // console.log(lando.landofile)
-    // console.log(lando.landofiles)
-    // // @TODO: determine what the requirements are for "app found", any landofile? just .lando.yml?
-    // process.exit(1)
+    // determine app context or not
+    if (landofile) {
+      const [MinApp] = bootstrap.getComponent('core.app');
+      const app = new MinApp(landofile, {...hyperdrive.get(), ...lando.get(landoCLIConfig.bin)});
+      this.debug(app);
+    }
 
     // organize plugins so that load order is reflected
     const organizedPlugins = bootstrap.collapsePlugins(bootstrap.groupPlugins(plugins));
