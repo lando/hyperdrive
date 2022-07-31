@@ -1,4 +1,7 @@
+const chalk = require('chalk');
+
 const {BaseCommand} = require('../../lib/base-command');
+const {Flags} = require('@oclif/core');
 
 class ConfigCommandSet extends BaseCommand {
   static description = 'sets hyperdrive configuration';
@@ -19,6 +22,11 @@ class ConfigCommandSet extends BaseCommand {
 
   static flags = {
     ...BaseCommand.globalFlags,
+    force: Flags.boolean({
+      default: false,
+      description: 'forces setting of protected config',
+      hidden: true,
+    }),
   };
 
   async run() {
@@ -30,10 +38,25 @@ class ConfigCommandSet extends BaseCommand {
 
     // start with data from file or empty
     const data = config.stores.overrides ? config.stores.overrides.get() : {};
+
     // mix in argv if they have paths and values
     for (const arg of argv) {
       const path = arg.split('=')[0];
       const value = arg.split('=')[1];
+
+      // if this a protect property then error
+      if ((path.startsWith('system.') && !flags.force)) {
+        this.error(`${path} is a protected config setting, we dont recommend you modify it!`, {
+          suggestions: [
+            `Use the hidden --force flag to set the config regardless. ${chalk.magenta('THIS IS USUALLY A BAD IDEA!')}`,
+          ],
+          ref: 'https://docs.lando.dev/hyperdrive/',
+          exit: 1,
+        });
+        continue;
+      }
+
+      // if we have a key and value then set it
       if (arg.split('=').length === 2) set(data, path, value);
     }
 

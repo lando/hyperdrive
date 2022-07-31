@@ -232,10 +232,10 @@ class Config extends nconf.Provider {
       }
     }
 
-    this.debug('saving %o to %o store', data, store);
+    // write the new file
     const dest = this.stores[store].file;
     this.#writeFile({...this.get(undefined, store, false), ...this.#encode(data)}, dest);
-    this.debug('saved %o to %s', data, dest);
+    this.debug('saved %o to %j', data, dest);
   }
 }
 

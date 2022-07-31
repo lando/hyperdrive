@@ -25,15 +25,20 @@ class ListCommand extends BaseCommand {
     // get args and flags
     const {flags} = await this.parse(ListCommand);
     // get needed helpers things
-    const {landofile, bootstrap, hyperdrive, lando} = this.config;
+    const {bootstrap, hyperdrive} = this.config;
+    // get more stuff
+    const {landofile} = hyperdrive.get();
+
+    // @TODO: what do we need here?
+    // glboal plugin dirs and core plugins?
+
     // get lando CLI component and config from registry
     const [LandoCLI, landoCLIConfig] = bootstrap.getComponent('core.lando');
+
     // create lando cli instance by merging together various config sources
     const landoCLI = new LandoCLI({
       ...hyperdrive.get('core'),
       ...landoCLIConfig,
-      ...lando.get(`${landoCLIConfig.bin}.lando`),
-      ...lando.get(`${landoCLIConfig.bin}.app`),
     });
 
     // if lando is not installed or is unsupported then throw an error?
@@ -55,7 +60,7 @@ class ListCommand extends BaseCommand {
     // determine app context or not
     if (landofile) {
       const [MinApp] = bootstrap.getComponent('core.app');
-      const app = new MinApp(landofile, {...hyperdrive.get(), ...lando.get(landoCLIConfig.bin)});
+      const app = new MinApp(landofile, hyperdrive.get());
       this.debug(app);
     }
 

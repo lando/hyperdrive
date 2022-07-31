@@ -7,7 +7,7 @@ const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommandGet extends BaseCommand {
   static description = 'gets hyperdrive configuration';
-  static usage = 'config get [<KEY> [<KEY> ...]] [-c <value>] [--debug] [--help] [--json]';
+  static usage = 'config get [<KEY> [<KEY> ...]] [-c <value>] [--config <value>] [--store <value>] [--system] [--debug] [--help] [--json]';
   static examples = [
     'hyperdrive config get',
     'hyperdrive config get core.telemetry --json',
@@ -26,9 +26,14 @@ class ConfigCommandGet extends BaseCommand {
 
   static flags = {
     ...BaseCommand.globalFlags,
+    system: Flags.boolean({
+      default: false,
+      description: 'shows protected system config',
+    }),
     store: Flags.string({
       description: 'gets a specific config store',
-      options: ['system', 'user'],
+      // @TODO: can we populate this automatically?
+      options: ['managed', 'system', 'user'],
     }),
   };
 
@@ -42,6 +47,11 @@ class ConfigCommandGet extends BaseCommand {
     // get the data, if argv has one element then use the string version
     const paths = argv.length === 1 ? argv[0] : argv;
     const data = config.get(paths, flags.store, false);
+
+    // filter out system config by default
+    if (!flags.system && flags.store !== 'system') {
+      delete data.system;
+    }
 
     // if data is undefined then throw an error
     if (argv.length > 0 && (data === undefined || data === {})) {

@@ -1,5 +1,7 @@
 const chalk = require('chalk');
+const debug = require('debug')('static@lando/core:deps:lando-cli');
 const findPlugins = require('./../utils/find-plugins');
+const parseStdoutJson = require('./../utils/parse-stdout-json');
 const fs = require('fs');
 const get = require('lodash/get');
 const path = require('path');
@@ -9,8 +11,6 @@ const {execSync} = require('child_process');
 const {satisfies} = require('semver');
 
 const Plugin = require('./plugin');
-
-const execSyncOpts = {maxBuffer: 1024 * 1024 * 10, encoding: 'utf-8'};
 
 /**
  *
@@ -50,39 +50,50 @@ class LandoCLI {
 
     // attempt to refresh info if we can
     // NOTE: this will not work if the actual version is less than the required 3.6.5
-    if ((this.autoSync || !this.version || !this.name || !this.landofile) && this.isInstalled) {
-      this.config = this.#load() || undefined;
-      if (this.config) {
-        this.version = get(this.config, `${this.bin}.lando.version`);
-        this.name = get(this.config, `${this.bin}.lando.name`);
-        this.landofile = get(this.config, `${this.bin}.app.landofile`);
-      }
+    // if ((this.autoSync || !this.version || !this.name || !this.landofile) && this.isInstalled) {
+    //   this.config = this.#load() || undefined;
+    //   if (this.config) {
+    //     this.version = get(this.config, `${this.bin}.lando.version`);
+    //     this.name = get(this.config, `${this.bin}.lando.name`);
+    //     this.landofile = get(this.config, `${this.bin}.app.landofile`);
+    //   }
+    // }
+
+    // // props to determine status
+    // this.isHyperdrived = this.isInstalled && satisfies(this.version, '>=3.6.5');
+    // this.isSupported = this.isInstalled && satisfies(this.version, this.required);
+
+    // // get props we need from the lando config
+    // this.plugins = get(this.config, `${this.bin}.lando.plugins`, plugins);
+    // this.pluginDirs = get(this.config, `${this.bin}.lando.pluginDirs`, pluginDirs);
+    // const globalDirs = this.pluginDirs.filter(dir => dir.type === 'global');
+    // this.globalPluginDir = get(this.config, `${this.bin}.lando.globalPluginDir`, globalDirs[0].dir);
+
+    // // discover other plugins
+    // const globalPlugins = globalDirs
+    // .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
+    // .map(dirs => dirs.dirs.map(dir => new Plugin({dir, debugspace, id: 'lando-cli', type: dirs.type})))
+    // .flat(Number.POSITIVE_INFINITY);
+    // // concat all plugins together
+    // this.plugins = [...this.plugins, ...globalPlugins];
+
+    // // // additional props
+    // this.updateAvailable = undefined;
+
+    // // log
+    // const status = this.isSupported ? chalk.green('supported') : chalk.red('not supported');
+    // this.debug('instantiated lando-cli version %o (%s), using %o', this.version, status, this.bin);
+  }
+
+  static getCmd(cmd) {
+    try {
+      debug('missing needed lando config, getting it from %o', cmd);
+      return parseStdoutJson(cmd);
+    } catch {
+      // @TODO need name?
+      debug('could not parse output from "%o" correctly', cmd);
+      return false;
     }
-
-    // props to determine status
-    this.isHyperdrived = this.isInstalled && satisfies(this.version, '>=3.6.5');
-    this.isSupported = this.isInstalled && satisfies(this.version, this.required);
-
-    // get props we need from the lando config
-    this.plugins = get(this.config, `${this.bin}.lando.plugins`, plugins);
-    this.pluginDirs = get(this.config, `${this.bin}.lando.pluginDirs`, pluginDirs);
-    const globalDirs = this.pluginDirs.filter(dir => dir.type === 'global');
-    this.globalPluginDir = get(this.config, `${this.bin}.lando.globalPluginDir`, globalDirs[0].dir);
-
-    // discover other plugins
-    const globalPlugins = globalDirs
-    .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
-    .map(dirs => dirs.dirs.map(dir => new Plugin({dir, debugspace, id: 'lando-cli', type: dirs.type})))
-    .flat(Number.POSITIVE_INFINITY);
-    // concat all plugins together
-    this.plugins = [...this.plugins, ...globalPlugins];
-
-    // // additional props
-    this.updateAvailable = undefined;
-
-    // log
-    const status = this.isSupported ? chalk.green('supported') : chalk.red('not supported');
-    this.debug('instantiated lando-cli version %o (%s), using %o', this.version, status, this.bin);
   }
 
   // @NOTE: should these all be static?
@@ -108,16 +119,16 @@ class LandoCLI {
 
   // Internal method to help load config
   // @TODO load config from binpath here?
-  #load() {
-    try {
-      this.debug('missing needed lando config, getting it from %o', this.configCommand);
-      return JSON.parse(execSync(this.configCommand, execSyncOpts));
-    } catch {
-      // @TODO need name?
-      this.debug('could not parse output from "%o" correctly', this.configCommand);
-      return false;
-    }
-  }
+  // #load() {
+  //   try {
+  //     this.debug('missing needed lando config, getting it from %o', this.configCommand);
+  //     return JSON.parse(execSync(this.configCommand, execSyncOpts));
+  //   } catch {
+  //     // @TODO need name?
+  //     this.debug('could not parse output from "%o" correctly', this.configCommand);
+  //     return false;
+  //   }
+  // }
 
   // helper to return plugins optionally by type
   getPlugins(type) {
