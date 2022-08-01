@@ -1,4 +1,6 @@
 
+const fs = require('fs');
+
 const {BaseCommand} = require('../lib/base-command');
 const {CliUx, Flags} = require('@oclif/core');
 
@@ -26,31 +28,33 @@ class ListCommand extends BaseCommand {
     const {flags} = await this.parse(ListCommand);
     // get needed helpers things
     const {bootstrap, hyperdrive} = this.config;
-    // get more stuff
-    const {landofile} = hyperdrive.get();
-
-    // @TODO: what do we need here?
-    // glboal plugin dirs and core plugins?
-
     // get lando CLI component and config from registry
     const [LandoCLI, landoCLIConfig] = bootstrap.getComponent('core.lando');
 
+    // if we dont have the lando config or autosync is on then get the lando config
+    if (!fs.existsSync(hyperdrive.get('system.lando-config')) || hyperdrive.get('core.auto-sync')) {
+      const {configCommand} = landoCLIConfig;
+      LandoCLI.getCmd(configCommand);
+    }
+
+    // get the lando config
+    // @TODO: try/catch?
+    const {bin} = landoCLIConfig;
+    const landoConfig = require(hyperdrive.get('system.lando-config'))[bin];
+
     // create lando cli instance by merging together various config sources
-    const landoCLI = new LandoCLI({
-      ...hyperdrive.get('core'),
-      ...landoCLIConfig,
-    });
+    const landoCLI = new LandoCLI({...hyperdrive.get('core'), ...landoCLIConfig, ...landoConfig.lando});
 
     // if lando is not installed or is unsupported then throw an error?
     // @TODO: lando should use id to reflect changes?
     if (!landoCLI.isInstalled) {
-      this.error(`${LandoCLI.name} is not installed! or cannot be detected.`, LandoCLI.notInstalledError);
+      this.error(`${landoCLI.name} is not installed! or cannot be detected.`, landoCLI.notInstalledError());
     }
 
     // unsupported error
     // @TODO: lando should use id to reflect changes?
     if (!landoCLI.isSupported) {
-      this.error(`${LandoCLI.name} is installed but hyperdrive needs version 3.6.5 or higher`, LandoCLI.notSupportedError);
+      this.error(`${landoCLI.name} is installed but hyperdrive needs version 3.6.5 or higher`, landoCLI.notSupportedError());
     }
 
     // start by getting lando provided plugins
@@ -58,11 +62,11 @@ class ListCommand extends BaseCommand {
     this.debug('acquired lando provided plugins %o', plugins.map(plugin => `${plugin.name}@${plugin.version}`));
 
     // determine app context or not
-    if (landofile) {
-      const [MinApp] = bootstrap.getComponent('core.app');
-      const app = new MinApp(landofile, hyperdrive.get());
-      this.debug(app);
-    }
+    // if (landofile) {
+    //   const [MinApp] = bootstrap.getComponent('core.app');
+    //   const app = new MinApp(landofile, hyperdrive.get());
+    //   this.debug(app);
+    // }
 
     // organize plugins so that load order is reflected
     const organizedPlugins = bootstrap.collapsePlugins(bootstrap.groupPlugins(plugins));

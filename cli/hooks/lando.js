@@ -25,12 +25,8 @@ module.exports = async({config}) => {
 
     // get what we need from lando config and
     const data = {
-      core: {
-        landofile: get(result, 'app.landofile', '.lando'),
-      },
-      plugins: {
-        globalInstallDir: get(result, 'lando.globalPluginDir', path.join(system.home, '.lando', 'plugins')),
-      },
+      core: {landofile: get(result, 'app.landofile', '.lando')},
+      plugins: {globalInstallDir: get(result, 'lando.globalPluginDir', path.join(system.home, '.lando', 'plugins'))},
     };
 
     // rebase lando config data on managed store
@@ -48,6 +44,7 @@ module.exports = async({config}) => {
   // if we have an file then lets set it in the config for downstream purposes
   if (landofilePath) {
     config.landofile = landofilePath;
+    config.hyperdrive.set('app.landofile', config.landofile);
     debug('detected a landofile file at %o', config.landofile);
   }
 };

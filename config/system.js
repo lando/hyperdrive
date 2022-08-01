@@ -15,6 +15,7 @@ module.exports = ({options}) => {
   return {
     core: {
       app: 'minapp',
+      autoSync: false,
       debugspace: id || 'hyperdrive',
       debug: false,
       engine: 'docker-desktop',
