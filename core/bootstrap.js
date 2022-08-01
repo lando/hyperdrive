@@ -68,7 +68,7 @@ class Bootstrapper {
     // get an id
     config.id = this.config.get('core.id') || this.config.get('core.id') || config.bin || path.basename(process.argv[1]);
     // set core debug flag
-    config.debug = this.config.get('core.debug');
+    this.config.set('core.debug', config.debug);
     // enable debugging if the config is set
     // @NOTE: this is only for core.debug=true set via the configfile, the --debug turns debugging on before this
     if (config.debug) require('debug').enable(config.debug === true ? '*' : config.debug);
