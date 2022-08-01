@@ -12,7 +12,7 @@ class ConfigCommandReset extends BaseCommand {
     for (const store in stores) {
       if (stores[store] && stores[store].type === 'file') {
         const file = stores[store].file;
-        this.debug('resetting config at %s', file);
+        this.debug('resetting config at %o', file);
         try {
           fs.unlinkSync(file);
         } catch (error) {
