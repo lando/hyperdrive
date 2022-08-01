@@ -16,7 +16,7 @@ module.exports = async({config}) => {
     const {configCommand, bin} = landoCLIConfig;
 
     // run the config get command
-    const result = get(LandoCLI.getCmd(configCommand), bin);
+    const result = get(LandoCLI.info(configCommand), bin);
 
     // if we dont have the props we need then throw something?
     for (const prop of ['app.landofile', 'lando.globalPluginDir']) {

@@ -34,7 +34,7 @@ class ListCommand extends BaseCommand {
     // if we dont have the lando config or autosync is on then get the lando config
     if (!fs.existsSync(hyperdrive.get('system.lando-config')) || hyperdrive.get('core.auto-sync')) {
       const {configCommand} = landoCLIConfig;
-      LandoCLI.getCmd(configCommand);
+      LandoCLI.info(configCommand);
     }
 
     // get the lando config
