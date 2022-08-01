@@ -15,7 +15,7 @@ const Plugin = require('./plugin');
  *
  */
 class LandoCLI {
-  static getCmd(cmd) {
+  static info(cmd = 'lando --hyperdrive') {
     try {
       debug('missing needed lando config, getting it from %o', cmd);
       return parseStdoutJson(cmd);
