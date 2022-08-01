@@ -237,6 +237,11 @@ class Config extends nconf.Provider {
     this.#writeFile({...this.get(undefined, store, false), ...this.#encode(data)}, dest);
     this.debug('saved %o to %j', data, dest);
   }
+
+  // override to replace the default access separator, this seems easier than using accessSeparator?
+  set(path, value) {
+    super.set(path.replace('.', ':'), value);
+  }
 }
 
 module.exports = Config;

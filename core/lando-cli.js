@@ -46,7 +46,7 @@ class LandoCLI {
     // set top level props
     this.autoSync = autoSync;
     this.bin = path.isAbsolute(bin) ? bin : which.sync('lando', {nothrow: true});
-    this.name = name || path.basename(this.bin);
+    this.name = name || path.basename(this.bin) || 'lando';
     this.channel = releaseChannel;
     this.id = id || product || path.basename(process.argv[1]) || 'hyperdrive';
     this.install = install;
@@ -64,28 +64,26 @@ class LandoCLI {
     // NOTE: this will not work if the actual version is less than the required 3.6.5
     if (this.isInstalled && (!this.version || this.plugins === [] || !this.pluginDirs === [] || this.autoSync)) {
       this.config = this.info() || undefined;
-      this.name = get(this.config, `${this.bin}.lando.name`);
       this.plugins = get(this.config, `${this.bin}.lando.plugins`);
       this.pluginDirs = get(this.config, `${this.bin}.lando.pluginDirs`);
       this.version = get(this.config, `${this.bin}.lando.version`);
+
+      // mix in other global plugins
+      const globalPlugins = this.pluginDirs
+      .filter(dir => dir.type === 'global')
+      .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
+      .map(dirs => dirs.dirs.map(dir => new Plugin({dir, debugspace, id: 'lando-cli', type: dirs.type})))
+      .flat(Number.POSITIVE_INFINITY);
+
+      // concat all plugins together
+      this.plugins = [...this.plugins, ...globalPlugins];
     }
 
     // props to determine status
     this.isHyperdrived = this.isInstalled && satisfies(this.version, '>=3.6.5');
     this.isSupported = this.isInstalled && satisfies(this.version, this.required);
-
-    // discover other plugins
-    const globalPlugins = this.pluginDirs
-    .filter(dir => dir.type === 'global')
-    .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
-    .map(dirs => dirs.dirs.map(dir => new Plugin({dir, debugspace, id: 'lando-cli', type: dirs.type})))
-    .flat(Number.POSITIVE_INFINITY);
-    // concat all plugins together
-    this.plugins = [...this.plugins, ...globalPlugins];
-
     // // additional props
     this.updateAvailable = undefined;
-
     // log
     const status = this.isSupported ? chalk.green('supported') : chalk.red('not supported');
     this.debug('instantiated lando-cli version %o (%s), using %o', this.version, status, this.bin);
@@ -107,7 +105,7 @@ class LandoCLI {
       suggestions: [
         `Run ${chalk.magenta('hyperdrive install lando')} and let us install lando for you.`,
         'Move a version of lando that you have into $PATH to help us detect it',
-        `Run ${chalk.magenta('hyperdrive config set lando-cli.bin=/path/to/my/lando')}`,
+        `Tell us where your lando is with ${chalk.magenta('hyperdrive config set lando-cli.bin=/path/to/my/lando')}`,
       ],
       ref: 'https://docs.lando.dev/getting-started/installation.html',
       exit: 1,
