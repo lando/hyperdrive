@@ -21,9 +21,10 @@ module.exports = async({id, argv, config}) => {
       cached: path.join(config.cacheDir, 'config.json'),
       env: 'HYPERDRIVE',
       id: 'hyperdrive',
+      // add oclif config so we can use it in our js templates
+      oclif: config,
       // sources are loading in increasing priority into the main config
       sources: {
-        defaults: path.join(__dirname, '..', '..', 'config', 'defaults.yaml'),
         system: path.join(config.dataDir, 'system.json'),
         managed: path.join(config.dataDir, 'managed.json'),
         user: path.join(config.configDir, 'config.yaml'),

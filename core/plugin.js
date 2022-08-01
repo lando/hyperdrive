@@ -11,7 +11,7 @@ class Plugin {
   /**
    * @TODO: scripts shoudl be moved into the engine constructor
    */
-  constructor({dir, id, type = 'app', releaseChannel = 'stable'} = {}) {
+  constructor({dir, debugspace, type = 'app', releaseChannel = 'stable'} = {}) {
     // core props
     this.location = dir;
     this.type = type;
@@ -21,7 +21,7 @@ class Plugin {
     this.config = {...this.pjson.lando, ...this.#load()};
     // set top level things
     this.name = this.config.name || this.pjson.name;
-    this.debug = require('debug')(`${id}:@lando/core:plugin:${this.name}`);
+    this.debug = require('debug')(`${debugspace}:@lando/core:plugin:${this.name}`);
     this.package = this.pjson.name;
     this.version = this.pjson.version;
     // add some computed properties

@@ -1,3 +1,4 @@
+const path = require('path');
 const Config = require('./config');
 
 class Bootstrapper {
@@ -64,28 +65,17 @@ class Bootstrapper {
   }
 
   async run(config = {}) {
-    // just some other identifiers
-    config.id = this.config.get('core.id') || config.bin || config.dirname;
-    config.product = this.config.get('core.product') || config.bin || config.dirname;
-
-    // set the core debug flag
-    config.debug = this.config.get('core.debug');
+    // get an id
+    config.id = this.config.get('core.id') || this.config.get('core.id') || config.bin || path.basename(process.argv[1]);
+    // set core debug flag
+    this.config.set('core.debug', config.debug);
     // enable debugging if the config is set
-    // @NOTE: this is only for debug=true set via the configfile, the --debug turns debugging on before this
+    // @NOTE: this is only for core.debug=true set via the configfile, the --debug turns debugging on before this
     if (config.debug) require('debug').enable(config.debug === true ? '*' : config.debug);
 
-    // mix in some additional and helpful config
-    // the environment we are running in
-    config.env = Object.hasOwn(process, 'pkg') ? 'prod' : 'dev';
-    // is running in a leia test
-    config.leia = Object.hasOwn(process.env, 'LEIA_PARSER_RUNNING');
-    // legacy
-    config.mode = 'cli';
-    // is running from a binary packaged up by @vercel/pkg
-    config.packaged = Object.hasOwn(process, 'pkg');
-
     // add the main config class to the OCLIF config
-    config.hyperdrive = this.config;
+    // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
+    config[config.id] = this.config;
   }
 }
 
