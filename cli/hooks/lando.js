@@ -1,6 +1,5 @@
 const chalk = require('chalk');
 const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:config');
-const findPlugins = require('./../../utils/find-plugins');
 const fs = require('fs');
 const get = require('lodash/get');
 const has = require('lodash/has');
@@ -50,7 +49,7 @@ module.exports = async({config}) => {
     // mix in other global plugins
     const globalPlugins = landoConfig.pluginDirs
     .filter(dir => dir.type === 'global')
-    .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
+    .map(dir => ({type: dir.type, dirs: config.bootstrap.findPlugins(dir.dir, dir.depth)}))
     .map(dirs => dirs.dirs.map(dir => new Plugin({dir, debugspace: core.id, id: 'lando-cli', type: dirs.type})))
     .flat(Number.POSITIVE_INFINITY);
 
