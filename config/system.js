@@ -74,11 +74,11 @@ module.exports = ({options}) => {
     updates: {
       notify: true,
     },
+    'docker-desktop': {
+      'required-version': '>=3.6.5 && <=5.0.0',
+      'supported-version': '>=3.6.5 && <=4.10.5',
+    },
+    // Allows you to pass env value to Docker, Docker Compose, etc.
+    env: {},
   };
 };
-
-/*
-docker-desktop:
-  required-version: ">=3.6.5 && <=5.0.0"
-  supported-version: ">=3.6.5 && <=4.10.5"
-*/
