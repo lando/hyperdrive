@@ -11,9 +11,10 @@ module.exports = async({config}) => {
   debug('config event works!');
   // get some stuff we need
   const {core, plugins, system} = config.hyperdrive.get();
-  // get the lando CLI component and deconstruct config
-  const [LandoCLI, landoCLIConfig] = config.bootstrap.getComponent('core.lando');
-  const {configCommand, bin} = landoCLIConfig;
+  // get the core lando class and deconstruct config
+
+  const LandoCLI = config.bootstrap.getClass('core.lando');
+  const {configCommand, bin} = LandoCLI.defaults;
 
   // dump the landoconfig file if we have to and rebase our managed config on it
   if (!core.landofile || !plugins.globalInstallDir || core.autoSync) {
@@ -43,7 +44,7 @@ module.exports = async({config}) => {
 
   // add the plugins into the config
   if (fs.existsSync(system.landoConfig)) {
-    const {bin} = landoCLIConfig;
+    const {bin} = LandoCLI.defaults;
     const landoConfig = require(system.landoConfig)[bin].lando;
 
     // mix in other global plugins

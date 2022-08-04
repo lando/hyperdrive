@@ -26,10 +26,8 @@ class ListCommand extends BaseCommand {
     const {flags} = await this.parse(ListCommand);
     // get needed helpers things
     const {bootstrap, hyperdrive, lando} = this.config;
-    // get lando CLI component and config from registry
-    const [LandoCLI, landoCLIConfig] = bootstrap.getComponent('core.lando');
-    // create lando cli instance by merging together various config sources
-    const landoCLI = new LandoCLI({...hyperdrive.get('core'), ...landoCLIConfig, ...lando});
+    // get lando cli component
+    const landoCLI = await bootstrap.getComponent('core.lando', lando);
 
     // if lando is not installed or is unsupported then throw an error?
     // @TODO: lando should use id to reflect changes?
@@ -40,7 +38,7 @@ class ListCommand extends BaseCommand {
     // unsupported error
     // @TODO: lando should use id to reflect changes?
     if (!landoCLI.isSupported) {
-      const {required} = landoCLIConfig;
+      const required = landoCLI.required;
       this.error(`${landoCLI.name} is installed but ${hyperdrive.get('core.id')} needs version ${required}`, landoCLI.notSupportedError());
     }
 

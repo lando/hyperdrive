@@ -31,8 +31,8 @@ class Plugin {
     // @TODO: do we need this still
     // this.namespace
     // this.config.core.engine
-    const [Component, componentConfig] = this.config.bootstrap.getComponent('core.engine');
-    this.engine = new Component(componentConfig);
+    // const [Component, componentConfig] = this.config.bootstrap.getComponent('core.engine');
+    // this.engine = new Component(componentConfig);
 
     // log
     const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');

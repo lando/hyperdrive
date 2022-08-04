@@ -26,22 +26,26 @@ class LandoCLI {
     }
   }
 
+  static setDefaults(defaults) {
+    LandoCLI.defaults = defaults;
+  }
+
   /**
    * @TODO: do we need any private properties?
    */
   constructor({
-    bin,
-    debugspace,
-    id,
-    product,
     version,
-    autoSync = false,
-    install = 'stable',
-    name = 'lando',
     plugins = [],
     pluginDirs = [],
-    required = '>=3.6.5',
-    releaseChannel = 'stable',
+    bin = LandoCLI.defaults.bin,
+    debugspace = LandoCLI.defaults.debugspace,
+    id = LandoCLI.defaults.id,
+    product = LandoCLI.defaults.product,
+    autoSync = LandoCLI.defaults.autoSync,
+    install = LandoCLI.defaults.install,
+    name = LandoCLI.defaults.name,
+    required = LandoCLI.defaults.required,
+    releaseChannel = LandoCLI.defaults.releaseChannel,
   } = {}) {
     // set top level props
     this.autoSync = autoSync;
@@ -165,4 +169,5 @@ class LandoCLI {
   // }
 }
 
+LandoCLI.defaults = {};
 module.exports = LandoCLI;
