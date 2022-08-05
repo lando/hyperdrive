@@ -55,7 +55,7 @@ class Bootstrapper {
     const Component = require(this.config.get(`registry.${component}`));
 
     // and set its defaults if applicable
-    if (Component.setDefaults && defaults) {
+    if (Component.setDefaults && typeof Component.setDefaults === 'function' && defaults) {
       const cConfig = this.config.get(component.split('.')[component.split('.').length - 1]);
       Component.setDefaults(config || {...this.config.get('core'), ...cConfig});
     }
@@ -71,12 +71,16 @@ class Bootstrapper {
   }
 
   // helper to get a component (and config?) from the registry
-  async getComponent(component, config, opts = {}) {
+  async getComponent(component, {config = {}, init = true} = {}, opts = {}) {
     // get class component and instantiate
     const Component = this.getClass(component, opts);
     const instance = new Component(config);
 
-    // @TODO: do init stuff here?
+    // and run its init func if applicable
+    if (instance.init && typeof instance.init === 'function' && init) {
+      await instance.init(config, opts);
+    }
+
     // and return
     return instance;
   }
