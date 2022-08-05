@@ -1,5 +1,4 @@
 const copydir = require('copy-dir');
-const mkdirp = require('mkdirp');
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
@@ -11,7 +10,7 @@ const filter = (stat, filepath, filename) => (path.extname(filename) !== '.js');
  */
 function moveConfig(src, dest) {
   // Ensure to exists
-  mkdirp.sync(dest);
+  fs.mkdirSync(dest, {recursive: true});
   // Try to copy the assets over
   try {
     // Copy opts and filter out all js files
@@ -27,7 +26,7 @@ function moveConfig(src, dest) {
     const f = _.get(error, 'path');
 
     // Catch this so we can try to repair
-    if (code !== 'EISDIR' || syscall !== 'open' || Boolean(mkdirp.sync(f))) {
+    if (code !== 'EISDIR' || syscall !== 'open' || Boolean(fs.mkdirSync(dest, {recursive: true}))) {
       throw new Error(error);
     }
 

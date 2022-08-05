@@ -3,7 +3,7 @@ const Dockerode = require('dockerode');
 class DockerEngine extends Dockerode {
   constructor(options = {}) {
     super(options);
-    this.name = 'docker';
+    this.name = 'docker-engine';
     this.supportedOS = ['linux'];
     this.version = this.getVersion();
     this.isInstalled = this.getInstalled();

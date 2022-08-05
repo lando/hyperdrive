@@ -34,7 +34,9 @@ module.exports = ({options}) => {
       // # @TODO: need to bump this once we release a lando with `lando --hyperdrive`
       required: '>=3.6.5',
     },
-    plugins: {},
+    plugin: {
+      globalInstallDir: path.join(home, '.lando', 'plugins'),
+    },
     registry: {
       app: {
         minapp: path.resolve(root, 'core/minapp'),
@@ -47,6 +49,7 @@ module.exports = ({options}) => {
       lando: {
         landoCli: path.resolve(root, 'core/lando-cli'),
       },
+      plugin: path.resolve(root, 'core/plugin'),
     },
     system: {
       arch,
@@ -74,9 +77,11 @@ module.exports = ({options}) => {
     updates: {
       notify: true,
     },
-    'docker-desktop': {
-      'required-version': '>=3.6.5 && <=5.0.0',
-      'supported-version': '>=3.6.5 && <=4.10.5',
+    dockerDesktop: {
+      // @TODO: better namespacing here?
+      required: '>=3.6.5 && <=5.0.0',
+      scripts: path.resolve(root, 'scripts'),
+      supported: '>=3.6.5 && <=4.10.5',
     },
     // Allows you to pass env value to Docker, Docker Compose, etc.
     env: {},

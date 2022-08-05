@@ -1,5 +1,7 @@
+// const path = require('path');
+
+// const {CliUx} = require('@oclif/core');
 const {PluginCommand} = require('../lib/plugin-command');
-const Plugin = require('../../core/plugin');
 
 class RemoveCommand extends PluginCommand {
   static description = 'Remove a plugin or dependency from your Lando installation.';
@@ -16,27 +18,35 @@ class RemoveCommand extends PluginCommand {
   // static parserOptions
 
   async run() {
-    const map = require('../../utils/map');
-    const path = require('path');
-    const {argv} = await this.parse(RemoveCommand);
-    const {CliUx} = require('@oclif/core');
-    const home = this.config.home;
-    const pluginsFolder = `${home}/.lando/plugins`;
-    const scripts = path.join(this.config.dataDir, 'scripts');
+    // mods
+    // const map = require('../../../utils/map');
+    // // get from config
+    // const {bootstrap} = this.config;
+    // // get needed classes
+    // const Plugin = bootstrap.getClass('plugin');
+    // // get argv
+    // const {argv} = await this.parse(RemoveCommand);
 
-    // Start the spinner
-    CliUx.ux.action.start('Uninstalling...');
+    // @TODO: to remove we need a list of all plugins so we can search by argv and return the root/location
+    // and then use that to remove
 
-    try {
-      await map(argv, function(pluginName) {
-        const plugin = new Plugin(pluginName, pluginsFolder, null, 'latest', scripts);
-        return plugin.remove();
-      });
-      CliUx.ux.action.stop('Uninstall successful.');
-    } catch (error) {
-      CliUx.ux.action.stop('Uninstall failed.');
-      this.error(error);
-    }
+    //   const home = this.config.home;
+    //   const pluginsFolder = `${home}/.lando/plugins`;
+    //   const scripts = path.join(this.config.dataDir, 'scripts');
+
+    //   // Start the spinner
+    //   CliUx.ux.action.start('Uninstalling...');
+
+    //   try {
+    //     await map(argv, function(pluginName) {
+    //       const plugin = new Plugin(pluginName, pluginsFolder, null, 'latest', scripts);
+    //       return plugin.remove();
+    //     });
+    //     CliUx.ux.action.stop('Uninstall successful.');
+    //   } catch (error) {
+    //     CliUx.ux.action.stop('Uninstall failed.');
+    //     this.error(error);
+    //   }
   }
 }
 

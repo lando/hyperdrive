@@ -57,7 +57,7 @@ class Bootstrapper {
     // and set its defaults if applicable
     if (Component.setDefaults && typeof Component.setDefaults === 'function' && defaults) {
       const cConfig = this.config.get(component.split('.')[component.split('.').length - 1]);
-      Component.setDefaults(config || {...this.config.get('core'), ...cConfig});
+      Component.setDefaults(config || {...this.config.get('system'), ...this.config.get('core'), ...cConfig});
     }
 
     // and set in cache if applicable

@@ -1,14 +1,33 @@
-const Docker = require('./docker-engine');
 const fs = require('fs');
 const path = require('path');
 
-class DockerDesktop extends Docker {
+const DockerEngine = require('./docker-engine');
+const moveConfig = require('./../utils/move-config');
+
+class DockerDesktop extends DockerEngine {
+  static setDefaults(defaults) {
+    DockerDesktop.defaults = defaults;
+  }
+
   constructor(options = {}) {
+    // @TODO: set upstream ops for dockerode eg host/socket?
+
+    // pass options upstream
     super(options);
+
+    // set the rest of our stuff
+    // @TODO: what are our fallbacks here?
+    const dataDir = DockerDesktop.defaults.dataDir;
     this.name = 'docker-desktop';
-    this.supportedOS = ['linux', 'windows', 'macos'];
+    this.scriptsSrc = DockerDesktop.defaults.scripts;
+    this.scriptsDest = path.join(dataDir, this.name, 'scripts');
+    moveConfig(this.scriptsSrc, this.scriptsDest);
+
     this.getVersion = this.getVersion();
     this.isInstalled = this.getInstalled();
+
+    // @TODO: should these be static props?
+    this.supportedOS = ['linux', 'windows', 'macos'];
   }
 
   /**
@@ -17,10 +36,48 @@ class DockerDesktop extends Docker {
    * @param {*} options
    * @returns
    */
-  async init(options) {
-    const engine = new DockerDesktop(options);
-    engine.info = await this.info();
-    return engine;
+  async init() {
+    // const engine = new DockerDesktop(options);
+    // engine.info = await this.info();
+    // return engine;
+  }
+
+  /**
+   * Add a Lando plugin.
+   */
+  async addPlugin(plugin) {
+    const createOptions = {
+      /*
+      Volumes: {
+        [plugin.path]: `/plugins/${plugin.pluginName}`,
+        [plugin.scripts]: '/scripts'
+      }, */
+      WorkingDir: '/tmp',
+      HostConfig: {
+        AutoRemove: true,
+        Binds: [
+          `${plugin.path}:/plugins/${plugin.name}`,
+          `${this.scriptsDest}:/scripts`,
+        ],
+      },
+      // tty: false,
+    };
+
+    try {
+      // @todo: would be nice to pass in process.stderr to get that output...could try using demux helper
+      // on debug statement to print that out at will.
+      super.run('node:14-alpine', ['sh', '-c', `/scripts/add.sh ${plugin.name}@${plugin.version} ${plugin.name}`], null, createOptions, function() {}).on('stream', function(stream) {
+        stream.on('data', buffer => {
+          // @todo: way to clean the output up better?
+          if (buffer.toString() !== '\u001B[1G\u001B[0K') {
+            const debug = require('debug')('engine:@lando/hyperdrive');
+            debug(String(buffer));
+          }
+        });
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -88,4 +145,5 @@ class DockerDesktop extends Docker {
   getVersion() {}
 }
 
+DockerDesktop.defaults = {};
 module.exports = DockerDesktop;
