@@ -5,19 +5,18 @@ const get = require('lodash/get');
 const has = require('lodash/has');
 const path = require('path');
 
-const Plugin = require('./../../core/plugin');
-
 module.exports = async({config}) => {
   debug('config event works!');
   // get some stuff we need
-  const {core, plugins, system} = config.hyperdrive.get();
-  // get the core lando class and deconstruct config
-
+  const {core, plugin, system} = config.hyperdrive.get();
+  // get the core classes we need
   const LandoCLI = config.bootstrap.getClass('core.lando');
+  const Plugin = config.bootstrap.getClass('plugin');
+  // deconstruct some defaults
   const {configCommand, bin} = LandoCLI.defaults;
 
   // dump the landoconfig file if we have to and rebase our managed config on it
-  if (!core.landofile || !plugins.globalInstallDir || core.autoSync) {
+  if (!core.landofile || !plugin.globalInstallDir || core.autoSync) {
     // run the config get command
     const result = get(LandoCLI.info(configCommand), bin);
 
@@ -32,7 +31,7 @@ module.exports = async({config}) => {
       core: {
         landofile: get(result, 'app.landofile', '.lando'), ...managedConfig.core,
       },
-      plugins: {
+      plugin: {
         'global-install-dir': get(result, 'lando.globalPluginDir', path.join(system.home, '.lando', 'plugins')), ...managedConfig.plugins,
       },
     };
@@ -51,7 +50,7 @@ module.exports = async({config}) => {
     const globalPlugins = landoConfig.pluginDirs
     .filter(dir => dir.type === 'global')
     .map(dir => ({type: dir.type, dirs: config.bootstrap.findPlugins(dir.dir, dir.depth)}))
-    .map(dirs => dirs.dirs.map(dir => new Plugin({dir, debugspace: core.id, id: 'lando-cli', type: dirs.type})))
+    .map(dirs => dirs.dirs.map(dir => new Plugin({root: dir, type: dirs.type})))
     .flat(Number.POSITIVE_INFINITY);
 
     // concat all plugins together

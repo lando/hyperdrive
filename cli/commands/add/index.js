@@ -1,7 +1,5 @@
 const {PluginCommand} = require('../../lib/plugin-command');
 const {CliUx} = require('@oclif/core');
-const path = require('path');
-const Plugin = require('../../../core/plugin');
 
 class AddCommand extends PluginCommand {
   // @TODO: For individual apps, you can create a .npmrc file to specify private registry.
@@ -27,11 +25,12 @@ class AddCommand extends PluginCommand {
   static strict = false;
 
   async run() {
+    // mods
     const map = require('../../../utils/map');
-    const moveConfig = require('../../../utils/move-config');
+    // get from config
     const {bootstrap} = this.config;
-    const [Component, componentConfig] = bootstrap.getComponent('core.engine');
-    const engine = new Component(componentConfig);
+    // get needed classes
+    const Plugin = bootstrap.getClass('plugin');
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
@@ -41,10 +40,6 @@ class AddCommand extends PluginCommand {
     CliUx.ux.action.start('Installing...');
 
     // Move the scripts folder into the OCLIF data directory.
-    const {home, dataDir} = this.config;
-    const scripts = path.join(dataDir, 'scripts');
-    moveConfig(path.resolve(__dirname, '..', '..', '..', 'scripts'), scripts);
-    const dest = `${home}/.lando/plugins`;
 
     // @todo: context detection. If we're in a Lando app, we'll add the plugin
     // to that app. We'll need to create a @lando/bootstrap package that will
@@ -61,8 +56,8 @@ class AddCommand extends PluginCommand {
     if (flags.global) {
       // Run docker commands to install plugins.
       try {
-        await map(argv, function(pluginName) {
-          return Plugin.add(pluginName, dest, scripts, engine);
+        await map(argv, plugin => {
+          return Plugin.add(plugin);
         });
         CliUx.ux.action.stop('Install successful.');
       } catch (error) {

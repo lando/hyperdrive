@@ -76,7 +76,7 @@ class LandoCLI {
       const globalPlugins = this.pluginDirs
       .filter(dir => dir.type === 'global')
       .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
-      .map(dirs => dirs.dirs.map(dir => new Plugin({dir, debugspace, id: 'lando-cli', type: dirs.type})))
+      .map(dirs => dirs.dirs.map(dir => new Plugin({root: dir, debugspace, id: 'lando-cli', type: dirs.type})))
       .flat(Number.POSITIVE_INFINITY);
 
       // concat all plugins together

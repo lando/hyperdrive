@@ -1,6 +1,5 @@
 const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../lib/base-command');
-const Plugin = require('../../core/plugin');
 
 class InfoCommand extends BaseCommand {
   // static _base = 'thing';
@@ -53,12 +52,15 @@ class InfoCommand extends BaseCommand {
   async run() {
     const _ = require('lodash');
     const keys = require('all-object-keys');
+    const Plugin = this.config.bootstrap.getClass('plugin');
+
     const {args, flags} = await this.parse(InfoCommand);
     const data = await Plugin.info(args.plugin);
     if (flags.json) return data;
 
     // Format data for table display.
     const tableKeys = keys(data);
+
     const tableRows = _(tableKeys)
     .filter(path => _.includes(tableKeys, path))
     .map(path => ({key: path, value: _.get(data, path)}))

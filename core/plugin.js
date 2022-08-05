@@ -2,58 +2,11 @@ const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
-const mkdirp = require('mkdirp');
 
 /**
  *
  */
 class Plugin {
-  /**
-   * @TODO: scripts shoudl be moved into the engine constructor
-   */
-  constructor({dir, debugspace, type = 'app', releaseChannel = 'stable'} = {}) {
-    // core props
-    this.location = dir;
-    this.type = type;
-    this.channel = releaseChannel;
-    // config props
-    this.pjson = require(path.join(dir, 'package.json'));
-    this.config = {...this.pjson.lando, ...this.#load()};
-    // set top level things
-    this.name = this.config.name || this.pjson.name;
-    this.debug = require('debug')(`${debugspace}:@lando/core:plugin:${this.name}`);
-    this.package = this.pjson.name;
-    this.version = this.pjson.version;
-    // add some computed properties
-    this.isInstalled = true;
-    this.isValid = Object.keys(this.config).length > 0;
-    this.updateAvailable = undefined;
-    // @TODO: do we need this still
-    // this.namespace
-    // this.config.core.engine
-    // const [Component, componentConfig] = this.config.bootstrap.getComponent('core.engine');
-    // this.engine = new Component(componentConfig);
-
-    // log
-    const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');
-    this.debug('instantiated %s plugin from %s', status, this.location);
-  }
-
-  // Internal method to help load config
-  // @TODO: we might want to put more stuff in here at some point.
-  // @NOTE: this will differ from "init" which should require in all needed files?
-  #load() {
-    const {location, options} = this;
-    // return the plugin.js return first
-    if (fs.existsSync(path.join(location, 'plugin.js'))) return require(path.join(location, 'plugin.js'))(options);
-    // otherwise return the plugin.yaml content
-    if (fs.existsSync(path.join(location, 'plugin.yaml'))) return yaml.load(fs.readFileSync(path.join(location, 'plugin.yaml'), 'utf8'));
-    // otherwise return the plugin.yml content
-    if (fs.existsSync(path.join(location, 'plugin.yml'))) return yaml.load(fs.readFileSync(path.join(location, 'plugin.yml'), 'utf8'));
-    // otherwise return uh, nothing?
-    return {};
-  }
-
   /**
    *
    * Install a plugin.
@@ -65,82 +18,19 @@ class Plugin {
    * @param {string} dest The plugin directory to install the plugin in.
    * @returns
    */
-  static async add(name, dest, scripts, engine) {
+  static async add(name, dest = Plugin.defaults.globalInstallDir, engine = Plugin.engine) {
     const nameVersion = this.mungeVersion(name);
     const pluginPath = `${dest}/${nameVersion.name}`;
 
-    // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
-    if (fs.existsSync(pluginPath)) {
-      fs.rmSync(pluginPath, {recursive: true});
-    }
+    // @TODO: add the new plugin to a temp directory, if success then remove old one and replace with new one
+    if (fs.existsSync(pluginPath)) fs.rmSync(pluginPath, {recursive: true});
 
-    mkdirp.sync(pluginPath);
+    fs.mkdirSync(pluginPath, {recursive: true});
     const plugin = {
       ...nameVersion,
-      scripts: scripts,
       path: pluginPath,
     };
     return engine.addPlugin(plugin);
-  }
-
-  async add() {
-    // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
-    if (fs.existsSync(this.location)) {
-      fs.rmSync(this.location, {recursive: true});
-    }
-
-    mkdirp.sync(this.location);
-    const run = this.engine.addPlugin(this);
-    run[1].attach({stream: true, stdout: true, stderr: true}, function(err, stream) {
-      console.log(err, stream);
-      stream.on('data', buffer => {
-        const debug = require('debug')(`add-${this.name}:@lando/hyperdrive`);
-        debug(String(buffer));
-      });
-    });
-    return run;
-  }
-
-  /**
-   *
-   * Separate a provided plugin's name and version strings.
-   *
-   * @param {string} name A string containing the name and optional version info for a plugin.
-   */
-  static mungeVersion(name) {
-    let nameVersion = {};
-    nameVersion.version = name.match('(?:[^@]*@\s*){2}(.*)'); // eslint-disable-line no-useless-escape
-    if (nameVersion.version === null) {
-      nameVersion.version = '';
-      nameVersion.name = name;
-    } else {
-      nameVersion.version = nameVersion.version[1];
-      nameVersion.name = name.replace(`@${nameVersion.version}`, '');
-    }
-
-    return nameVersion;
-  }
-
-  static async info(name) {
-    const {manifest} = require('pacote');
-    const nameVersion = this.mungeVersion(name);
-    const config = {
-      fullMetadata: true,
-      preferOnline: true,
-    };
-    const info = await manifest(name, config);
-    return this.formatInfo(nameVersion.name, info);
-  }
-
-  async info() {
-    const {manifest} = require('pacote');
-    const query = `${this.name}@${this.version}`;
-    const config = {
-      fullMetadata: true,
-      preferOnline: true,
-    };
-    const info = await manifest(query, config);
-    return this.formatInfo(this.name, info);
   }
 
   /**
@@ -166,6 +56,129 @@ class Plugin {
     };
   }
 
+  static async info(name) {
+    const {manifest} = require('pacote');
+    const nameVersion = this.mungeVersion(name);
+    const config = {
+      fullMetadata: true,
+      preferOnline: true,
+    };
+    const info = await manifest(name, config);
+    return this.formatInfo(nameVersion.name, info);
+  }
+
+  /**
+   *
+   * Separate a provided plugin's name and version strings.
+   *
+   * @param {string} name A string containing the name and optional version info for a plugin.
+   */
+  static mungeVersion(name) {
+    let nameVersion = {};
+    nameVersion.version = name.match('(?:[^@]*@\s*){2}(.*)'); // eslint-disable-line no-useless-escape
+    if (nameVersion.version === null) {
+      nameVersion.version = '';
+      nameVersion.name = name;
+    } else {
+      nameVersion.version = nameVersion.version[1];
+      nameVersion.name = name.replace(`@${nameVersion.version}`, '');
+    }
+
+    return nameVersion;
+  }
+
+  static setDefaults(defaults) {
+    Plugin.defaults = defaults;
+  }
+
+  static setEngine(engine) {
+    Plugin.engine = engine;
+  }
+
+  /**
+   * @TODO: scripts shoudl be moved into the engine constructor
+   */
+  constructor({
+    root,
+    type = 'app',
+    intstallDir = Plugin.defaults.globalInstallDir,
+    debugspace = Plugin.defaults.debugspace,
+    releaseChannel = Plugin.defaults.releaseChannel,
+  } = {}) {
+    // core props
+    this.channel = releaseChannel;
+    this.installDir = intstallDir;
+    this.root = root;
+    this.type = type;
+
+    // config props
+    // @TODO: this is only for human friendly output
+    this.location = root;
+    this.pjson = require(path.join(this.root, 'package.json'));
+    this.config = {...this.pjson.lando, ...this.#load()};
+    // set top level things
+    this.name = this.config.name || this.pjson.name;
+    this.debug = require('debug')(`${debugspace}:@lando/core:plugin:${this.name}`);
+    this.package = this.pjson.name;
+    this.version = this.pjson.version;
+    // add some computed properties
+    this.isInstalled = true;
+    this.isValid = Object.keys(this.config).length > 0;
+    this.updateAvailable = undefined;
+    // @TODO: do we need this still
+    // this.namespace
+    // this.config.core.engine
+    // const [Component, componentConfig] = this.config.bootstrap.getComponent('core.engine');
+    // this.engine = new Component(componentConfig);
+
+    // log
+    const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');
+    this.debug('instantiated %s plugin from %s', status, this.root);
+  }
+
+  // Internal method to help load config
+  // @TODO: we might want to put more stuff in here at some point.
+  // @NOTE: this will differ from "init" which should require in all needed files?
+  #load() {
+    const {root, options} = this;
+    // return the plugin.js return first
+    if (fs.existsSync(path.join(root, 'plugin.js'))) return require(path.join(root, 'plugin.js'))(options);
+    // otherwise return the plugin.yaml content
+    if (fs.existsSync(path.join(root, 'plugin.yaml'))) return yaml.load(fs.readFileSync(path.join(root, 'plugin.yaml'), 'utf8'));
+    // otherwise return the plugin.yml content
+    if (fs.existsSync(path.join(root, 'plugin.yml'))) return yaml.load(fs.readFileSync(path.join(root, 'plugin.yml'), 'utf8'));
+    // otherwise return uh, nothing?
+    return {};
+  }
+
+  async add() {
+    // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
+    if (fs.existsSync(this.root)) {
+      fs.rmSync(this.root, {recursive: true});
+    }
+
+    fs.mkdirSync(this.root, {recursive: true});
+    const run = this.engine.addPlugin(this);
+    run[1].attach({stream: true, stdout: true, stderr: true}, function(err, stream) {
+      stream.on('data', buffer => {
+        const debug = require('debug')(`add-${this.name}:@lando/hyperdrive`);
+        debug(String(buffer));
+      });
+    });
+    return run;
+  }
+
+  async info() {
+    const {manifest} = require('pacote');
+    const query = `${this.name}@${this.version}`;
+    const config = {
+      fullMetadata: true,
+      preferOnline: true,
+    };
+    const info = await manifest(query, config);
+    return this.formatInfo(this.name, info);
+  }
+
   // update(version) {
 
   // }
@@ -175,7 +188,7 @@ class Plugin {
    *
    */
   remove() {
-    return fs.rmSync(this.location, {recursive: true});
+    return fs.rmSync(this.root, {recursive: true});
   }
 
   // update(version) {
@@ -240,4 +253,6 @@ class Plugin {
   // }
 }
 
+Plugin.defaults = {};
+Plugin.engine = undefined;
 module.exports = Plugin;
