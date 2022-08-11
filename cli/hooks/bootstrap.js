@@ -54,13 +54,13 @@ module.exports = async({id, argv, config}) => {
   debug('minstrap complete, using %s as bootstrapper', minstrapper.loader);
 
   // get the boostrapper and run it
-  config.Bootstrapper = require(minstrapper.loader);
-  config.bootstrap = new config.Bootstrapper(minstrapper.config);
+  const Bootstrapper = require(minstrapper.loader);
+  const bootstrap = new Bootstrapper(minstrapper.config);
 
   // Initialize
   // @TODO: could it be better to merge the result of bootstrapper.run() into config so we can load in other stuff?
   try {
-    await config.bootstrap.run(config);
+    await bootstrap.run(config);
     debug('bootstrap completed successfully!');
   } catch (error) {
     // @TODO: figure out how to use OCLIF error handling to print a message here?

@@ -117,7 +117,21 @@ class Bootstrapper {
     // add the main config class and instance to the OCLIF config
     config.Config = Config;
     // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
-    config[config.id] = this.config;
+    config[config.id] = {
+      bootstrap: this,
+      config: this.config,
+      getClass: (component, opts) => {
+        return Reflect.apply(this.getClass, this, [component, opts]);
+      },
+      getComponent: (component, config, opts) => {
+        return Reflect.apply(this.getComponent, this, [component, config, opts]);
+      },
+      id: this.id,
+      options: this.options,
+      registry: this.registry,
+      Bootstrapper,
+      Config,
+    };
   }
 }
 

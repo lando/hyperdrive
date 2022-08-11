@@ -34,10 +34,10 @@ class ConfigCommandSet extends BaseCommand {
     // get args and flags
     const {argv, flags} = await this.parse(ConfigCommandSet);
     // get the hyperdrive config object
-    const config = this.config.hyperdrive;
+    const {hyperdrive} = this.config;
 
     // start with data from file or empty
-    const data = config.stores.overrides ? config.stores.overrides.get() : {};
+    const data = hyperdrive.config.stores.overrides ? hyperdrive.config.stores.overrides.get() : {};
 
     // mix in argv if they have paths and values
     for (const arg of argv) {
@@ -61,7 +61,7 @@ class ConfigCommandSet extends BaseCommand {
     }
 
     // save result
-    config.save(data);
+    hyperdrive.config.save(data);
 
     // if json then return the saved result
     if (flags.json) return data;

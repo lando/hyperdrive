@@ -54,15 +54,17 @@ class InfoCommand extends BaseCommand {
   async run() {
     const _ = require('lodash');
     const sortBy = require('lodash/sortBy');
-    const Plugin = this.config.bootstrap.getClass('plugin');
-    const {keys} = this.config.Config;
+
+    // get hyperdrive stuff
+    const {hyperdrive} = this.config;
+    const Plugin = hyperdrive.getClass('plugin');
 
     const {args, flags} = await this.parse(InfoCommand);
     const data = await Plugin.info(args.plugin);
     if (flags.json) return data;
 
     // Format data for table display.
-    const tableKeys = keys(data, {expandArrays: false});
+    const tableKeys = hyperdrive.Config.keys(data, {expandArrays: false});
 
     const rows = _(tableKeys)
     .filter(path => _.includes(tableKeys, path))

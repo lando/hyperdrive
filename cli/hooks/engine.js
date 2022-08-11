@@ -4,14 +4,14 @@ module.exports = async({Command, config}) => {
   // get stuff we need
   // @TODO: what about command aliases?
   const {id} = Command;
-  const {bootstrap} = config;
+  const {hyperdrive} = config;
 
   // Add the engine as a global thing if we need it
   // @TODO: add more commands here?
   // @TODO: does this make sense to do here?
   if (id === 'add') {
-    const Plugin = bootstrap.getClass('plugin');
-    const engine = await bootstrap.getComponent('core.engine');
+    const Plugin = hyperdrive.getClass('plugin');
+    const engine = await hyperdrive.getComponent('core.engine');
     Plugin.setEngine(engine);
   }
 };
