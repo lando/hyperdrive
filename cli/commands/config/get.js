@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const get = require('lodash/get');
+const prettify = require('./../../../utils/prettify');
 
 const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
@@ -71,12 +72,14 @@ class ConfigCommandGet extends BaseCommand {
 
     // otherwise CLI table
     } else {
-      const rows = keys(data, {expandArrays: false}).map(key => ({key,
-        // try to get directly from store, otherwise get from subset
-        value: config.get(key, flags.store, false) || get(data, key),
-      }));
+      const rows = keys(data, {expandArrays: false})
+      .map(key => ({key, value: config.get(key, flags.store, false) || get(data, key)}));
+
       this.log();
-      CliUx.ux.table(sortBy(rows, 'key'), {key: {}, value: {}});
+      CliUx.ux.table(sortBy(rows, 'key'), {
+        key: {},
+        value: {get: row => prettify(row.value)},
+      });
       this.log();
     }
   }

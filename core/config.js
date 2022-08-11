@@ -227,12 +227,17 @@ class Config extends nconf.Provider {
 
   // overriden save method
   save(data, store = this.managed) {
-    // purposefully try to boolean type strings
+    // purposefully try to type parse things
     // NOTE: is this a good idea?
     for (const key of Config.keys(data)) {
       if (get(data, key)) {
+        // booleans
         if (get(data, key) === 'true' || get(data, key) === '1') set(data, key, true);
         if (get(data, key) === 'false' || get(data, key) === '0') set(data, key, false);
+        // arrays of strings
+        if (Array.isArray(this.get(key)) && typeof get(data, key) === 'string') {
+          set(data, key, get(data, key).split(/, |[ ,|]/));
+        }
       }
     }
 
