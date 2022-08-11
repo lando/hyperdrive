@@ -7,6 +7,9 @@ const yaml = require('js-yaml');
  *
  */
 class Plugin {
+  static name = 'plugin';
+  static cspace = 'plugin';
+
   /**
    *
    * Install a plugin.
@@ -106,7 +109,6 @@ class Plugin {
     releaseChannel = Plugin.defaults.releaseChannel,
   } = {}) {
     // core props
-    this.name = 'plugins';
     this.channel = releaseChannel;
     this.installDir = intstallDir;
     this.root = root;

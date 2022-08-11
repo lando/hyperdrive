@@ -2,18 +2,6 @@ const path = require('path');
 const Config = require('./config');
 
 class Bootstrapper {
-  constructor(options = {}) {
-    this.id = options.id || 'lando';
-    // the global config
-    this.config = new Config(options);
-    // debugger
-    this.debug = require('debug')(`${this.id}:@lando/core:bootstrap`);
-    // a registry of loaded component classes
-    this.registry = options.registry || {};
-    // just save the options
-    this.options = options;
-  }
-
   static collapsePlugins(plugins) {
     return require('../utils/collapse-plugins')(plugins);
   }
@@ -33,6 +21,18 @@ class Bootstrapper {
 
   static groupPlugins(plugins) {
     return require('../utils/group-plugins')(plugins, {app: 1, team: 2, global: 3, core: 4});
+  }
+
+  constructor(options = {}) {
+    this.id = options.id || 'lando';
+    // the global config
+    this.config = new Config(options);
+    // debugger
+    this.debug = require('debug')(`${this.id}:@lando/core:bootstrap`);
+    // a registry of loaded component classes
+    this.registry = options.registry || {};
+    // just save the options
+    this.options = options;
   }
 
   // helper to get a class
@@ -56,8 +56,8 @@ class Bootstrapper {
 
     // and set its defaults if applicable
     if (Component.setDefaults && typeof Component.setDefaults === 'function' && defaults) {
-      const cConfig = this.config.get(component.split('.')[component.split('.').length - 1]);
-      Component.setDefaults(config || {...this.config.get('system'), ...this.config.get('core'), ...cConfig});
+      const namespace = Component.cspace || Component.name || component.split('.')[component.split('.').length - 1];
+      Component.setDefaults(config || {...this.config.get('system'), ...this.config.get('core'), ...this.config.get(namespace)});
     }
 
     // and set in cache if applicable

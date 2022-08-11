@@ -5,6 +5,9 @@ const DockerEngine = require('./docker-engine');
 const moveConfig = require('./../utils/move-config');
 
 class DockerDesktop extends DockerEngine {
+  static name = 'docker-desktop';
+  static cspace = 'docker-desktop';
+
   static setDefaults(defaults) {
     DockerDesktop.defaults = defaults;
   }
@@ -18,9 +21,8 @@ class DockerDesktop extends DockerEngine {
     // set the rest of our stuff
     // @TODO: what are our fallbacks here?
     const dataDir = DockerDesktop.defaults.dataDir;
-    this.name = 'docker-desktop';
     this.scriptsSrc = DockerDesktop.defaults.scripts;
-    this.scriptsDest = path.join(dataDir, this.name, 'scripts');
+    this.scriptsDest = path.join(dataDir, DockerDesktop.name, 'scripts');
     moveConfig(this.scriptsSrc, this.scriptsDest);
 
     this.getVersion = this.getVersion();

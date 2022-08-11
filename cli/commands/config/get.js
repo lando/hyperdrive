@@ -14,7 +14,7 @@ class ConfigCommandGet extends BaseCommand {
     'hyperdrive config get core.telemetry updates.notify --store=user',
     'hyperdrive config get -c config.yaml',
     'hyperdrive config get --store user',
-  ]
+  ];
 
   static strict = false;
 
