@@ -1,3 +1,5 @@
+const prettify = require('./../../utils/prettify');
+
 const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../lib/base-command');
 
@@ -51,6 +53,7 @@ class InfoCommand extends BaseCommand {
 
   async run() {
     const _ = require('lodash');
+    const sortBy = require('lodash/sortBy');
     const Plugin = this.config.bootstrap.getClass('plugin');
     const {keys} = this.config.Config;
 
@@ -61,12 +64,17 @@ class InfoCommand extends BaseCommand {
     // Format data for table display.
     const tableKeys = keys(data, {expandArrays: false});
 
-    const tableRows = _(tableKeys)
+    const rows = _(tableKeys)
     .filter(path => _.includes(tableKeys, path))
     .map(path => ({key: path, value: _.get(data, path)}))
     .value();
 
-    CliUx.ux.table(tableRows, {key: {}, value: {}});
+    this.log();
+    CliUx.ux.table(sortBy(rows, 'key'), {
+      key: {},
+      value: {get: row => prettify(row.value)},
+    });
+    this.log();
   }
 }
 
