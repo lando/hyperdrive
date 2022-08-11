@@ -28,9 +28,9 @@ class AddCommand extends PluginCommand {
     // mods
     const map = require('../../../utils/map');
     // get from config
-    const {bootstrap} = this.config;
+    const {hyperdrive} = this.config;
     // get needed classes
-    const Plugin = bootstrap.getClass('plugin');
+    const Plugin = hyperdrive.getClass('plugin');
 
     // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
     // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop

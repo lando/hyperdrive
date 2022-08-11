@@ -8,7 +8,8 @@ class ConfigCommandReset extends BaseCommand {
   static strict = false;
 
   async run() {
-    const stores = this.config.hyperdrive.stores;
+    const {hyperdrive} = this.config;
+    const stores = hyperdrive.config.stores;
     for (const store in stores) {
       if (stores[store] && stores[store].type === 'file') {
         const file = stores[store].file;

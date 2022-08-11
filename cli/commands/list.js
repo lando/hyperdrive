@@ -25,9 +25,9 @@ class ListCommand extends BaseCommand {
     // get args and flags
     const {flags} = await this.parse(ListCommand);
     // get needed helpers things
-    const {bootstrap, hyperdrive, lando} = this.config;
+    const {hyperdrive} = this.config;
     // get lando cli component
-    const landoCLI = await bootstrap.getComponent('core.lando', lando);
+    const landoCLI = await hyperdrive.getComponent('core.lando', hyperdrive.lando);
 
     // if lando is not installed or is unsupported then throw an error?
     // @TODO: lando should use id to reflect changes?
@@ -54,7 +54,7 @@ class ListCommand extends BaseCommand {
     // }
 
     // organize plugins so that load order is reflected
-    const organizedPlugins = bootstrap.collapsePlugins(bootstrap.groupPlugins(plugins));
+    const organizedPlugins = hyperdrive.bootstrap.collapsePlugins(hyperdrive.bootstrap.groupPlugins(plugins));
 
     // filter out invalid and hidden plugins
     const rows = sortBy(organizedPlugins.filter(plugin => plugin.isValid && !plugin.isHidden), 'name');

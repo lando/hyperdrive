@@ -42,12 +42,11 @@ class ConfigCommandGet extends BaseCommand {
     // get args and flags
     const {argv, flags} = await this.parse(ConfigCommandGet);
     // get the hyperdrive config object
-    const config = this.config.hyperdrive;
-    const {keys} = this.config.Config;
+    const {hyperdrive} = this.config;
 
     // get the data, if argv has one element then use the string version
     const paths = argv.length === 1 ? argv[0] : argv;
-    const data = config.get(paths, flags.store, false);
+    const data = hyperdrive.config.get(paths, flags.store, false);
 
     // filter out system config by default
     if (!flags.system && flags.store !== 'system') {
@@ -72,8 +71,8 @@ class ConfigCommandGet extends BaseCommand {
 
     // otherwise CLI table
     } else {
-      const rows = keys(data, {expandArrays: false})
-      .map(key => ({key, value: config.get(key, flags.store, false) || get(data, key)}));
+      const rows = hyperdrive.Config.keys(data, {expandArrays: false})
+      .map(key => ({key, value: hyperdrive.config.get(key, flags.store, false) || get(data, key)}));
 
       this.log();
       CliUx.ux.table(sortBy(rows, 'key'), {
