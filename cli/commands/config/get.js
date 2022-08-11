@@ -1,6 +1,5 @@
 const chalk = require('chalk');
 const get = require('lodash/get');
-const keys = require('all-object-keys');
 
 const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
@@ -43,6 +42,7 @@ class ConfigCommandGet extends BaseCommand {
     const {argv, flags} = await this.parse(ConfigCommandGet);
     // get the hyperdrive config object
     const config = this.config.hyperdrive;
+    const {keys} = this.config.Config;
 
     // get the data, if argv has one element then use the string version
     const paths = argv.length === 1 ? argv[0] : argv;
@@ -71,7 +71,7 @@ class ConfigCommandGet extends BaseCommand {
 
     // otherwise CLI table
     } else {
-      const rows = keys(data).map(key => ({key,
+      const rows = keys(data, {expandArrays: false}).map(key => ({key,
         // try to get directly from store, otherwise get from subset
         value: config.get(key, flags.store, false) || get(data, key),
       }));

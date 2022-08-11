@@ -51,15 +51,15 @@ class InfoCommand extends BaseCommand {
 
   async run() {
     const _ = require('lodash');
-    const keys = require('all-object-keys');
     const Plugin = this.config.bootstrap.getClass('plugin');
+    const {keys} = this.config.Config;
 
     const {args, flags} = await this.parse(InfoCommand);
     const data = await Plugin.info(args.plugin);
     if (flags.json) return data;
 
     // Format data for table display.
-    const tableKeys = keys(data);
+    const tableKeys = keys(data, {expandArrays: false});
 
     const tableRows = _(tableKeys)
     .filter(path => _.includes(tableKeys, path))

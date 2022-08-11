@@ -106,15 +106,16 @@ class Bootstrapper {
   async run(config = {}) {
     // get an id
     config.id = this.config.get('core.id') || this.config.get('core.id') || config.bin || path.basename(process.argv[1]);
+
     // reconcile debug flag
     config.debug = this.config.get('core.debug') || config.debug || false;
-
     // enable debugging if the config is set
     // @NOTE: this is only for core.debug=true set via the configfile, the --debug turns debugging on before this
     // @TODO: right now you cannot pass in --debug = string and you should be able to
     if (config.debug) require('debug').enable(config.debug === true || config.debug === 1 ? '*' : config.debug);
 
-    // add the main config class to the OCLIF config
+    // add the main config class and instance to the OCLIF config
+    config.Config = Config;
     // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
     config[config.id] = this.config;
   }

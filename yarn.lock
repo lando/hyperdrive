@@ -1007,13 +1007,6 @@ ajv@^8.0.1:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-all-object-keys@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/all-object-keys/-/all-object-keys-2.2.0.tgz#4e0cd06357eefc006741f6bb8a47dde500dbe01c"
-  integrity sha512-x8eEZ/ZhC6OjCKanec3y7DpCj/Kymife0yVkq56XDWUwZcZotzC0ejgO5/dbgRiBVMRb09dY+JP9dySCHysl9A==
-  dependencies:
-    try-catch "^3.0.0"
-
 ansi-colors@4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-4.1.1.tgz#cbb9ae256bf750af1eab344f229aa27fe94ba348"
@@ -5879,11 +5872,6 @@ trim-repeated@^1.0.0:
   integrity sha512-pkonvlKk8/ZuR0D5tLW8ljt5I8kmxp2XKymhepUeOdCEfKpZaktSArkLHZt76OB1ZvO9bssUsDty4SWhLvZpLg==
   dependencies:
     escape-string-regexp "^1.0.2"
-
-try-catch@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/try-catch/-/try-catch-3.0.1.tgz#93abdca71ce148a08adb49e08dbd491cd485164d"
-  integrity sha512-91yfXw1rr/P6oLpHSyHDOHm0vloVvUoo9FVdw8YwY05QjJQG9OT0LUxe2VRAzmHG+0CUOmI3nhxDUMLxDN/NEQ==
 
 tslib@^1.9.0:
   version "1.14.1"
