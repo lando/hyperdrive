@@ -1,6 +1,9 @@
 const Dockerode = require('dockerode');
 
 class DockerEngine extends Dockerode {
+  static name = 'docker-engine';
+  static cspace = 'docker-engine';
+
   constructor(options = {}) {
     super(options);
     this.name = 'docker-engine';
