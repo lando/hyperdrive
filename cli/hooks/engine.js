@@ -7,6 +7,8 @@ module.exports = async({Command, config}) => {
   const {bootstrap} = config;
 
   // Add the engine as a global thing if we need it
+  // @TODO: add more commands here?
+  // @TODO: does this make sense to do here?
   if (id === 'add') {
     const Plugin = bootstrap.getClass('plugin');
     const engine = await bootstrap.getComponent('core.engine');

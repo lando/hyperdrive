@@ -1,10 +1,10 @@
 const camelcaseKeys = require('camelcase-keys');
 const fs = require('fs');
 const get = require('lodash/get');
+const getKeys = require('./../utils/get-object-keys');
 const has = require('lodash/has');
 const kebabcase = require('lodash/kebabCase');
 const kebabcaseKeys = require('kebabcase-keys');
-const keys = require('all-object-keys');
 const nconf = require('nconf');
 const path = require('path');
 const set = require('lodash/set');
@@ -14,6 +14,10 @@ const yaml = require('js-yaml');
 nconf.formats.yaml = require('nconf-yaml');
 
 class Config extends nconf.Provider {
+  static keys(data, {prefix = '', expandArrays = true} = {}) {
+    return getKeys(data, {prefix, expandArrays});
+  }
+
   constructor(options) {
     // get parent stuff
     super();
@@ -225,7 +229,7 @@ class Config extends nconf.Provider {
   save(data, store = this.managed) {
     // purposefully try to boolean type strings
     // NOTE: is this a good idea?
-    for (const key of keys(data)) {
+    for (const key of Config.keys(data)) {
       if (get(data, key)) {
         if (get(data, key) === 'true' || get(data, key) === '1') set(data, key, true);
         if (get(data, key) === 'false' || get(data, key) === '0') set(data, key, false);
@@ -239,6 +243,7 @@ class Config extends nconf.Provider {
   }
 
   // override to replace the default access separator, this seems easier than using accessSeparator?
+  // @TODO: handle "pretty" versions and type?
   set(path, value) {
     super.set(path.replace('.', ':'), value);
   }

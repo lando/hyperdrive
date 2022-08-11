@@ -106,6 +106,7 @@ class Plugin {
     releaseChannel = Plugin.defaults.releaseChannel,
   } = {}) {
     // core props
+    this.name = 'plugins';
     this.channel = releaseChannel;
     this.installDir = intstallDir;
     this.root = root;
