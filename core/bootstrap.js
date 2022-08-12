@@ -55,9 +55,9 @@ class Bootstrapper {
     const Component = require(this.config.get(`registry.${component}`));
 
     // and set its defaults if applicable
-    if (Component.setDefaults && typeof Component.setDefaults === 'function' && defaults) {
+    if (defaults) {
       const namespace = Component.cspace || Component.name || component.split('.')[component.split('.').length - 1];
-      Component.setDefaults(config || {...this.config.get('system'), ...this.config.get('core'), ...this.config.get(namespace)});
+      Component.defaults = config || {...this.config.get('system'), ...this.config.get('core'), ...this.config.get(namespace)};
     }
 
     // and set in cache if applicable

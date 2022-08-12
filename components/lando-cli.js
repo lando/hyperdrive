@@ -1,7 +1,7 @@
 const chalk = require('chalk');
 const debug = require('debug')('static@lando/core:deps:lando-cli');
-const findPlugins = require('./../utils/find-plugins');
-const parseStdoutJson = require('./../utils/parse-stdout-json');
+const findPlugins = require('../utils/find-plugins');
+const parseStdoutJson = require('../utils/parse-stdout-json');
 const fs = require('fs');
 const get = require('lodash/get');
 const path = require('path');
@@ -27,10 +27,6 @@ class LandoCLI {
       debug('could not parse output from "%o" correctly', cmd);
       return false;
     }
-  }
-
-  static setDefaults(defaults) {
-    LandoCLI.defaults = defaults;
   }
 
   /**
@@ -89,7 +85,9 @@ class LandoCLI {
     // props to determine status
     this.isHyperdrived = this.isInstalled && satisfies(this.version, '>=3.6.5');
     this.isSupported = this.isInstalled && satisfies(this.version, this.required);
-    // // additional props
+    this.isReady = this.isHyperdrived && this.isSupported;
+
+    // additional props
     this.updateAvailable = undefined;
     // log
     const status = this.isSupported ? chalk.green('supported') : chalk.red('not supported');

@@ -90,10 +90,6 @@ class Plugin {
     return nameVersion;
   }
 
-  static setDefaults(defaults) {
-    Plugin.defaults = defaults;
-  }
-
   static setEngine(engine) {
     Plugin.engine = engine;
   }

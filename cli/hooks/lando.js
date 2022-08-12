@@ -12,7 +12,6 @@ module.exports = async({config}) => {
   const {core, plugin, system} = hyperdrive.config.get();
   // get the core classes we need
   const LandoCLI = hyperdrive.getClass('core.lando');
-  const Plugin = hyperdrive.getClass('plugin');
   // deconstruct some defaults
   const {configCommand, bin} = LandoCLI.defaults;
 
@@ -45,10 +44,13 @@ module.exports = async({config}) => {
 
   // add the plugins into the config
   if (fs.existsSync(system.landoConfig)) {
+    const Plugin = hyperdrive.getClass('plugin');
     const {bin} = LandoCLI.defaults;
     const landoConfig = require(system.landoConfig)[bin].lando;
 
     // mix in other global plugins
+    // @TODO: as the amount of global plugins goes up the more this will slow EVERYTHING down
+    // how should be optimize? cache the list of global plugins? bust cache when new plugin is added/removed/updated?
     const globalPlugins = landoConfig.pluginDirs
     .filter(dir => dir.type === 'global')
     .map(dir => ({type: dir.type, dirs: hyperdrive.bootstrap.findPlugins(dir.dir, dir.depth)}))
@@ -68,6 +70,20 @@ module.exports = async({config}) => {
 
   // if we have an file then lets set it in the config for downstream purposes
   if (landofilePath) {
+    // what does hyperdrive need for most downstream things?
+    // the status of the config? app.config vs hyperdrive.config?
+    // the list of plugins?
+
+    // how does minapp loading happen?
+    // minapp should legit just load landofiles and mix in any global things
+    // 1. set the static props defaults = config plugins = lando plugins
+    // 2. constructor will need to:
+    //    a. load in initial landofile
+    //    b. assess whether we have initial landofiles to load
+    //    c. assemble the landofiles together in a CONFIG: TBD on relationship with global config?
+    //    d. get the plugin info and add it to App.plugins?
+    //    e. cache results of stuff? how is cache loading going to work for config/plugins in lando/
+
     hyperdrive.landofile = landofilePath;
     hyperdrive.config.set('app.landofile', hyperdrive.landofile);
     debug('detected a landofile file at %o', hyperdrive.landofile);
