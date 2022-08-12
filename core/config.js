@@ -151,20 +151,22 @@ class Config extends nconf.Provider {
 
     // environment is next in line
     // @TODO: make separator configuration?
-    const separator = '_';
-    const rootKey = `${env}${separator}`;
-    super.env({
-      separator,
-      lowerCase: true,
-      parseValues: true,
-      transform: obj => {
-        if (obj.key.startsWith(rootKey.toLowerCase())) {
-          obj.key = obj.key.replace(rootKey.toLowerCase(), '');
-          return obj;
-        }
-      },
-    });
-    this.debug('loaded config from %o env namespace', rootKey);
+    if (env) {
+      const separator = '_';
+      const rootKey = `${env}${separator}`;
+      super.env({
+        separator,
+        lowerCase: true,
+        parseValues: true,
+        transform: obj => {
+          if (obj.key.startsWith(rootKey.toLowerCase())) {
+            obj.key = obj.key.replace(rootKey.toLowerCase(), '');
+            return obj;
+          }
+        },
+      });
+      this.debug('loaded config from %o env namespace', rootKey);
+    }
 
     // load additional file sources that exist, skip overrides and defaults since those
     // are handled elsewhere

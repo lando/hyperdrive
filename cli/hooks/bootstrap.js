@@ -8,6 +8,10 @@ const {Parser} = require('@oclif/core');
 module.exports = async({id, argv, config}) => {
   // start by highlighting the basic input
   debug('running %s with %o', chalk.magenta(id), argv);
+
+  // event intended to do any preflight checks
+  await config.runHook('bootstrap-preflight', config);
+
   // preemptively do a basic check for the config flag
   const {flags} = await Parser.parse(argv, {strict: false, flags: BaseCommand.globalFlags});
 
@@ -50,15 +54,14 @@ module.exports = async({id, argv, config}) => {
   // to that end you will want to add an OCLIF plugin and hook into the "minstrapper" event. you can replace the
   // minstrapper there. note that your even twill have access to both config and hyperdrive
   //
-  await config.runHook('minstrap', {minstrapper, config});
-  debug('minstrap complete, using %s as bootstrapper', minstrapper.loader);
+  await config.runHook('bootstrap-setup', {minstrapper, config});
+  debug('bootstrap-setup complete, using %s as bootstrapper', minstrapper.loader);
 
   // get the boostrapper and run it
   const Bootstrapper = require(minstrapper.loader);
   const bootstrap = new Bootstrapper(minstrapper.config);
 
   // Initialize
-  // @TODO: could it be better to merge the result of bootstrapper.run() into config so we can load in other stuff?
   try {
     await bootstrap.run(config);
     debug('bootstrap completed successfully!');
@@ -69,6 +72,17 @@ module.exports = async({id, argv, config}) => {
     process.exit(666); // eslint-disable-line no-process-exit
   }
 
-  // final hook to modify the config
-  await config.runHook('config', config);
+  // final hooks to modify the config, all representing different bootstrap considerations
+  // @NOTE: these are more or less the same as the bootstrap events in lando
+  //
+  // intended to modify/augment the config with essential things
+  await config.runHook('bootstrap-config', config);
+  // intended to discover/load/init plugins
+  await config.runHook('bootstrap-plugins', config);
+  // intended to discover/load/init additional commands
+  await config.runHook('bootstrap-commmands', config);
+  // intended to discover/load/init the app
+  await config.runHook('bootstrap-app', config);
+  // intended for any final config considerations
+  await config.runHook('bootstrap-final', config);
 };

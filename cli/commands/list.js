@@ -43,8 +43,7 @@ class ListCommand extends BaseCommand {
     }
 
     // start by getting lando provided plugins
-    const plugins = landoCLI.getPlugins();
-    this.debug('acquired lando provided plugins %o', plugins.map(plugin => `${plugin.name}@${plugin.version}`));
+    this.debug('acquired lando provided plugins %o', hyperdrive.plugins.map(plugin => `${plugin.name}@${plugin.version}`));
 
     // determine app context or not
     // if (landofile) {
@@ -54,7 +53,7 @@ class ListCommand extends BaseCommand {
     // }
 
     // organize plugins so that load order is reflected
-    const organizedPlugins = hyperdrive.bootstrap.collapsePlugins(hyperdrive.bootstrap.groupPlugins(plugins));
+    const organizedPlugins = hyperdrive.bootstrap.collapsePlugins(hyperdrive.bootstrap.groupPlugins(hyperdrive.plugins));
 
     // filter out invalid and hidden plugins
     const rows = sortBy(organizedPlugins.filter(plugin => plugin.isValid && !plugin.isHidden), 'name');
@@ -68,7 +67,7 @@ class ListCommand extends BaseCommand {
     CliUx.ux.table(rows, {name: {}, package: {}, type: {}, location: {}, version: {}});
     this.log();
     // also throw warnings if there are any invalid plugins
-    for (const invalidPlugin of plugins.filter(plugin => !plugin.isValid)) {
+    for (const invalidPlugin of hyperdrive.plugins.filter(plugin => !plugin.isValid)) {
       this.warn(`${invalidPlugin.name} was detected at ${invalidPlugin.location} but does not seem to be a valid plugin!`);
     }
 

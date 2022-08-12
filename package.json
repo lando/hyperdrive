@@ -77,14 +77,18 @@
     "commands": "./cli/commands",
     "helpClass": "./core/help",
     "hooks": {
-      "config": [
-        "./cli/hooks/lando.js"
-      ],
       "init": [
         "./cli/hooks/bootstrap.js"
       ],
-      "minstrap": [
-        "./cli/hooks/minstrap.js"
+
+      "bootstrap-config": [
+        "./cli/hooks/lando.js"
+      ],
+      "bootstrap-plugins": [
+        "./cli/hooks/plugins.js"
+      ],
+      "bootstrap-app": [
+        "./cli/hooks/app.js"
       ],
       "prerun": [
         "./cli/hooks/engine.js"
