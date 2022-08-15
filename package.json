@@ -40,6 +40,8 @@
     "dockerode": "^3.3.2",
     "download": "^8.0.0",
     "execa": "^6.1.0",
+    "is-docker": "^3.0.0",
+    "is-root": "^3.0.0",
     "js-yaml": "^4.1.0",
     "kebabcase-keys": "^1.0.0",
     "lodash": "^4.17.21",
@@ -80,7 +82,9 @@
       "init": [
         "./cli/hooks/bootstrap.js"
       ],
-
+      "bootstrap-preflight": [
+        "./cli/hooks/checks.js"
+      ],
       "bootstrap-config": [
         "./cli/hooks/lando.js"
       ],
@@ -91,6 +95,9 @@
         "./cli/hooks/app.js"
       ],
       "prerun": [
+        "./cli/hooks/prerun.js"
+      ],
+      "prerun-deps": [
         "./cli/hooks/engine.js"
       ]
     },
