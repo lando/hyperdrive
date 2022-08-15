@@ -67,7 +67,7 @@ class Bootstrapper {
   }
 
   // helper to get a component (and config?) from the registry
-  async getComponent(component, {config = {}, init = true} = {}, opts = {}) {
+  async getComponent(component, config = {}, init = true, opts = {}) {
     // get class component and instantiate
     const Component = this.getClass(component, opts);
     const instance = new Component(config);

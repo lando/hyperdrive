@@ -1,6 +1,5 @@
 const chalk = require('chalk');
 const debug = require('debug')('static@lando/core:deps:lando-cli');
-const findPlugins = require('../utils/find-plugins');
 const parseStdoutJson = require('../utils/parse-stdout-json');
 const fs = require('fs');
 const get = require('lodash/get');
@@ -8,8 +7,6 @@ const path = require('path');
 const which = require('which');
 
 const {satisfies} = require('semver');
-
-const Plugin = require('./plugin');
 
 /**
  *
@@ -34,8 +31,6 @@ class LandoCLI {
    */
   constructor({
     version,
-    plugins = [],
-    pluginDirs = [],
     bin = LandoCLI.defaults.bin,
     debugspace = LandoCLI.defaults.debugspace,
     id = LandoCLI.defaults.id,
@@ -53,8 +48,6 @@ class LandoCLI {
     this.channel = releaseChannel;
     this.id = id || product || path.basename(process.argv[1]) || 'hyperdrive';
     this.install = install;
-    this.plugins = plugins;
-    this.pluginDirs = pluginDirs;
     this.required = required;
     this.version = version;
 
@@ -65,21 +58,9 @@ class LandoCLI {
 
     // attempt to refresh info if we can
     // NOTE: this will not work if the actual version is less than the required 3.6.5
-    if (this.isInstalled && (!this.version || this.plugins === [] || !this.pluginDirs === [] || this.autoSync)) {
+    if (this.isInstalled && (!this.version || this.autoSync)) {
       this.config = this.info() || undefined;
-      this.plugins = get(this.config, `${this.bin}.lando.plugins`);
-      this.pluginDirs = get(this.config, `${this.bin}.lando.pluginDirs`);
       this.version = get(this.config, `${this.bin}.lando.version`);
-
-      // mix in other global plugins
-      const globalPlugins = this.pluginDirs
-      .filter(dir => dir.type === 'global')
-      .map(dir => ({type: dir.type, dirs: findPlugins(dir.dir, dir.depth)}))
-      .map(dirs => dirs.dirs.map(dir => new Plugin({root: dir, debugspace, id: 'lando-cli', type: dirs.type})))
-      .flat(Number.POSITIVE_INFINITY);
-
-      // concat all plugins together
-      this.plugins = [...this.plugins, ...globalPlugins];
     }
 
     // props to determine status
@@ -126,12 +107,6 @@ class LandoCLI {
       ref: 'https://docs.lando.dev/getting-started/updating.html',
       exit: 2,
     };
-  }
-
-  // helper to return plugins optionally by type
-  getPlugins(type) {
-    if (type) return this.plugins.filter(plugin => plugin.type === type);
-    return this.plugins;
   }
 
   /**
