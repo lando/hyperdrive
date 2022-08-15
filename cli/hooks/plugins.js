@@ -1,4 +1,4 @@
-const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:bootstrap-plugins');
+const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:bootstrap-plugins-pre');
 const fs = require('fs');
 const get = require('lodash/get');
 const has = require('lodash/has');
@@ -9,10 +9,6 @@ module.exports = async({config}) => {
   const {hyperdrive} = config;
   // get some config we need
   const {plugin} = hyperdrive.config.get();
-
-  // start with lando core plugins
-  hyperdrive.plugins = get(hyperdrive, 'lando.plugins', []);
-  debug('discovered %o core %o plugins', hyperdrive.plugins.length, get(hyperdrive, 'lando.product', 'lando'));
 
   // if we dont have a global plugin manifest then create it
   if (!fs.existsSync(plugin.globalManifest) && has(hyperdrive, 'lando.pluginDirs')) {
@@ -32,9 +28,19 @@ module.exports = async({config}) => {
       return dumpable;
     });
 
+    // do the dump
     fs.mkdirSync(path.dirname(plugin.globalManifest), {recursive: true});
     fs.writeFileSync(plugin.globalManifest, JSON.stringify(globalPlugins, null, 2));
   }
 
-  hyperdrive.plugins = [...hyperdrive.plugins, ...require(plugin.globalManifest)];
+  // get our global plugins
+  // @TODO: try/catch for require?
+  const globalPlugins = require(plugin.globalManifest);
+  debug('discovered %o global %o plugins', globalPlugins.length, get(hyperdrive, 'lando.product', 'lando'));
+  hyperdrive.plugins.add('global', {type: 'literal', store: hyperdrive.bootstrap.normalizePlugins(globalPlugins)});
+
+  // then see if we have any core plugins
+  const corePlugins = get(hyperdrive, 'lando.plugins', []);
+  debug('discovered %o core %o plugins', corePlugins.length, get(hyperdrive, 'lando.product', 'lando'));
+  hyperdrive.plugins.add('core', {type: 'literal', store: hyperdrive.bootstrap.normalizePlugins(corePlugins)});
 };

@@ -1,6 +1,13 @@
-// const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:bootstrap-app');
+const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:bootstrap-app-pre');
+const get = require('lodash/get');
 
-module.exports = async() => {
+module.exports = async({config}) => {
+  // get hdrive
+  const {hyperdrive} = config;
+  debug('discovered %o app %o plugins', 1, get(hyperdrive, 'lando.product', 'lando'));
+  hyperdrive.plugins.add('app', {type: 'literal', store: {docekr: {package: 'thing2'}}});
+
+  // get some config we need
   // debug(config);
   // // get the lando file
   // const landofile = core.landofile;

@@ -2,10 +2,6 @@ const path = require('path');
 const Config = require('./config');
 
 class Bootstrapper {
-  static collapsePlugins(plugins) {
-    return require('../utils/collapse-plugins')(plugins);
-  }
-
   static findApp(files, startFrom) {
     return require('../utils/find-app')(files, startFrom);
   }
@@ -19,8 +15,8 @@ class Bootstrapper {
 
   // }
 
-  static groupPlugins(plugins) {
-    return require('../utils/group-plugins')(plugins, {app: 1, team: 2, global: 3, core: 4});
+  static normalizePlugins(plugins, options = {}) {
+    return require('../utils/normalize-plugins')(plugins, options);
   }
 
   constructor(options = {}) {
@@ -85,10 +81,6 @@ class Bootstrapper {
     return instance;
   }
 
-  collapsePlugins(plugins) {
-    return require('../utils/collapse-plugins')(plugins);
-  }
-
   findApp(files, startFrom) {
     return require('../utils/find-app')(files, startFrom);
   }
@@ -98,9 +90,8 @@ class Bootstrapper {
     return require('./../utils/find-plugins')(dir, depth);
   }
 
-  // @TODO: does it make sense to also make this an instance method?
-  groupPlugins(plugins) {
-    return require('../utils/group-plugins')(plugins, {app: 1, team: 2, global: 3, core: 4});
+  normalizePlugins(plugins, options = {}) {
+    return require('../utils/normalize-plugins')(plugins, options);
   }
 
   async run(config = {}) {
@@ -128,6 +119,7 @@ class Bootstrapper {
       },
       id: this.id,
       options: this.options,
+      plugins: require('nconf'),
       registry: this.registry,
       Bootstrapper,
       Config,
