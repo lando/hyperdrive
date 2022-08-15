@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:bootstrap-config');
+const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:bootstrap-config-pre');
 const fs = require('fs');
 const get = require('lodash/get');
 const has = require('lodash/has');

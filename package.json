@@ -85,13 +85,13 @@
       "bootstrap-preflight": [
         "./cli/hooks/checks.js"
       ],
-      "bootstrap-config": [
+      "bootstrap-config-pre": [
         "./cli/hooks/lando.js"
       ],
-      "bootstrap-plugins": [
+      "bootstrap-plugins-pre": [
         "./cli/hooks/plugins.js"
       ],
-      "bootstrap-app": [
+      "bootstrap-app-pre": [
         "./cli/hooks/app.js"
       ],
       "prerun": [

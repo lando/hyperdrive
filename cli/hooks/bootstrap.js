@@ -91,15 +91,29 @@ module.exports = async({id, argv, config}) => {
   }
 
   // final hooks to modify the config, all representing different bootstrap considerations
-  // @NOTE: these are more or less the same as the bootstrap events in lando
-  // intended to modify/augment the config with essential things
+  // @TODO: better define what pre-post mean?
+  // @TODO: do we need to assess the failure status of these events like we do with bootstrap-preflight?
+  // @NOTE: seems like at the very least we could print the debug output?
+  // @NOTE: could we wrap events in some other function that handles this the way we want?
+  await config.runHook('bootstrap-config-pre', config);
   await config.runHook('bootstrap-config', config);
-  // intended to discover/load/init plugins
-  await config.runHook('bootstrap-plugins', config);
-  // intended to discover/load/init additional commands
-  await config.runHook('bootstrap-commmands', config);
+  await config.runHook('bootstrap-config-post', config);
+
   // intended to discover/load/init the app
+  await config.runHook('bootstrap-app-pre', config);
   await config.runHook('bootstrap-app', config);
+  await config.runHook('bootstrap-app-post', config);
+
+  // intended to discover/load/init plugins
+  await config.runHook('bootstrap-plugins-pre', config);
+  await config.runHook('bootstrap-plugins', config);
+  await config.runHook('bootstrap-plugins-post', config);
+
+  // intended to discover/load/init additional commands
+  await config.runHook('bootstrap-commmands-pre', config);
+  await config.runHook('bootstrap-commmands', config);
+  await config.runHook('bootstrap-commmands-post', config);
+
   // intended for any final config considerations
   await config.runHook('bootstrap-final', config);
 };
