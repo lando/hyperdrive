@@ -9,7 +9,7 @@ module.exports = ({options}) => {
 
   // get other stuff
   const user = os.userInfo();
-  const landoBin = which.sync('lando', {nothrow: true});
+  const landoBin = which.sync('lando', {nothrow: true}) || 'lando';
 
   // return the system config
   return {

@@ -40,8 +40,8 @@
     "dockerode": "^3.3.2",
     "download": "^8.0.0",
     "execa": "^6.1.0",
-    "is-docker": "^3.0.0",
-    "is-root": "^3.0.0",
+    "is-docker": "^2",
+    "is-root": "^2",
     "js-yaml": "^4.1.0",
     "kebabcase-keys": "^1.0.0",
     "lodash": "^4.17.21",
@@ -114,13 +114,19 @@
     "outputPath": "dist",
     "scripts": [
       "bin/*.js",
+      "cli/**/*.js",
+      "components/**/*.js",
+      "config/**/*.js",
+      "core/**/*.js",
       "lib/*.js",
-      "cli/**/*.js"
+      "utils/**/*.js"
     ],
     "assets": [
+      "LICENSE",
       "package.json",
       "yarn.lock",
-      "config.yml"
+      "config/**/*.yaml",
+      "scripts/**/*.sh"
     ]
   }
 }
