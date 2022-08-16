@@ -27,21 +27,43 @@ module.exports = async({config}) => {
     }
   }
 
-  // otherwise do the checks
-  const supportedPlatform = ['darwin', 'linux', 'win32', 'wsl'];
-  const supportedArch = ['amd64', 'arm64', 'aarch64', 'x64'];
-  // check helpers
-  const isDocker = require('is-docker');
-  const isRoot = require('is-root');
-
   // check arch
-  if (!supportedArch.includes(arch)) throw new Error(`${arch} is not a supported architecture!`);
+  const supportedArchs = ['amd64', 'arm64', 'aarch64', 'x64'];
+  if (!supportedArchs.includes(arch)) {
+    const error = new Error(`${arch} is not a supported architecture!`);
+    error.code = 'HDUNARCH';
+    error.ref = 'https://docs.lando.dev/hyperdrive/requirements';
+    error.suggestions = [
+      `Run ${bin} on one of the following architectures: ${supportedArchs.join('|')}`,
+      'Read https://docs.lando.dev/hyperdrive/requirements',
+    ];
+    throw error;
+  }
 
   // check platform
-  if (!supportedPlatform.includes(platform)) throw new Error(`${platform} is not a supported platform!`);
+  const supportedPlatforms = ['darwin', 'linux', 'win32', 'wsl'];
+  if (!supportedPlatforms.includes(platform)) {
+    const error = new Error(`${platform} is not a supported platform!`);
+    error.code = 'HDUNPLAT';
+    error.ref = 'https://docs.lando.dev/hyperdrive/requirements';
+    error.suggestions = [
+      `Run ${bin} on one of the following platforms: ${supportedPlatforms.join('|')}`,
+      'Read https://docs.lando.dev/hyperdrive/requirements',
+    ];
+    throw error;
+  }
 
   // check user
-  if (isRoot() && !isDocker()) throw new Error(`${bin} cannot be run as root!`);
+  if (require('is-root')() && !require('is-docker')()) {
+    const error = new Error(`${bin} cannot be run as root!`);
+    error.code = 'HDNOROOT';
+    error.ref = 'https://docs.lando.dev/hyperdrive/requirements';
+    error.suggestions = [
+      `Run ${bin} as a non-root user eg uid != 0`,
+      'Read https://docs.lando.dev/hyperdrive/requirements',
+    ];
+    throw error;
+  }
 
   // @TODO: error if running with admin perms on windows?
   // not 100% sure if this matters but worth investigating?

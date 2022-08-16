@@ -1,34 +1,31 @@
-/* eslint-disable no-process-exit */
 const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:init');
 const path = require('path');
 
 const {BaseCommand} = require('./../lib/base-command');
-const {Errors, Parser} = require('@oclif/core');
+const hookHandler = require('./../../utils/hook-handler');
+const {Parser} = require('@oclif/core');
 
 module.exports = async({id, argv, config}) => {
   // start by highlighting the basic input
   debug('running %o with %o', id, argv);
 
-  // event intended to do any preflight checks eg things that should prevent the tool from running
-  // we grab the result of the event so we can check for failures since this is critical for checks
-  //
+  // save the original config.runHook
+  config._runHook = config.runHook;
+  // replace config.runHook so it exits the process by default, you can still use the original behavior with
+  // setting handler: false or using config._runHook
   // see: https://github.com/oclif/core/issues/393
-  const checks = await config.runHook('bootstrap-preflight', config);
+  config.runHook = async(event, data, handler = hookHandler) => {
+    const result = await config._runHook(event, data);
+    // if no handler then just return the result like config._runHook does
+    if (!handler) return result;
+    // if no failures then just return like config._runHook does
+    if (result.failures.length === 0) return result;
+    // handler errors
+    handler(result.failures[0].error);
+  };
 
-  // if a check has failed print error and hard exit
-  if (checks.failures.length > 0) {
-    const {bin} = config;
-    Errors.error(checks.failures[0].error.message, {
-      suggestions: [
-        `Make sure you are *not* running ${bin} as the root user.`,
-        'Make sure you are running a supported architecture.',
-        'Make sure you are running a supported platform/os.',
-      ],
-      ref: 'https://docs.lando.dev/hyperdrive/requirements',
-      exit: false,
-    });
-    process.exit(6660);
-  }
+  // run the preflight checks
+  await config.runHook('bootstrap-preflight', config);
 
   // preemptively do a basic check for the config flag
   const {flags} = await Parser.parse(argv, {strict: false, flags: BaseCommand.globalFlags});
@@ -84,10 +81,7 @@ module.exports = async({id, argv, config}) => {
     await bootstrap.run(config);
     debug('bootstrap completed successfully!');
   } catch (error) {
-    // @TODO: figure out how to use OCLIF error handling to print a message here?
-    console.error(new Error('Bootstrap failed! See error below')); // eslint-disable-line no-console
-    console.error(error); // eslint-disable-line no-console
-    process.exit(6661);
+    hookHandler(new Error(`Bootstrap failed! ${error.message}`));
   }
 
   // final hooks to modify the config, all representing different bootstrap considerations
