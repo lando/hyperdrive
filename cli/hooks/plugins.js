@@ -12,7 +12,7 @@ module.exports = async({config}) => {
 
   // if we dont have a global plugin manifest then create it
   if (!fs.existsSync(plugin.globalManifest) && has(hyperdrive, 'lando.pluginDirs')) {
-    debug('no global plugin manifest at %o looking for plugins in %s', plugin.globalManifest, hyperdrive.lando.pluginDirs);
+    debug('no global plugin manifest at %o looking for plugins in %o', plugin.globalManifest, hyperdrive.lando.pluginDirs);
     // look for plugins
     const Plugin = hyperdrive.getClass('plugin');
     const globalPlugins = get(hyperdrive, 'lando.pluginDirs', [])

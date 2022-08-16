@@ -99,15 +99,15 @@ module.exports = async({id, argv, config}) => {
   await config.runHook('bootstrap-config', config);
   await config.runHook('bootstrap-config-post', config);
 
-  // intended to discover/load/init the app
-  await config.runHook('bootstrap-app-pre', config);
-  await config.runHook('bootstrap-app', config);
-  await config.runHook('bootstrap-app-post', config);
-
   // intended to discover/load/init plugins
   await config.runHook('bootstrap-plugins-pre', config);
   await config.runHook('bootstrap-plugins', config);
   await config.runHook('bootstrap-plugins-post', config);
+
+  // intended to discover/load/init the app
+  await config.runHook('bootstrap-app-pre', config);
+  await config.runHook('bootstrap-app', config);
+  await config.runHook('bootstrap-app-post', config);
 
   // intended to discover/load/init additional commands
   await config.runHook('bootstrap-commmands-pre', config);

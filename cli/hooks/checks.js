@@ -6,11 +6,12 @@ const path = require('path');
 module.exports = async({config}) => {
   // get the main things
   const {arch, bin, cacheDir, platform} = config;
+  const uid = process.getuid ? process.getuid() : '-1';
 
   // for performance purposes save a hash of arch/platform/user and only reevaluate if the hash does not exist
   // if the hash does exist then it means we are good
   const compatFile = path.join(cacheDir, 'compat.json');
-  const compatKey = Buffer.from(`${arch}:${platform}:${process.getuid()}`, 'utf8').toString('base64');
+  const compatKey = Buffer.from(`${arch}:${platform}:${uid}`, 'utf8').toString('base64');
 
   // if we have a compatfile then lets try to load it up so we can skip the checks
   if (fs.existsSync(compatFile)) {

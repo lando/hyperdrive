@@ -34,7 +34,7 @@ module.exports = async({config}) => {
       },
       plugin: {
         'global-install-dir': globalInstallDir, ...managedConfig.plugins,
-        'global-manifest': path.join(globalInstallDir, 'manifest.json'),
+        'global-manifest': path.join(system.cacheDir, 'manifest.json'),
       },
     };
 
