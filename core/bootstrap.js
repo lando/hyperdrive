@@ -2,10 +2,6 @@ const path = require('path');
 const Config = require('./config');
 
 class Bootstrapper {
-  static collapsePlugins(plugins) {
-    return require('../utils/collapse-plugins')(plugins);
-  }
-
   static findApp(files, startFrom) {
     return require('../utils/find-app')(files, startFrom);
   }
@@ -19,8 +15,8 @@ class Bootstrapper {
 
   // }
 
-  static groupPlugins(plugins) {
-    return require('../utils/group-plugins')(plugins, {app: 1, team: 2, global: 3, core: 4});
+  static normalizePlugins(plugins, options = {}) {
+    return require('../utils/normalize-plugins')(plugins, options);
   }
 
   constructor(options = {}) {
@@ -55,9 +51,9 @@ class Bootstrapper {
     const Component = require(this.config.get(`registry.${component}`));
 
     // and set its defaults if applicable
-    if (Component.setDefaults && typeof Component.setDefaults === 'function' && defaults) {
+    if (defaults) {
       const namespace = Component.cspace || Component.name || component.split('.')[component.split('.').length - 1];
-      Component.setDefaults(config || {...this.config.get('system'), ...this.config.get('core'), ...this.config.get(namespace)});
+      Component.defaults = config || {...this.config.get('system'), ...this.config.get('core'), ...this.config.get(namespace)};
     }
 
     // and set in cache if applicable
@@ -71,7 +67,7 @@ class Bootstrapper {
   }
 
   // helper to get a component (and config?) from the registry
-  async getComponent(component, {config = {}, init = true} = {}, opts = {}) {
+  async getComponent(component, config = {}, init = true, opts = {}) {
     // get class component and instantiate
     const Component = this.getClass(component, opts);
     const instance = new Component(config);
@@ -85,10 +81,6 @@ class Bootstrapper {
     return instance;
   }
 
-  collapsePlugins(plugins) {
-    return require('../utils/collapse-plugins')(plugins);
-  }
-
   findApp(files, startFrom) {
     return require('../utils/find-app')(files, startFrom);
   }
@@ -98,9 +90,8 @@ class Bootstrapper {
     return require('./../utils/find-plugins')(dir, depth);
   }
 
-  // @TODO: does it make sense to also make this an instance method?
-  groupPlugins(plugins) {
-    return require('../utils/group-plugins')(plugins, {app: 1, team: 2, global: 3, core: 4});
+  normalizePlugins(plugins, options = {}) {
+    return require('../utils/normalize-plugins')(plugins, options);
   }
 
   async run(config = {}) {
@@ -128,6 +119,7 @@ class Bootstrapper {
       },
       id: this.id,
       options: this.options,
+      plugins: require('nconf'),
       registry: this.registry,
       Bootstrapper,
       Config,

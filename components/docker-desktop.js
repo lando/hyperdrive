@@ -1,22 +1,53 @@
 const fs = require('fs');
+const moveConfig = require('../utils/move-config');
 const path = require('path');
 
-const DockerEngine = require('./docker-engine');
-const moveConfig = require('./../utils/move-config');
+const Dockerode = require('dockerode');
 
-class DockerDesktop extends DockerEngine {
+class DockerDesktop extends Dockerode {
   static name = 'docker-desktop';
   static cspace = 'docker-desktop';
 
-  static setDefaults(defaults) {
-    DockerDesktop.defaults = defaults;
-  }
-
   constructor(options = {}) {
+    // start by figuring out our dockerode options and passing them upstream
+
+    // then set/strip needed ENVVARS
+
+    // determine installed status
+    // daemon/client locations
+    // try to load in additional information from files as needed using core/Config?
+
+    // determine is
     // @TODO: set upstream ops for dockerode eg host/socket?
+    // console.log(DockerDesktop.defaults)
+    // DockerDesktop.defaults
+    /*
+      // Set defaults if we have to
+      if (_.isEmpty(engineConfig)) {
+        engineConfig = {
+          socketPath: (process.platform === 'win32') ? '//./pipe/docker_engine' : '/var/run/docker.sock',
+          host: '127.0.0.1',
+          port: 2376,
+        };
+      }
+      // Set the docker host if its non-standard
+      if (engineConfig.host !== '127.0.0.1') env.DOCKER_HOST = setDockerHost(engineConfig.host, engineConfig.port);
+      // Set the TLS/cert things if needed
+      if (_.has(engineConfig, 'certPath')) {
+        env.DOCKER_CERT_PATH = engineConfig.certPath;
+        env.DOCKER_TLS_VERIFY = 1;
+        env.DOCKER_BUILDKIT = 1;
+        engineConfig.ca = fs.readFileSync(path.join(env.DOCKER_CERT_PATH, 'ca.pem'));
+        engineConfig.cert = fs.readFileSync(path.join(env.DOCKER_CERT_PATH, 'cert.pem'));
+        engineConfig.key = fs.readFileSync(path.join(env.DOCKER_CERT_PATH, 'key.pem'));
+      }
+      // Return
+      return engineConfig;
+    */
 
     // pass options upstream
     super(options);
+    // @TODO: strip DOCKER ENV? and reset?
 
     // set the rest of our stuff
     // @TODO: what are our fallbacks here?
@@ -39,9 +70,8 @@ class DockerDesktop extends DockerEngine {
    * @returns
    */
   async init() {
-    // const engine = new DockerDesktop(options);
-    // engine.info = await this.info();
-    // return engine;
+    // const stuff = await this.info();
+    // console.log(stuff);
   }
 
   /**
@@ -68,7 +98,7 @@ class DockerDesktop extends DockerEngine {
     try {
       // @todo: would be nice to pass in process.stderr to get that output...could try using demux helper
       // on debug statement to print that out at will.
-      super.run('node:14-alpine', ['sh', '-c', `/scripts/add.sh ${plugin.name}@${plugin.version} ${plugin.name}`], null, createOptions, function() {}).on('stream', function(stream) {
+      super.run('node:14-alpine', ['sh', '-c', `/scripts/plugin-add.sh ${plugin.name}@${plugin.version} ${plugin.name}`], null, createOptions, function() {}).on('stream', function(stream) {
         stream.on('data', buffer => {
           // @todo: way to clean the output up better?
           if (buffer.toString() !== '\u001B[1G\u001B[0K') {

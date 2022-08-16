@@ -15,8 +15,6 @@ class AddCommand extends PluginCommand {
     ...PluginCommand.flags,
   };
 
-  static aliases = ['install'];
-
   static examples = [
     'hyperdrive add @lando/apache --global',
     'hyperdrive add @lando/apache@0.5.0',
@@ -32,25 +30,36 @@ class AddCommand extends PluginCommand {
     // get needed classes
     const Plugin = hyperdrive.getClass('plugin');
 
-    // Lando should install Docker Desktop by default, but have a flag --no-docker-desktop that would skip installing it.
-    // OCLIF "Topics" to create a subcommand `hyperdrive add lando`/`hyperdrive add docker-desktop`, which may be useful for creating these distinct variations for Lando/Docker Desktop
+    // weg
     const {flags, argv} = await this.parse(AddCommand);
+
+    // validate flags and args?
+    // argv is now required?
+    // @TODO: no argv maybe suggest hyperdrive install?
+    // @TODO: what happens if we pull down a plugin that is not a lando plugin?
+    // is there some way for us to validate this first? maybe something on Plugin.info()?
+
+    // determine the context?
+    // if --global then just assume hyperdrive.config
+    // if not global then use app.config
+    // if not global and no app then throw an error
+    // @TODO: do we want helper methods like hyperdrive.plugin.add|remove|update or app.plugin.add|remove|update?
+
+    // do engine various checks to ensure we can actually install a plugin
+    // is the engine installed?
+    // if not then prompt for installation? and add as first thing on listr or install separatly?
+    // is the engine supported?
+    // if not then prompt for installation? and add as first thing on listr or install separatly?
+    // is the engine ready?
+    // if not then prompt to turn it on? and add as first thing on listr or install separatly?
+
+    // intall the plugins based on context
+    // @TODO: what about team context?
+    // modify the landofile as needed?
+    // @TODO: move to listr?
 
     // Start the spinner
     CliUx.ux.action.start('Installing...');
-
-    // Move the scripts folder into the OCLIF data directory.
-
-    // @todo: context detection. If we're in a Lando app, we'll add the plugin
-    // to that app. We'll need to create a @lando/bootstrap package that will
-    // provide the functionality to...
-    //  - analyze/load Lando global config
-    //  - load a Lando app
-    // ...in our case this will be used to detect context and load the Landofile.
-
-    // App install logic.
-
-    // Namespace install logic.
 
     // Global install logic.
     if (flags.global) {
