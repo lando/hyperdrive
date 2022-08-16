@@ -1,4 +1,3 @@
-/* eslint-disable node/no-unsupported-features/es-syntax */
 const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:bootstrap-preflight');
 const fs = require('fs');
 const path = require('path');
@@ -6,11 +5,13 @@ const path = require('path');
 module.exports = async({config}) => {
   // get the main things
   const {arch, bin, cacheDir, platform} = config;
+  const uid = process.getuid ? process.getuid() : '-1';
+  const env = process.pkg ? 'prod' : 'dev';
 
   // for performance purposes save a hash of arch/platform/user and only reevaluate if the hash does not exist
   // if the hash does exist then it means we are good
   const compatFile = path.join(cacheDir, 'compat.json');
-  const compatKey = Buffer.from(`${arch}:${platform}:${process.getuid()}`, 'utf8').toString('base64');
+  const compatKey = Buffer.from(`${arch}:${platform}:${uid}:${env}`, 'utf8').toString('base64');
 
   // if we have a compatfile then lets try to load it up so we can skip the checks
   if (fs.existsSync(compatFile)) {
@@ -30,8 +31,8 @@ module.exports = async({config}) => {
   const supportedPlatform = ['darwin', 'linux', 'win32', 'wsl'];
   const supportedArch = ['amd64', 'arm64', 'aarch64', 'x64'];
   // check helpers
-  const isDocker = await import('is-docker');
-  const isRoot = await import('is-root');
+  const isDocker = require('is-docker');
+  const isRoot = require('is-root');
 
   // check arch
   if (!supportedArch.includes(arch)) throw new Error(`${arch} is not a supported architecture!`);
@@ -40,7 +41,7 @@ module.exports = async({config}) => {
   if (!supportedPlatform.includes(platform)) throw new Error(`${platform} is not a supported platform!`);
 
   // check user
-  if (isRoot.default() && !isDocker.default()) throw new Error(`${bin} cannot be run as root!`);
+  if (isRoot() && !isDocker()) throw new Error(`${bin} cannot be run as root!`);
 
   // @TODO: error if running with admin perms on windows?
   // not 100% sure if this matters but worth investigating?

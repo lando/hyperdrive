@@ -26,22 +26,6 @@ class ListCommand extends BaseCommand {
     const {flags} = await this.parse(ListCommand);
     // get needed helpers things
     const {hyperdrive} = this.config;
-    // get lando cli component
-    const landoCLI = await hyperdrive.getComponent('core.lando', hyperdrive.lando);
-
-    // if lando is not installed or is unsupported then throw an error?
-    // @TODO: lando should use id to reflect changes?
-    if (!landoCLI.isInstalled) {
-      this.error(`${landoCLI.name} is not installed! or cannot be detected.`, landoCLI.notInstalledError());
-    }
-
-    // unsupported error
-    // @TODO: lando should use id to reflect changes?
-    if (!landoCLI.isSupported) {
-      const required = landoCLI.required;
-      this.error(`${landoCLI.name} is installed but ${hyperdrive.get('core.id')} needs version ${required}`, landoCLI.notSupportedError());
-    }
-
     // determine app context or not
     // if (landofile) {
     //   const [MinApp] = bootstrap.getComponent('core.app');

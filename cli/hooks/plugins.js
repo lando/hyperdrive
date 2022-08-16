@@ -35,7 +35,7 @@ module.exports = async({config}) => {
 
   // get our global plugins
   // @TODO: try/catch for require?
-  const globalPlugins = require(plugin.globalManifest);
+  const globalPlugins = fs.existsSync(plugin.globalManifest) ? require(plugin.globalManifest) : [];
   debug('discovered %o global %o plugins', globalPlugins.length, get(hyperdrive, 'lando.product', 'lando'));
   hyperdrive.plugins.add('global', {type: 'literal', store: hyperdrive.bootstrap.normalizePlugins(globalPlugins)});
 
