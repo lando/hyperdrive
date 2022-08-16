@@ -91,7 +91,7 @@ class DockerDesktop extends Dockerode {
         ],
       },
       Env: [
-        "PREFIX=/home"
+        'PREFIX=/home',
       ],
       // tty: false,
     };
