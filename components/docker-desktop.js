@@ -54,6 +54,8 @@ class DockerDesktop extends Dockerode {
     const dataDir = DockerDesktop.defaults.dataDir;
     this.scriptsSrc = DockerDesktop.defaults.scripts;
     this.scriptsDest = path.join(dataDir, DockerDesktop.name, 'scripts');
+    this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
+    fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
     moveConfig(this.scriptsSrc, this.scriptsDest);
 
     this.getVersion = this.getVersion();
@@ -79,19 +81,18 @@ class DockerDesktop extends Dockerode {
    */
   async addPlugin(plugin) {
     const createOptions = {
-      /*
-      Volumes: {
-        [plugin.path]: `/plugins/${plugin.pluginName}`,
-        [plugin.scripts]: '/scripts'
-      }, */
       WorkingDir: '/tmp',
       HostConfig: {
         AutoRemove: true,
         Binds: [
           `${plugin.path}:/plugins/${plugin.name}`,
           `${this.scriptsDest}:/scripts`,
+          `${this.npmrcDest}:/home/etc/npmrc`,
         ],
       },
+      Env: [
+        'PREFIX=/home',
+      ],
       // tty: false,
     };
 
