@@ -67,14 +67,14 @@ class Bootstrapper {
   }
 
   // helper to get a component (and config?) from the registry
-  async getComponent(component, config = {}, init = true, opts = {}) {
+  async getComponent(component, constructor = {}, init = true, opts = {}) {
     // get class component and instantiate
     const Component = this.getClass(component, opts);
-    const instance = new Component(config);
+    const instance = Array.isArray(constructor) ? new Component(...constructor) : new Component(constructor);
 
     // and run its init func if applicable
     if (instance.init && typeof instance.init === 'function' && init) {
-      await instance.init(config, opts);
+      await instance.init(constructor, opts);
     }
 
     // and return
@@ -119,7 +119,7 @@ class Bootstrapper {
       },
       id: this.id,
       options: this.options,
-      plugins: require('nconf'),
+      plugins: new Config({decode: false}),
       registry: this.registry,
       Bootstrapper,
       Config,

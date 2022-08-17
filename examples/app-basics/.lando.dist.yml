@@ -1,2 +1,2 @@
 plugins:
-  "@pirog/php": pirog/php#main
+  "@pirog/otherthing": pirog/php#main

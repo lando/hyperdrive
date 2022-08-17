@@ -4,3 +4,4 @@
 config:
   core:
     debug: 1
+    engine: docker-colima

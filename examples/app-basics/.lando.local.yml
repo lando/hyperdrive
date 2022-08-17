@@ -1,3 +1,5 @@
-name: lando-base
-env_file:
+env-file:
   - environment/local.env
+thing-guy: 'stuff'
+plugins:
+  "@lando/php": pirog/php#main

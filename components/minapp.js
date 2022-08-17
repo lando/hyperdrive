@@ -1,9 +1,12 @@
+const crypto = require('crypto');
 const fs = require('fs');
-// const get = require('lodash/get');
+const get = require('lodash/get');
 const path = require('path');
+const slugify = require('slugify');
 const yaml = require('js-yaml');
 
-// const Config = require('./config');
+const Config = require('./../core/config');
+const Plugin = require('./plugin');
 
 /**
  * @NOTE: the purpose of the minapp is something we can just new MinApp() without a helper async load/init function
@@ -18,60 +21,123 @@ const yaml = require('js-yaml');
 class MinApp {
   // private props
   #landofile
+  #landofiles
   #landofileExt
-  #mainfile
-   #config // the "global" config
-  #options
-  #plugins
 
   /**
    * @TODO: options? channel?
    */
-  constructor(landofile, options = {}) {
+  constructor({
+    landofile,
+    cacheDir = MinApp.defaults.cacheDir,
+    config = {},
+    configDir = MinApp.defaults.configDir,
+    dataDir = MinApp.defaults.dataDir,
+    instance = MinApp.defaults.instance,
+    landofiles = MinApp.defaults.landofiles,
+    plugins = {},
+    product = 'lando',
+  } = {}) {
+    // @TODO: throw error if no landofile or doesnt exist
+    // @TODO: if no name then we should throw an error
+
+    // start by loading in the main landofile and getting the name
+    const mainfile = yaml.load(fs.readFileSync(landofile, 'utf8'));
+    this.name = slugify(mainfile.name, {lower: true, strict: true});
+    this.root = path.dirname(landofile);
+
+    // set other props that are name-dependent
+    this.cacheDir = path.join(cacheDir, 'apps', this.name);
+    this.configDir = path.join(configDir, 'apps', this.name);
+    this.dataDir = path.join(dataDir, 'apps', this.name);
+    this.debug = require('debug')(`${this.name}:@lando/core:minapp`);
+    this.env = `${product}-${this.name}`.toUpperCase().replace(/-/gi, '_');
+    this.id = slugify(crypto.createHash('sha1').update(`${landofile}:${this.name}`).digest('base64'));
+    this.instance = instance;
+
     // private props
     this.#landofileExt = landofile.split('.').pop();
     this.#landofile = path.basename(landofile, `.${this.#landofileExt}`);
-    this.#mainfile = yaml.load(fs.readFileSync(this.#landofile, 'utf8'));
-    this.#options = options;
-    // @TODO some id base64 hash of name/namespace/root? what is the default user?
+    // @NOTE: landofiles can only be overridden in the main landofile for, i hope, obvious reasons
+    this.#landofiles = this.getLandofiles(get(mainfile, 'config.core.landofiles', landofiles));
 
-    // load the main appfile
-    this.root = path.dirname(this.#landofile);
-    this.name = this.#mainfile.name;
-    // @TODO: validate that we have at least a name?
-    // @TODO: special parsing of name eg camelcase?
-    // @TODO: an id filed eg base64 encodded name?
-    // @TODO: any additional landofiles we should add based on what is in the main file?
+    // created needed dirs
+    for (const dir of [this.cacheDir, this.configDir, this.dataDir]) {
+      fs.mkdirSync(path.dirname(dir), {recursive: true});
+      this.debug('ensured directory %o exists', dir);
+    }
 
-    // set the debugger
-    this.debug = require('debug')(`${this.name}:@lando/core:minapp`);
-    // this.debug('YES')
+    // build the app config by loading in the apps
+    this.appConfig = new Config({
+      cached: path.join(this.cacheDir, 'landofiles.json'),
+      env: this.env,
+      id: this.name,
+      sources: Object.fromEntries(this.#landofiles.map(landofile => ([landofile.type, landofile.path]))),
+    });
 
-    // build hte config config
-    // const cConfig = {
-    //   cached: '',
-    //   // env: ? ID_APPNAME?
-    //   // id: this.#name,
-    // }
-    // @TODO: what do defaults look like?
-    // @TODO: loop through and add sources?
-    // @TODO: determine various directories like where do cache stuff
-    // @TODO: if cache exists do we just load that and continue? what busts the cache?
+    // separate out the plugins and mix in global ones
+    this.plugins = new Config({decode: false});
+    const appPlugins = this.appConfig.get('plugins', undefined, false);
+    this.plugins.add('app', {type: 'literal', store: this.normalizePlugins(appPlugins)});
+    this.plugins.add('global', {type: 'literal', store: plugins});
 
-    // const landofiles = get(options, 'app.landofiles', [''])
-    // .map(file => file === '' ? `${this.#landofile}.${this.#landofileExt}` : `${this.#landofile}.${file}.${this.#landofileExt}`);
+    // separate out the config and mix in the global ones
+    this.config = new Config();
+    this.config.add('app', {type: 'literal', store: this.appConfig.get('config')});
+    this.config.add('global', {type: 'literal', store: config});
+  }
 
-    // console.log(landofiles)
-    // discover additional landofiles
-    // const landofile = get()
+  getLandofiles(files = []) {
+    return files
+    // assemble the filename/type
+    .map(type => ({
+      filename: type === '' ? `${this.#landofile}.${this.#landofileExt}` : `${this.#landofile}.${type}.${this.#landofileExt}`,
+      type: type === '' ? 'main' : type,
+    }))
+    // get the absolute paths
+    .map(landofile => ({type: landofile.type, path: path.join(this.root, landofile.filename)}))
+    // filter out ones that dont exist
+    .filter(landofile => fs.existsSync(landofile.path))
+    // merge in includes
+    .map(landofile => {
+      // see if we have any includes
+      const includes = get(yaml.load(fs.readFileSync(landofile.path, 'utf8')), 'includes');
+      if (includes) {
+        const landofiles = this.getLandofiles((typeof includes === 'string') ? [includes] : includes);
+        return [...landofiles, landofile];
+      }
 
-    // build list of absolute paths to look for landofiles
-    // load them into Config?
-    // @TODO make this a static method?
+      // otherwise arrify and return
+      return [landofile];
+    })
+    // flatten
+    .flat(Number.POSITIVE_INFINITY);
+  }
 
-    // discover additional plugins
-    // process.exit(1)
+  normalizePlugins(plugins = {}) {
+    const normalizedPlugins = Object.entries(plugins)
+    .map(entry => {
+      const name = entry[0];
+      const data = entry[1];
+      // compute some defaults
+      const location = path.join(this.root, '.plugins', name);
+      const defaults = (typeof data === 'object') ? {location, ...data} : {location};
+
+      // override defaults as needed if we have data set as string
+      if (typeof data === 'string') {
+        if (fs.existsSync(path.join(this.root, data))) defaults.location = path.join(this.root, data);
+        else defaults.version = data;
+      }
+
+      // at this point we should have an object and we should merge over default values
+      const plugin = new Plugin({name, type: 'app', ...defaults});
+      return [name, {name, ...defaults, ...plugin.getStripped()}];
+    });
+
+    // return objectification
+    return Object.fromEntries(normalizedPlugins);
   }
 }
 
+MinApp.defaults = {};
 module.exports = MinApp;

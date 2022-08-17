@@ -1,5 +1,8 @@
 name: hyperdrive-app-basics
 
+includes:
+  - drupal
+
 plugins:
   "@pirog/test-plugin": ./plugins/test-plugin
   "@lando/drupal": ^0.5.0

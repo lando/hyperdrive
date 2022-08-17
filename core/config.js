@@ -18,13 +18,15 @@ class Config extends nconf.Provider {
     return getKeys(data, {prefix, expandArrays});
   }
 
-  constructor(options) {
+  constructor(options = {}) {
     // get parent stuff
     super();
     // get the id first since we need this for downstream things
     this.id = options.id || options.product || path.basename(process.argv[1]);
     // properties
     this.managed = options.managed || 'managed';
+    // decode into camelcade
+    this.decode = options.decode !== false;
     // namespaces utils
     this.debug = require('debug')(`${this.id}:@lando/core:config`);
     // keep options around
@@ -114,7 +116,7 @@ class Config extends nconf.Provider {
     // @NOTE: we dont do this on templates.dest because we assume template destinations will be sources
     // otherwise what is the point?
     for (const [source, file] of Object.entries(sources)) {
-      if (file) {
+      if (file && !fs.existsSync(path.dirname(file))) {
         fs.mkdirSync(path.dirname(file), {recursive: true});
         this.debug('ensured %o directory %o exists', source, path.dirname(file));
       }
@@ -188,8 +190,7 @@ class Config extends nconf.Provider {
     // ensure dest directory exists
     if (cached) {
       fs.mkdirSync(path.dirname(cached), {recursive: true});
-      this.#writeFile(this.#encode(super.get()), cached);
-      super.add('cached', {type: 'file', file: cached});
+      this.#writeFile(super.get(), cached);
       this.debug('dumped compiled and cached config file to %o', cached);
     }
 
@@ -199,7 +200,7 @@ class Config extends nconf.Provider {
   }
 
   // overridden get method for easier deep path selection and key-case handling
-  get(path, store, decode = true) {
+  get(path, store, decode = this.decode) {
     // log the actions
     this.debug('getting %o from %o store with decode %o', path || 'everything', store ? store : 'default', decode);
 

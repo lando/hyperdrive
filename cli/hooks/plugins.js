@@ -17,13 +17,7 @@ module.exports = async({config}) => {
     .map(dir => ({type: dir.type, dirs: hyperdrive.bootstrap.findPlugins(dir.dir, dir.depth)}))
     .map(dirs => dirs.dirs.map(dir => new Plugin({root: dir, type: dirs.type})))
     .flat(Number.POSITIVE_INFINITY)
-    // @TODO: should we have some standard way to do this?
-    // @TODO: is this list going to change?
-    // @TODO: what about things like deprecated and hidden?
-    .map(plugin => {
-      const {channel, config, debug, installDir, pjson, root, updateAvailable, ...dumpable} = plugin;
-      return dumpable;
-    });
+    .map(plugin => plugin.getStripped());
   };
 
   // if we dont have a global plugin manifest then create it

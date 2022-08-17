@@ -3,7 +3,7 @@ const {BaseCommand} = require('../lib/base-command');
 const {CliUx, Flags} = require('@oclif/core');
 
 class ListCommand extends BaseCommand {
-  static description = 'gets plugins for given context';
+  static description = 'gets installed plugins for given context';
   static examples = [
     'hyperdrive config list',
     'hyperdrive config list --global',
@@ -15,7 +15,7 @@ class ListCommand extends BaseCommand {
     global: Flags.boolean({
       char: 'g',
       description: 'forces use of global context',
-      default: true, // @todo: temporary until we get context detection working.
+      default: false,
     }),
   };
 
@@ -25,19 +25,15 @@ class ListCommand extends BaseCommand {
     // get args and flags
     const {flags} = await this.parse(ListCommand);
     // get needed helpers things
-    const {hyperdrive} = this.config;
-    // determine app context or not
-    // if (landofile) {
-    //   const [MinApp] = bootstrap.getComponent('core.app');
-    //   const app = new MinApp(landofile, hyperdrive.get());
-    //   this.debug(app);
-    // }
+    const {hyperdrive, app} = this.config;
 
-    // get our plugins
-    const plugins = hyperdrive.plugins.get();
+    // if we have app context and this isn't global then
+    const plugins = !flags.global && app ? app.plugins.get() : hyperdrive.plugins.get();
 
     // filter out invalid and hidden plugins
-    const rows = sortBy(Object.keys(plugins).map(name => ({name, ...plugins[name]})), 'name');
+    const rows = sortBy(Object.keys(plugins)
+    .map(name => ({name, ...plugins[name]}))
+    .filter(row => row.isInstalled), 'name');
 
     // if JSON then return here
     if (flags.json) return rows;
