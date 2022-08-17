@@ -9,6 +9,9 @@ const readdirSyncAbsDir = require('./readdir-absolute');
  * we want it to have minimal deps eg no LODASH or GLOB
  */
 module.exports = (dir, depth = 1) => {
+  // if dir doesnt exist then return []
+  if (!fs.existsSync(dir)) return [];
+
   // list of files that indicate we have a plugin
   const pConfigFiles = ['plugin.js', 'plugin.yml', 'package.json'];
   // rescurse through dirs until we are good

@@ -33,9 +33,7 @@ module.exports = ({options}) => {
       // # @TODO: need to bump this once we release a lando with `lando --hyperdrive`
       required: '>=3.6.5',
     },
-    plugin: {
-      globalInstallDir: path.join(home, '.lando', 'plugins'),
-    },
+    plugin: {},
     registry: {
       app: {
         minapp: path.resolve(root, 'components/minapp'),

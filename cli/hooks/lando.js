@@ -15,26 +15,28 @@ module.exports = async({config}) => {
   const {configCommand, bin} = LandoCLI.defaults;
 
   // dump the landoconfig file if we have to and rebase our managed config on it
-  if (!core.landofile || !core.landofiles || !plugin.globalInstallDir || !plugin.globalManifest || core.autoSync) {
+  if (!core.landofile || !core.landofiles || !plugin.globalDir || !plugin.userDir || !plugin.globalManifest || core.autoSync) {
     // run the config get command
     const result = get(LandoCLI.info(configCommand), bin);
 
     // if we dont have the props we need then throw something?
-    for (const prop of ['app.landofile', 'app.landofiles', 'lando.globalPluginDir']) {
+    for (const prop of ['app.landofile', 'app.landofiles', 'lando.globalDir', 'lando.userDir']) {
       if (!has(result, prop)) debug(`${chalk.red('could not')} find %o in the result from %o, using the default`, prop, configCommand);
     }
 
     // get what we need from lando config and
     const managedConfig = hyperdrive.config.get(undefined, hyperdrive.config.managed);
-    const globalInstallDir = get(result, 'lando.globalPluginDir', path.join(system.home, '.lando', 'plugins'));
+    const globalDir = get(result, 'lando.globalDir', path.join(system.home, '.lando', 'global-plugins'));
+    const userDir = get(result, 'lando.userDir', path.join(system.home, '.lando', 'plugins'));
     const data = {
       core: {
         landofile: get(result, 'app.landofile', '.lando'), ...managedConfig.core,
         landofiles: get(result, 'app.landofiles', ['base', 'dist', 'recipe', 'upstream', '', 'local', 'user']), ...managedConfig.core,
       },
       plugin: {
-        'global-install-dir': globalInstallDir, ...managedConfig.plugins,
-        'global-manifest': path.join(system.cacheDir, 'manifest.json'),
+        'global-dir': globalDir, ...managedConfig.plugins,
+        'global-manifest': path.join(system.dataDir, 'global-plugins.json'),
+        'user-dir': userDir, ...managedConfig.plugins,
       },
     };
 
