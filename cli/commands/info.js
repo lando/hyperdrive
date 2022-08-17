@@ -1,7 +1,5 @@
-const prettify = require('./../../utils/prettify');
-
-const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../lib/base-command');
+const {Flags} = require('@oclif/core');
 
 class InfoCommand extends BaseCommand {
   // static _base = 'thing';
@@ -54,6 +52,8 @@ class InfoCommand extends BaseCommand {
   async run() {
     const _ = require('lodash');
     const sortBy = require('lodash/sortBy');
+    const prettify = require('./../../utils/prettify');
+    const {CliUx} = require('@oclif/core');
 
     // get hyperdrive stuff
     const {hyperdrive} = this.config;
