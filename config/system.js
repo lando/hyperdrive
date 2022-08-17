@@ -1,6 +1,7 @@
 const os = require('os');
 const path = require('path');
 const which = require('which');
+const getContext = require('./../utils/get-context');
 
 module.exports = ({options}) => {
   // get oclicf things we need
@@ -54,19 +55,21 @@ module.exports = ({options}) => {
       bin,
       cacheDir,
       configDir,
+      context: getContext(),
       dataDir,
       env: Object.hasOwn(process, 'pkg') ? 'prod' : 'dev',
       errlog,
       gid: user.gid,
       home,
       id: id || 'hyperdrive',
+      interface: 'cli',
       leia: Object.hasOwn(process.env, 'LEIA_PARSER_RUNNING'),
-      mode: 'cli',
       landoConfig: path.join(cacheDir, 'lando.json'),
       packaged: Object.hasOwn(process, 'pkg'),
       platform,
       product: id || 'hyperdrive',
       root,
+      server: 'node',
       shell: which.sync(shell, {nothrow: true}),
       version,
       windows,
