@@ -51,6 +51,7 @@
     "nconf-yaml": "^1.0.2",
     "pacote": "^13.6.1",
     "semver": "^7.3.7",
+    "slugify": "^1.6.5",
     "which": "^2.0.2"
   },
   "devDependencies": {

@@ -54,7 +54,7 @@ class ConfigCommandGet extends BaseCommand {
     }
 
     // if data is undefined then throw an error
-    if (argv.length > 0 && (data === undefined || data === {})) {
+    if (argv.length > 0 && (data === undefined || Object.keys(data).length === 0)) {
       this.error('No configuration found for the given keys!', {
         suggestions: [`Run ${chalk.magenta('hyperdrive config get')} for a full list of keys`],
         ref: 'https://docs.lando.dev/hyperdrive/cli/config.html#get',

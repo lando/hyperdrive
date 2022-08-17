@@ -1,0 +1,6 @@
+{
+  "name": "@pirog/test-plugin",
+  "description": "A library and cli for Lando dependency and package management.",
+  "lando": {},
+  "version": "1.0.0"
+}

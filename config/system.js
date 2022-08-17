@@ -15,7 +15,7 @@ module.exports = ({options}) => {
   // return the system config
   return {
     core: {
-      app: 'minapp',
+      app: 'app',
       autoSync: false,
       debugspace: id || 'hyperdrive',
       debug: false,
@@ -36,6 +36,7 @@ module.exports = ({options}) => {
     plugin: {},
     registry: {
       app: {
+        app: path.resolve(root, 'components/app'),
         minapp: path.resolve(root, 'components/minapp'),
       },
       engine: {

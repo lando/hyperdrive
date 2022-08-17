@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const fs = require('fs');
+const has = require('lodash/has');
 const path = require('path');
 const yaml = require('js-yaml');
 
@@ -98,41 +99,37 @@ class Plugin {
    * @TODO: scripts shoudl be moved into the engine constructor
    */
   constructor({
+    location,
     root,
     type = 'app',
-    intstallDir = Plugin.defaults.globalInstallDir,
     debugspace = Plugin.defaults.debugspace,
     releaseChannel = Plugin.defaults.releaseChannel,
   } = {}) {
     // core props
     this.channel = releaseChannel;
-    this.installDir = intstallDir;
-    this.root = root;
+    this.root = root || location;
     this.type = type;
 
     // config props
-    // @TODO: this is only for human friendly output
-    this.location = root;
-    this.pjson = require(path.join(this.root, 'package.json'));
-    this.config = {...this.pjson.lando, ...this.#load()};
-    // set top level things
-    this.name = this.config.name || this.pjson.name;
-    this.debug = require('debug')(`${debugspace}:@lando/core:plugin:${this.name}`);
-    this.package = this.pjson.name;
-    this.version = this.pjson.version;
-    // add some computed properties
-    this.isInstalled = true;
-    this.isValid = Object.keys(this.config).length > 0;
-    this.updateAvailable = undefined;
-    // @TODO: do we need this still
-    // this.namespace
-    // this.config.core.engine
-    // const [Component, componentConfig] = this.config.bootstrap.getComponent('core.engine');
-    // this.engine = new Component(componentConfig);
+    this.location = this.root;
+    this.isInstalled = fs.existsSync(path.join(this.root, 'package.json'));
 
-    // log
-    const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');
-    this.debug('instantiated %s plugin from %s', status, this.root);
+    // if installed we can get more info
+    if (this.isInstalled) {
+      this.pjson = require(path.join(this.root, 'package.json'));
+      this.config = {...this.pjson.lando, ...this.#load()};
+      // set top level things
+      this.name = this.config.name || this.pjson.name;
+      this.debug = require('debug')(`${debugspace}:@lando/core:plugin:${this.name}`);
+      this.package = this.pjson.name;
+      this.version = this.pjson.version;
+      // add some computed properties
+      this.isValid = Object.keys(this.config).length > 0 || has(this.pjson, 'lando');
+      this.updateAvailable = undefined;
+      // log
+      const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');
+      this.debug('instantiated %s plugin from %s', status, this.root);
+    }
   }
 
   // Internal method to help load config
@@ -165,6 +162,11 @@ class Plugin {
       });
     });
     return run;
+  }
+
+  getStripped() {
+    const {channel, config, debug, installDir, pjson, root, updateAvailable, ...stripped} = this;
+    return stripped;
   }
 
   async info() {
