@@ -205,6 +205,7 @@ class Config extends nconf.Provider {
 
     // start by grabbing the data set
     const data = store ? this.stores[store].get() : super.get();
+
     // no path, return the whole thing
     if (path === null || path === undefined || path.length === 0) {
       return decode ? this.#decode(data) : data;
@@ -246,7 +247,7 @@ class Config extends nconf.Provider {
     // write the new file
     const dest = this.stores[store].file;
     this.#writeFile({...this.get(undefined, store, false), ...this.#encode(data)}, dest);
-    this.debug('saved %o to %j', data, dest);
+    this.debug('saved %o to %o', data, dest);
   }
 
   // override to replace the default access separator, this seems easier than using accessSeparator?
