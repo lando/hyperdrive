@@ -13,6 +13,7 @@ module.exports = async({id, argv, config}) => {
   config._runHook = config.runHook;
   // replace config.runHook so it exits the process by default, you can still use the original behavior with
   // setting handler: false or using config._runHook
+  //
   // see: https://github.com/oclif/core/issues/393
   config.runHook = async(event, data, handler = hookHandler) => {
     const result = await config._runHook(event, data);

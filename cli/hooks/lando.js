@@ -25,7 +25,7 @@ module.exports = async({config}) => {
     }
 
     // get what we need from lando config and
-    const managedConfig = hyperdrive.config.stores[hyperdrive.config.managed].get();
+    const managedConfig = hyperdrive.config.get(undefined, hyperdrive.config.managed);
     const globalInstallDir = get(result, 'lando.globalPluginDir', path.join(system.home, '.lando', 'plugins'));
     const data = {
       core: {
