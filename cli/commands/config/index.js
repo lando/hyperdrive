@@ -2,10 +2,9 @@ const {loadHelpClass} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommand extends BaseCommand {
-  static description = 'manages hyperdrive configuration';
-  static flags = {
-    ...BaseCommand.globalFlags,
-  };
+  static description = 'manages configuration';
+  static flags = {...BaseCommand.globalFlags};
+  static usage = 'config [CMD] [-c <value>] [--debug] [--help] [--json]';
 
   async run() {
     const Help = await loadHelpClass(this.config);

@@ -1,13 +1,9 @@
-const chalk = require('chalk');
-const get = require('lodash/get');
-const prettify = require('./../../../utils/prettify');
-
-const {CliUx, Flags} = require('@oclif/core');
+const {Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommandGet extends BaseCommand {
-  static description = 'gets hyperdrive configuration';
-  static usage = 'config get [<KEY> [<KEY> ...]] [-c <value>] [--config <value>] [--store <value>] [--system] [--debug] [--help] [--json]';
+  static description = 'gets configuration';
+  static usage = 'config get [<KEY> [<KEY> ...]] [-c <value>] [--config <value>] [--store <value>] [--protected] [--debug] [--help] [--json]';
   static examples = [
     'hyperdrive config get',
     'hyperdrive config get core.telemetry --json',
@@ -26,32 +22,46 @@ class ConfigCommandGet extends BaseCommand {
 
   static flags = {
     ...BaseCommand.globalFlags,
-    system: Flags.boolean({
+    protected: Flags.boolean({
       default: false,
       description: 'shows protected system config',
     }),
     store: Flags.string({
       description: 'gets a specific config store',
-      // @TODO: can we populate this automatically?
-      options: ['managed', 'system', 'user'],
+      options: ['app', 'global', 'system', 'user'],
     }),
   };
 
   async run() {
+    const chalk = require('chalk');
+    const get = require('lodash/get');
+    const prettify = require('./../../../utils/prettify');
     const sortBy = require('lodash/sortBy');
+
+    const {CliUx} = require('@oclif/core');
+
     // get args and flags
     const {argv, flags} = await this.parse(ConfigCommandGet);
-    // get the hyperdrive config object
-    const {hyperdrive} = this.config;
-
     // get the data, if argv has one element then use the string version
     const paths = argv.length === 1 ? argv[0] : argv;
-    const data = hyperdrive.config.get(paths, flags.store, false);
+    // get the hyperdrive and app objects
+    const {hyperdrive, app} = this.config;
 
-    // filter out system config by default
-    if (!flags.system && flags.store !== 'system') {
-      delete data.system;
+    // throw error if we are requesting the app store in the wrong context
+    if (!app && flags.store === 'app') {
+      this.error('app store not available in global context.', {
+        suggestions: ['Go into an app directory and rerun the command'],
+        ref: 'https://docs.lando.dev/hyperdrive/context',
+        exit: 1,
+      });
     }
+
+    // get the data from the correct thing
+    const config = app ? app.config : hyperdrive.config;
+    const data = config.get(paths, flags.store, false);
+
+    // filter out protected config by default
+    if (!flags.protected) delete data.system;
 
     // if data is undefined then throw an error
     if (argv.length > 0 && (data === undefined || Object.keys(data).length === 0)) {
@@ -72,7 +82,7 @@ class ConfigCommandGet extends BaseCommand {
     // otherwise CLI table
     } else {
       const rows = hyperdrive.Config.keys(data, {expandArrays: false})
-      .map(key => ({key, value: hyperdrive.config.get(key, flags.store, false) || get(data, key)}));
+      .map(key => ({key, value: config.get(key, flags.store, false) || get(data, key)}));
 
       this.log();
       CliUx.ux.table(sortBy(rows, 'key'), {
