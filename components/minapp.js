@@ -36,11 +36,10 @@ class MinApp {
     instance = MinApp.defaults.instance,
     landofiles = MinApp.defaults.landofiles,
     plugins = {},
-    product = 'lando',
+    product = MinApp.defaults.product,
   } = {}) {
     // @TODO: throw error if no landofile or doesnt exist
     // @TODO: if no name then we should throw an error
-
     // start by loading in the main landofile and getting the name
     const mainfile = yaml.load(fs.readFileSync(landofile, 'utf8'));
     this.name = slugify(mainfile.name, {lower: true, strict: true});
@@ -70,6 +69,7 @@ class MinApp {
     // build the app config by loading in the apps
     this.appConfig = new Config({
       cached: path.join(this.cacheDir, 'landofiles.json'),
+      managed: 'main',
       env: this.env,
       id: this.name,
       sources: Object.fromEntries(this.#landofiles.map(landofile => ([landofile.type, landofile.path]))),
@@ -79,14 +79,14 @@ class MinApp {
     const appPlugins = this.normalizePlugins(this.appConfig.get('plugins', undefined, false));
     this.plugins = new Config({decode: false});
     this.plugins.add('app', {type: 'literal', store: appPlugins});
-    this.plugins.add('global', {type: 'literal', store: plugins});
+    this.plugins.add(product, {type: 'literal', store: plugins});
 
     // separate out the config and mix in the global ones
     // @TODO: what other props should we include in here?
     const appStuff = {name: this.name, location: this.root};
     this.config = new Config();
     this.config.add('app', {type: 'literal', store: {app: appStuff, ...this.appConfig.get('config')}});
-    this.config.add('global', {type: 'literal', store: config});
+    this.config.add(product, {type: 'literal', store: config});
   }
 
   getLandofiles(files = []) {

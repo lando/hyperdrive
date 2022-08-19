@@ -203,7 +203,6 @@ class Config extends nconf.Provider {
   get(path, store, decode = this.decode) {
     // log the actions
     this.debug('getting %o from %o store with decode %o', path || 'everything', store ? store : 'default', decode);
-
     // start by grabbing the data set
     const data = store ? this.stores[store].get() : super.get();
 
