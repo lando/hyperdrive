@@ -41,19 +41,20 @@ module.exports = async({id, argv, config}) => {
       cached: path.join(config.cacheDir, 'config.json'),
       env: 'HYPERDRIVE',
       id: 'hyperdrive',
+      managed: 'global',
       // add oclif config so we can use it in our js templates
       oclif: config,
       // sources are loading in increasing priority into the main config
       sources: {
         system: path.join(config.dataDir, 'system.json'),
-        managed: path.join(config.dataDir, 'managed.json'),
+        global: path.join(config.dataDir, 'global.json'),
         user: path.join(config.configDir, 'config.yaml'),
         overrides: flags.config ? path.resolve(flags.config) : undefined,
       },
       // templates can prepopulate or override sources before they are loaded
       templates: {
         system: {source: systemTemplate, dest: path.join(config.dataDir, 'system.json'), replace: true},
-        managed: {data: {}, dest: path.join(config.dataDir, 'managed.json')},
+        global: {data: {}, dest: path.join(config.dataDir, 'global.json')},
         user: {source: userTemplate, dest: path.join(config.configDir, 'config.yaml')},
       },
     },

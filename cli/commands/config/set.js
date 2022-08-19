@@ -4,7 +4,7 @@ const {BaseCommand} = require('../../lib/base-command');
 const {Flags} = require('@oclif/core');
 
 class ConfigCommandSet extends BaseCommand {
-  static description = 'sets hyperdrive configuration';
+  static description = 'sets configuration';
   static usage = 'config set [<KEY=VALUE> [<KEY=VALUE> ...]] [-c <value>] [--debug] [--help] [--json]';
   static examples = [
     'hyperdrive config set core.telemetry=false',
