@@ -1,9 +1,9 @@
-const {Flags} = require('@oclif/core');
+const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
+const {extended} = CliUx.ux.table.flags();
 
 class ConfigCommandGet extends BaseCommand {
   static description = 'gets configuration';
-  static usage = 'config get [<KEY> [<KEY> ...]] [-c <value>] [--config <value>] [--store <value>] [--protected] [--debug] [--help] [--json]';
   static examples = [
     'hyperdrive config get',
     'hyperdrive config get core.telemetry --json',
@@ -22,43 +22,28 @@ class ConfigCommandGet extends BaseCommand {
 
   static flags = {
     ...BaseCommand.globalFlags,
+    extended,
     protected: Flags.boolean({
       default: false,
-      description: 'shows protected system config',
-    }),
-    store: Flags.string({
-      description: 'gets a specific config store',
-      options: ['app', 'global', 'system', 'user'],
+      description: 'show protected system config',
     }),
   };
 
   async run() {
+    // mods and deps
     const chalk = require('chalk');
-    const get = require('lodash/get');
     const prettify = require('./../../../utils/prettify');
     const sortBy = require('lodash/sortBy');
 
-    const {CliUx} = require('@oclif/core');
-
-    // get args and flags
+    // args and flags
     const {argv, flags} = await this.parse(ConfigCommandGet);
-    // get the data, if argv has one element then use the string version
+    // normalize argv
     const paths = argv.length === 1 ? argv[0] : argv;
-    // get the hyperdrive and app objects
+    // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
-
-    // throw error if we are requesting the app store in the wrong context
-    if (!app && flags.store === 'app') {
-      this.error('app store not available in global context.', {
-        suggestions: ['Go into an app directory and rerun the command'],
-        ref: 'https://docs.lando.dev/hyperdrive/context',
-        exit: 1,
-      });
-    }
-
-    // get the data from the correct thing
+    // get the starting data from the correct context
     const config = app ? app.config : hyperdrive.config;
-    const data = config.get(paths, flags.store, false);
+    const data = config.get(paths, undefined, false);
 
     // filter out protected config by default
     if (!flags.protected) delete data.system;
@@ -78,19 +63,35 @@ class ConfigCommandGet extends BaseCommand {
     // if the data is not an object then just print the result
     if (typeof data !== 'object' || data === null) {
       this.log(data);
-
-    // otherwise CLI table
-    } else {
-      const rows = hyperdrive.Config.keys(data, {expandArrays: false})
-      .map(key => ({key, value: config.get(key, flags.store, false) || get(data, key)}));
-
-      this.log();
-      CliUx.ux.table(sortBy(rows, 'key'), {
-        key: {},
-        value: {get: row => prettify(row.value)},
-      });
-      this.log();
+      this.exit();
     }
+
+    // otherwise construct some rows for tabular display
+    const rows = hyperdrive.Config.keys(data, {expandArrays: false}).map(key => {
+      // start with the basics
+      const row = {key, value: config.get(key, undefined, false)};
+      // also loop through and add the values from each store for use in --extended
+      for (const store of Object.keys(config.stores)) {
+        row[store] = config.get(key, store, false);
+      }
+
+      return row;
+    });
+
+    // construct the column options
+    const columns = {key: {}, value: {get: row => prettify(row.value)}};
+    // also loop through and add the values from each store for use in --extended
+    // @NOTE: this will not add stores with no content
+    for (const [name, store] of Object.entries(config.stores)) {
+      if (Object.keys(store.store).length > 0) {
+        columns[name] = {get: row => prettify(row[name]), extended: true};
+      }
+    }
+
+    // print table
+    this.log();
+    CliUx.ux.table(sortBy(rows, 'key'), columns, {extended: flags.extended});
+    this.log();
   }
 }
 

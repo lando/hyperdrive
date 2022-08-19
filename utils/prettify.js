@@ -5,6 +5,9 @@ const os = require('os');
  * @TODO: is it ok to assume that all data in an array will be the same type?
  */
 module.exports = (data, {arraySeparator = ', '} = {}) => {
+  // if undefined then just return an empty string
+  if (data === undefined) return '';
+
   // handle arrays differently
   if (Array.isArray(data)) {
     // join lists of strings together
