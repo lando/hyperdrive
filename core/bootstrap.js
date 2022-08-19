@@ -10,11 +10,6 @@ class Bootstrapper {
     return require('./../utils/find-plugins')(dir, depth);
   }
 
-  // assemble app configuration using ordered list of files
-  // static getAppConfig(dir, depth = 1) {
-
-  // }
-
   static normalizePlugins(plugins, options = {}) {
     return require('../utils/normalize-plugins')(plugins, options);
   }

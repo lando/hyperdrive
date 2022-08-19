@@ -4,7 +4,7 @@ module.exports = async({config}) => {
   // get some stuff we need
   const {hyperdrive} = config;
   // if we dont have an instance id then compute and dump
-  if (!hyperdrive.config.get('system.instance', hyperdrive.config.managed)) {
+  if (!hyperdrive.config.get(`${hyperdrive.config.managed}:system.instance`)) {
     const {nanoid} = require('nanoid');
     const data = {system: {instance: nanoid()}};
     hyperdrive.config.save(data);

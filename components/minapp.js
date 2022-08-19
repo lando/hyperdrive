@@ -76,15 +76,15 @@ class MinApp {
     });
 
     // separate out the plugins and mix in global ones
-    const appPlugins = this.normalizePlugins(this.appConfig.get('plugins', undefined, false));
-    this.plugins = new Config({decode: false});
+    const appPlugins = this.normalizePlugins(this.appConfig.get('plugins', false));
+    this.plugins = new Config({id: this.name, decode: false});
     this.plugins.add('app', {type: 'literal', store: appPlugins});
     this.plugins.add(product, {type: 'literal', store: plugins});
 
     // separate out the config and mix in the global ones
     // @TODO: what other props should we include in here?
     const appStuff = {name: this.name, location: this.root};
-    this.config = new Config();
+    this.config = new Config({id: this.name});
     this.config.add('app', {type: 'literal', store: {app: appStuff, ...this.appConfig.get('config')}});
     this.config.add(product, {type: 'literal', store: config});
   }

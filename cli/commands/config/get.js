@@ -12,8 +12,6 @@ class ConfigCommandGet extends BaseCommand {
     'hyperdrive config get --store user',
   ];
 
-  static strict = false;
-
   static args = [{
     name: 'key',
     description: 'config key(s) to get',
@@ -37,13 +35,12 @@ class ConfigCommandGet extends BaseCommand {
 
     // args and flags
     const {argv, flags} = await this.parse(ConfigCommandGet);
-    // normalize argv
-    const paths = argv.length === 1 ? argv[0] : argv;
     // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
     // get the starting data from the correct context
     const config = app ? app.config : hyperdrive.config;
-    const data = config.get(paths, undefined, false);
+    // start by just grabbing everything or a single value
+    const data = (argv.length === 1) ? config.get(argv[0], false) : config.get(undefined, false);
 
     // filter out protected config by default
     if (!flags.protected) delete data.system;
@@ -69,10 +66,10 @@ class ConfigCommandGet extends BaseCommand {
     // otherwise construct some rows for tabular display
     const rows = hyperdrive.Config.keys(data, {expandArrays: false}).map(key => {
       // start with the basics
-      const row = {key, value: config.get(key, undefined, false)};
+      const row = {key, value: config.get(key)};
       // also loop through and add the values from each store for use in --extended
       for (const store of Object.keys(config.stores)) {
-        row[store] = config.get(key, store, false);
+        row[store] = config.get(`${store}:${key}`);
       }
 
       return row;

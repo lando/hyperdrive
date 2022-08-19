@@ -2,7 +2,6 @@ const camelcaseKeys = require('camelcase-keys');
 const fs = require('fs');
 const get = require('lodash/get');
 const getKeys = require('./../utils/get-object-keys');
-const has = require('lodash/has');
 const kebabcase = require('lodash/kebabCase');
 const kebabcaseKeys = require('kebabcase-keys');
 const nconf = require('nconf');
@@ -190,7 +189,7 @@ class Config extends nconf.Provider {
     // ensure dest directory exists
     if (cached) {
       fs.mkdirSync(path.dirname(cached), {recursive: true});
-      this.#writeFile(super.get(), cached);
+      // this.#writeFile(super.get(), cached);
       this.debug('dumped compiled and cached config file to %o', cached);
     }
 
@@ -200,32 +199,37 @@ class Config extends nconf.Provider {
   }
 
   // overridden get method for easier deep path selection and key-case handling
-  get(path, store, decode = this.decode) {
+  get(path, decode = this.decode, data = {}) {
     // log the actions
-    this.debug('getting %o from %o store with decode %o', path || 'everything', store ? store : 'default', decode);
-    // start by grabbing the data set
-    const data = store ? this.stores[store].get() : super.get();
+    this.debug('getting %o from %o config with decode %o', path || 'everything', this.id, decode);
 
-    // no path, return the whole thing
-    if (path === null || path === undefined || path.length === 0) {
-      return decode ? this.#decode(data) : data;
+    // if we are looking for a path to the default store
+    if (typeof path === 'string' && path.split(':').length === 1) {
+      data = get(super.get(), path);
+
+    // if we are looking for a path to another store
+    } else if (typeof path === 'string' && path.split(':').length >= 2) {
+      const store = path.split(':')[0];
+      path = path.split(':')[1];
+      data = path ? get(this.stores[store].store, path) : this.stores[store].store;
+
+    // otherwise just get it all
+    } else {
+      data = super.get();
     }
 
-    // if we have path that is a string then just return the value
-    if (typeof path === 'string') {
-      return decode ? this.#decode(get(data, path)) : get(data, path);
-    }
-
-    // otherwise return an object of many props
-    const props = {};
-    for (const key of this.#encode(path)) {
-      if (has(data, key)) {
-        set(props, key, get(data, key));
+    // if decode is on and this is an object
+    if (typeof data === 'object') {
+      // for whatever reason "type" is getting added to teh config, we need to remove this manually
+      // see https://github.com/indexzero/nconf/issues/300
+      delete data.type;
+      if (decode) {
+        data = this.#decode(data);
       }
     }
 
-    // return
-    return decode ? this.#decode(props) : props;
+    // finish
+    return data;
   }
 
   // overriden save method
@@ -246,14 +250,14 @@ class Config extends nconf.Provider {
 
     // write the new file
     const dest = this.stores[store].file;
-    this.#writeFile({...this.get(undefined, store, false), ...this.#encode(data)}, dest);
+    this.#writeFile({...this.stores[store].store, ...this.#encode(data)}, dest);
     this.debug('saved %o to %o', data, dest);
   }
 
   // override to replace the default access separator, this seems easier than using accessSeparator?
   // @TODO: handle "pretty" versions and type?
   set(path, value) {
-    super.set(path.replace('.', ':'), value);
+    super.set(path.replace(/\./gi, ':'), value);
   }
 }
 

@@ -25,18 +25,17 @@ module.exports = async({config}) => {
     }
 
     // get what we need from lando config and
-    const managedConfig = hyperdrive.config.get(undefined, hyperdrive.config.managed);
     const globalDir = get(result, 'lando.globalDir', path.join(system.home, '.lando', 'global-plugins'));
     const userDir = get(result, 'lando.userDir', path.join(system.home, '.lando', 'plugins'));
     const data = {
       core: {
-        landofile: get(result, 'app.landofile', '.lando'), ...managedConfig.core,
-        landofiles: get(result, 'app.landofiles', ['base', 'dist', 'recipe', 'upstream', '', 'local', 'user']), ...managedConfig.core,
+        landofile: get(result, 'app.landofile', '.lando'),
+        landofiles: get(result, 'app.landofiles', ['base', 'dist', 'recipe', 'upstream', '', 'local', 'user']),
       },
       plugin: {
-        'global-dir': globalDir, ...managedConfig.plugins,
+        'global-dir': globalDir,
         'global-manifest': path.join(system.dataDir, 'global-plugins.json'),
-        'user-dir': userDir, ...managedConfig.plugins,
+        'user-dir': userDir,
       },
     };
 
