@@ -1,10 +1,7 @@
-const camelcaseKeys = require('camelcase-keys');
 const fs = require('fs');
 const get = require('lodash/get');
-const getKeys = require('./../utils/get-object-keys');
-const kebabcase = require('lodash/kebabCase');
-const kebabcaseKeys = require('kebabcase-keys');
 const nconf = require('nconf');
+const merge = require('lodash/merge');
 const path = require('path');
 const set = require('lodash/set');
 const yaml = require('js-yaml');
@@ -14,7 +11,7 @@ nconf.formats.yaml = require('nconf-yaml');
 
 class Config extends nconf.Provider {
   static keys(data, {prefix = '', expandArrays = true} = {}) {
-    return getKeys(data, {prefix, expandArrays});
+    return require('./../utils/get-object-keys')(data, {prefix, expandArrays});
   }
 
   constructor(options = {}) {
@@ -24,8 +21,6 @@ class Config extends nconf.Provider {
     this.id = options.id || options.product || path.basename(process.argv[1]);
     // properties
     this.managed = options.managed || 'managed';
-    // decode into camelcade
-    this.decode = options.decode !== false;
     // namespaces utils
     this.debug = require('debug')(`${this.id}:@lando/core:config`);
     // keep options around
@@ -34,23 +29,19 @@ class Config extends nconf.Provider {
     this.#init(options);
   }
 
-  // this.#decode
-  #decode(data) {
-    return camelcaseKeys(data, {deep: true});
-  }
-
-  // this.#decode
-  #encode(data) {
-    // transform to array if string
-    if (typeof data === 'string') data = [data];
-
-    // if array then map and return
-    if (Array.isArray(data)) {
-      return data.map(prop => prop.split('.').map(part => kebabcase(part)).join('.'));
-    }
-
-    // else assume object and return
-    return kebabcaseKeys(data, {deep: true});
+  // internal to get the whole thing
+  // we have to do this for various reasons
+  //
+  // see:
+  // https://github.com/indexzero/nconf/issues/300
+  // https://github.com/indexzero/nconf/issues/120
+  // https://github.com/indexzero/nconf/issues/315
+  #get() {
+    const data = merge({}, ...Object.keys(this.stores).reverse().map(store => this.stores[store].store));
+    delete data.type;
+    delete data.logicalSeparator;
+    delete data.parseValues;
+    return data;
   }
 
   // check to see if YAML or JSON
@@ -137,7 +128,7 @@ class Config extends nconf.Provider {
       // or read/write from correct input format to correct output format
       } else {
         const data = options.source ? this.#readFile(options.source) : options.data;
-        this.#writeFile(this.#encode(data), options.dest);
+        this.#writeFile(this.encode(data), options.dest);
       }
 
       // if we get here then we are generating a config file from a template
@@ -198,14 +189,37 @@ class Config extends nconf.Provider {
     if (this.stores.user && this.stores.user.store === null) this.stores.user.store = {};
   }
 
+  add(name, options, usage) {
+    return super.add(name, {logicalSeparator: '.', parseValues: true, ...options}, usage);
+  }
+
+  // this.#decode
+  decode(data) {
+    return require('camelcase-keys')(data, {deep: true});
+  }
+
+  // this.#encode
+  encode(data) {
+    // transform to array if string
+    if (typeof data === 'string') data = [data];
+
+    // if array then map and return
+    if (Array.isArray(data)) {
+      return data.map(prop => prop.split('.').map(part => require('lodash/kebabCase')(part)).join('.'));
+    }
+
+    // else assume object and return
+    return require('kebabcase-keys')(data, {deep: true});
+  }
+
   // overridden get method for easier deep path selection and key-case handling
-  get(path, decode = this.decode, data = {}) {
+  getUncoded(path, data = {}) {
     // log the actions
-    this.debug('getting %o from %o config with decode %o', path || 'everything', this.id, decode);
+    this.debug('getting %o from %o config with', path || 'everything', this.id);
 
     // if we are looking for a path to the default store
     if (typeof path === 'string' && path.split(':').length === 1) {
-      data = get(super.get(), path);
+      data = get(this.#get(), path);
 
     // if we are looking for a path to another store
     } else if (typeof path === 'string' && path.split(':').length >= 2) {
@@ -215,21 +229,16 @@ class Config extends nconf.Provider {
 
     // otherwise just get it all
     } else {
-      data = super.get();
-    }
-
-    // if decode is on and this is an object
-    if (typeof data === 'object') {
-      // for whatever reason "type" is getting added to teh config, we need to remove this manually
-      // see https://github.com/indexzero/nconf/issues/300
-      delete data.type;
-      if (decode) {
-        data = this.#decode(data);
-      }
+      data = this.#get();
     }
 
     // finish
     return data;
+  }
+
+  // returns the resulting object with camelcase keys
+  get(path) {
+    return this.decode(this.getUncoded(path));
   }
 
   // overriden save method
@@ -250,14 +259,9 @@ class Config extends nconf.Provider {
 
     // write the new file
     const dest = this.stores[store].file;
-    this.#writeFile({...this.stores[store].store, ...this.#encode(data)}, dest);
+    this.stores[store].store = merge({}, this.stores[store].store, this.encode(data));
+    this.#writeFile(this.stores[store].store, dest);
     this.debug('saved %o to %o', data, dest);
-  }
-
-  // override to replace the default access separator, this seems easier than using accessSeparator?
-  // @TODO: handle "pretty" versions and type?
-  set(path, value) {
-    super.set(path.replace(/\./gi, ':'), value);
   }
 }
 

@@ -40,14 +40,14 @@ class ConfigCommandGet extends BaseCommand {
     // get the starting data from the correct context
     const config = app ? app.config : hyperdrive.config;
     // start by just grabbing everything or a single value
-    const data = (argv.length === 1) ? config.get(argv[0], false) : config.get(undefined, false);
+    const data = (argv.length === 1) ? config.getUncoded(argv[0]) : config.getUncoded();
 
     // filter out protected config by default
-    if (!flags.protected) delete data.system;
+    if (typeof data === 'object' && !flags.protected) delete data.system;
 
     // if data is undefined then throw an error
     if (argv.length > 0 && (data === undefined || Object.keys(data).length === 0)) {
-      this.error('No configuration found for the given keys!', {
+      this.error(`No configuration found for key: "${argv[0]}"`, {
         suggestions: [`Run ${chalk.magenta('hyperdrive config get')} for a full list of keys`],
         ref: 'https://docs.lando.dev/hyperdrive/cli/config.html#get',
         exit: 1,
@@ -66,10 +66,10 @@ class ConfigCommandGet extends BaseCommand {
     // otherwise construct some rows for tabular display
     const rows = hyperdrive.Config.keys(data, {expandArrays: false}).map(key => {
       // start with the basics
-      const row = {key, value: config.get(key)};
+      const row = {key, value: config.getUncoded(key)};
       // also loop through and add the values from each store for use in --extended
       for (const store of Object.keys(config.stores)) {
-        row[store] = config.get(`${store}:${key}`);
+        row[store] = config.getUncoded(`${store}:${key}`);
       }
 
       return row;
