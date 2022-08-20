@@ -14,7 +14,7 @@ module.exports = async({config}) => {
   // if we have an file then lets set it in the config for downstream purposes
   if (fs.existsSync(landofilePath)) {
     const MinApp = hyperdrive.getClass('app.minapp');
-    config.app = new MinApp({landofile: landofilePath, config: hyperdrive.config.get(), plugins: hyperdrive.plugins.get()});
+    config.app = new MinApp({landofile: landofilePath, config: hyperdrive.config.get(), plugins: hyperdrive.plugins.getUncoded()});
     debug('discovered an app called %o at %o', config.app.name, path.dirname(landofilePath)); // eslint-disable-line unicorn/consistent-destructuring
   }
 };

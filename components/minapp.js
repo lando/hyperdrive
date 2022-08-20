@@ -76,8 +76,8 @@ class MinApp {
     });
 
     // separate out the plugins and mix in global ones
-    const appPlugins = this.normalizePlugins(this.appConfig.get('plugins', false));
-    this.plugins = new Config({id: this.name, decode: false});
+    const appPlugins = this.normalizePlugins(this.appConfig.getUncoded('plugins'));
+    this.plugins = new Config({id: this.name});
     this.plugins.add('app', {type: 'literal', store: appPlugins});
     this.plugins.add(product, {type: 'literal', store: plugins});
 
