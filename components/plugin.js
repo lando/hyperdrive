@@ -2,7 +2,7 @@ const chalk = require('chalk');
 const fs = require('fs');
 const has = require('lodash/has');
 const path = require('path');
-const yaml = require('js-yaml');
+const yaml = require('yaml');
 
 /**
  *
@@ -140,9 +140,9 @@ class Plugin {
     // return the plugin.js return first
     if (fs.existsSync(path.join(root, 'plugin.js'))) return require(path.join(root, 'plugin.js'))(options);
     // otherwise return the plugin.yaml content
-    if (fs.existsSync(path.join(root, 'plugin.yaml'))) return yaml.load(fs.readFileSync(path.join(root, 'plugin.yaml'), 'utf8'));
+    if (fs.existsSync(path.join(root, 'plugin.yaml'))) return yaml.parse(fs.readFileSync(path.join(root, 'plugin.yaml'), 'utf8'));
     // otherwise return the plugin.yml content
-    if (fs.existsSync(path.join(root, 'plugin.yml'))) return yaml.load(fs.readFileSync(path.join(root, 'plugin.yml'), 'utf8'));
+    if (fs.existsSync(path.join(root, 'plugin.yml'))) return yaml.parse(fs.readFileSync(path.join(root, 'plugin.yml'), 'utf8'));
     // otherwise return uh, nothing?
     return {};
   }
