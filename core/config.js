@@ -36,6 +36,13 @@ class Config extends nconf.Provider {
     this.#init(options);
   }
 
+  #clean(data = {}) {
+    delete data.type;
+    delete data.logicalSeparator;
+    delete data.parseValues;
+    return data;
+  }
+
   // internal to get the whole thing
   // we have to do this for various reasons
   //
@@ -44,11 +51,7 @@ class Config extends nconf.Provider {
   // https://github.com/indexzero/nconf/issues/120
   // https://github.com/indexzero/nconf/issues/315
   #get() {
-    const data = merge({}, ...Object.keys(this.stores).reverse().map(store => this.stores[store].store));
-    delete data.type;
-    delete data.logicalSeparator;
-    delete data.parseValues;
-    return data;
+    return this.#clean(merge({}, ...Object.keys(this.stores).reverse().map(store => this.stores[store].store)));
   }
 
   // check to see if YAML or JSON
@@ -243,7 +246,7 @@ class Config extends nconf.Provider {
     } else if (typeof path === 'string' && path.split(':').length >= 2) {
       const store = path.split(':')[0];
       path = path.split(':')[1];
-      data = path ? get(this.stores[store].store, path) : this.stores[store].store;
+      data = path ? get(this.stores[store].store, path) : this.#clean(this.stores[store].store);
 
     // otherwise just get it all
     } else {
