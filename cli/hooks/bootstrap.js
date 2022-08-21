@@ -1,4 +1,5 @@
 const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:init');
+const fs = require('fs');
 const path = require('path');
 
 const {BaseCommand} = require('./../lib/base-command');
@@ -30,6 +31,10 @@ module.exports = async({id, argv, config}) => {
 
   // preemptively do a basic check for the config flag
   const {flags} = await Parser.parse(argv, {strict: false, flags: BaseCommand.globalFlags});
+  // debug if flag config file doesnt exist
+  if (flags.config && !fs.existsSync(flags.config)) {
+    debug('tried to load %s into config but it doesnt exist', flags.config);
+  }
 
   // start the hyperdrive config by setting the default bootstrapper and its config
   const systemTemplate = path.join(__dirname, '..', '..', 'config', 'system.js');
@@ -49,7 +54,7 @@ module.exports = async({id, argv, config}) => {
         system: path.join(config.dataDir, 'system.json'),
         global: path.join(config.dataDir, 'global.json'),
         user: path.join(config.configDir, 'config.yaml'),
-        overrides: flags.config ? path.resolve(flags.config) : undefined,
+        overrides: flags.config && fs.existsSync(flags.config) ? path.resolve(flags.config) : undefined,
       },
       // templates can prepopulate or override sources before they are loaded
       templates: {

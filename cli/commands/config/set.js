@@ -13,7 +13,7 @@ class ConfigCommandSet extends BaseCommand {
   static args = [{
     name: 'key=value',
     description: 'config key(s) and their value(s) to set',
-    required: true,
+    required: false,
   }];
 
   static flags = {
@@ -37,10 +37,22 @@ class ConfigCommandSet extends BaseCommand {
 
     // args and flags
     const {argv, flags} = await this.parse(ConfigCommandSet);
+
+    // if no argv and no --config then throw error
+    if (argv.length === 0 && !flags.config) {
+      this.log();
+      this.warn('you must specify a key=value or a config file! see help below');
+      this.log();
+      const {loadHelpClass} = require('@oclif/core');
+      const Help = await loadHelpClass(this.config);
+      const help = new Help(this.config, this.config.pjson.helpOptions);
+      await help.showHelp(['config']);
+    }
+
     // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
     // start with data from file or empty
-    const data = hyperdrive.config.stores.overrides ? hyperdrive.config.stores.overrides.get() : {};
+    const data = hyperdrive.config.stores.overrides ? hyperdrive.config.get('overrides:') : {};
 
     // mix in argv if they have paths and values
     for (const arg of argv) {
