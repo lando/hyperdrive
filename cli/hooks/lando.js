@@ -41,7 +41,6 @@ module.exports = async({config}) => {
 
     // rebase lando config data on managed store
     hyperdrive.config.save(data);
-    hyperdrive.config.defaults(data);
   }
 
   // add the lando config

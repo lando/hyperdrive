@@ -1,14 +1,21 @@
+// modz
 const fs = require('fs');
 const get = require('lodash/get');
 const nconf = require('nconf');
 const merge = require('lodash/merge');
 const path = require('path');
 const set = require('lodash/set');
-const yaml = require('js-yaml');
+const yaml = require('yaml');
 
-// add custom formats
-nconf.formats.yaml = require('nconf-yaml');
+// Add some custom formatters
+nconf.formats.yaml = {
+  parse: (obj, options) => yaml.parse(obj, options),
+  stringify: (obj, options) => yaml.stringify(obj, options),
+};
 
+/*
+ * Creates a new Config instance.
+ */
 class Config extends nconf.Provider {
   static keys(data, {prefix = '', expandArrays = true} = {}) {
     return require('./../utils/get-object-keys')(data, {prefix, expandArrays});
@@ -56,39 +63,6 @@ class Config extends nconf.Provider {
       return 'js';
     case '.json':
       return 'json';
-    }
-  }
-
-  // check to see if YAML or JSON
-  #readFile(file) {
-    switch (path.extname(file)) {
-    case '.yaml':
-    case '.yml':
-      return yaml.load(fs.readFileSync(file, 'utf8'));
-    case '.js':
-      return (typeof require(file) === 'function') ? require(file)(this) : require(file);
-    case '.json':
-      return require(file);
-    }
-  }
-
-  // check to see if YAML or JSON
-  #writeFile(data, file) {
-    switch (path.extname(file)) {
-    case '.yaml':
-    case '.yml':
-      try {
-        return fs.writeFileSync(file, yaml.dump(data));
-      } catch (error) {
-        throw new Error(error);
-      }
-
-    case '.json':
-      try {
-        return fs.writeFileSync(file, JSON.stringify(data, null, 2));
-      } catch (error) {
-        throw new Error(error);
-      }
     }
   }
 
@@ -164,7 +138,7 @@ class Config extends nconf.Provider {
     // are handled elsewhere
     for (const [source, file] of Object.entries(sources).reverse()) {
       if (source !== 'overrides' && source !== 'defaults' && file) {
-        super.file(source, {file, format: nconf.formats[this.#getFormat(file)]});
+        this.add(source, {type: 'file', file, format: nconf.formats[this.#getFormat(file)]});
         this.debug('loaded %s config from %o', source, file);
       }
     }
@@ -175,12 +149,10 @@ class Config extends nconf.Provider {
       this.debug('loaded %o default config from %o', sources.defaults);
     }
 
-    // add a "cached" source if possible and save the compiled result there
-    // @NOTE: this isnt actually loaded into the config tree its
-    // ensure dest directory exists
+    // dump the result to file
     if (cached) {
       fs.mkdirSync(path.dirname(cached), {recursive: true});
-      // this.#writeFile(super.get(), cached);
+      this.#writeFile(this.get(), cached);
       this.debug('dumped compiled and cached config file to %o', cached);
     }
 
@@ -189,8 +161,54 @@ class Config extends nconf.Provider {
     if (this.stores.user && this.stores.user.store === null) this.stores.user.store = {};
   }
 
+  // check to see if YAML or JSON
+  #readFile(file) {
+    switch (path.extname(file)) {
+    case '.yaml':
+    case '.yml':
+      return yaml.parse(fs.readFileSync(file, 'utf8'));
+    case '.js':
+      return (typeof require(file) === 'function') ? require(file)(this) : require(file);
+    case '.json':
+      return require(file);
+    }
+  }
+
+  // check to see if YAML or JSON
+  #writeFile(data, file) {
+    switch (path.extname(file)) {
+    case '.yaml':
+    case '.yml':
+      try {
+        return fs.writeFileSync(file, yaml.stringify(data));
+      } catch (error) {
+        throw new Error(error);
+      }
+
+    case '.json':
+      try {
+        return fs.writeFileSync(file, JSON.stringify(data, null, 2));
+      } catch (error) {
+        throw new Error(error);
+      }
+    }
+  }
+
   add(name, options, usage) {
-    return super.add(name, {logicalSeparator: '.', parseValues: true, ...options}, usage);
+    // default opts
+    const defaultOpts = {logicalSeparator: '.', parseValues: true};
+    // if adding a file store with js then read file and change to literal store
+    // @NOTE: this is better than nconf.formats.js because literal stores cannot save and
+    if (options.type === 'file' && this.#getFormat(options.file) === 'js') {
+      return super.add(
+        name,
+        {...defaultOpts, type: 'literal', store: this.encode(this.#readFile(options.file))},
+        usage,
+      );
+    }
+
+    // or just kick upstream
+    return super.add(name, {...defaultOpts, ...options}, usage);
   }
 
   // this.#decode
@@ -262,6 +280,7 @@ class Config extends nconf.Provider {
     this.stores[store].store = merge({}, this.stores[store].store, this.encode(data));
     this.#writeFile(this.stores[store].store, dest);
     this.debug('saved %o to %o', data, dest);
+    this.reset();
   }
 }
 
