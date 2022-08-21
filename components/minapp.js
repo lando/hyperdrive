@@ -3,7 +3,7 @@ const fs = require('fs');
 const get = require('lodash/get');
 const path = require('path');
 const slugify = require('slugify');
-const yaml = require('js-yaml');
+const yaml = require('yaml');
 
 const Config = require('./../core/config');
 const Plugin = require('./plugin');
@@ -41,7 +41,7 @@ class MinApp {
     // @TODO: throw error if no landofile or doesnt exist
     // @TODO: if no name then we should throw an error
     // start by loading in the main landofile and getting the name
-    const mainfile = yaml.load(fs.readFileSync(landofile, 'utf8'));
+    const mainfile = yaml.parse(fs.readFileSync(landofile, 'utf8'));
     this.name = slugify(mainfile.name, {lower: true, strict: true});
     this.root = path.dirname(landofile);
 
@@ -103,7 +103,7 @@ class MinApp {
     // merge in includes
     .map(landofile => {
       // see if we have any includes
-      const includes = get(yaml.load(fs.readFileSync(landofile.path, 'utf8')), 'includes');
+      const includes = get(yaml.parse(fs.readFileSync(landofile.path, 'utf8')), 'includes');
       if (includes) {
         const landofiles = this.getLandofiles((typeof includes === 'string') ? [includes] : includes);
         return [...landofiles, landofile];
