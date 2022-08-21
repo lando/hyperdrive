@@ -20,6 +20,11 @@ class ConfigCommandGet extends BaseCommand {
   static flags = {
     ...BaseCommand.globalFlags,
     extended,
+    global: Flags.boolean({
+      char: 'g',
+      description: 'force use of global context',
+      default: false,
+    }),
     protected: Flags.boolean({
       default: false,
       description: 'show protected system config',
@@ -37,7 +42,7 @@ class ConfigCommandGet extends BaseCommand {
     // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
     // get the starting data from the correct context
-    const config = app ? app.config : hyperdrive.config;
+    const config = (app && !flags.global) ? app.config : hyperdrive.config;
     // start by just grabbing everything or a single value
     const data = (argv.length === 1) ? config.getUncoded(argv[0]) : config.getUncoded();
 

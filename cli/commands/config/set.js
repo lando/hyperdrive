@@ -13,7 +13,7 @@ class ConfigCommandSet extends BaseCommand {
   static args = [{
     name: 'key=value',
     description: 'config key(s) and their value(s) to set',
-    required: false,
+    required: true,
   }];
 
   static flags = {
@@ -22,6 +22,11 @@ class ConfigCommandSet extends BaseCommand {
       default: false,
       description: 'force setting of protected config',
       hidden: true,
+    }),
+    global: Flags.boolean({
+      char: 'g',
+      description: 'force use of global context',
+      default: false,
     }),
   };
 
@@ -57,7 +62,7 @@ class ConfigCommandSet extends BaseCommand {
     }
 
     // save result in the correct place
-    if (app) {
+    if (app && !flags.global) {
       app.appConfig.save({config: data});
     } else {
       hyperdrive.config.save(data);
