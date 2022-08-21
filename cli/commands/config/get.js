@@ -7,9 +7,8 @@ class ConfigCommandGet extends BaseCommand {
   static examples = [
     'hyperdrive config get',
     'hyperdrive config get core.telemetry --json',
-    'hyperdrive config get core.telemetry updates.notify --store=user',
     'hyperdrive config get -c config.yaml',
-    'hyperdrive config get --store user',
+    'hyperdrive config get --protected',
   ];
 
   static args = [{
@@ -65,6 +64,8 @@ class ConfigCommandGet extends BaseCommand {
 
     // otherwise construct some rows for tabular display
     const rows = hyperdrive.Config.keys(data, {expandArrays: false}).map(key => {
+      // if we have argv then we need to modify the key
+      if (argv.length === 1) key = `${argv[0]}.${key}`;
       // start with the basics
       const row = {key, value: config.getUncoded(key)};
       // also loop through and add the values from each store for use in --extended

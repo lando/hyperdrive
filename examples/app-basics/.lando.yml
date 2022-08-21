@@ -3,13 +3,12 @@ name: hyperdrive-app-basics
 
 # THIS IS A COMMENT 2
 includes:
- # THIS IS A COMMENT 3
+  # THIS IS A COMMENT
   - drupal
 
 # THIS IS A COMMENT 4
 plugins:
-  # THIS IS A COMMENT 5
+  # THIS IS A COMMENT
   "@pirog/test-plugin": ./plugins/test-plugin
   "@lando/drupal": ^0.5.0
 
-test: thing

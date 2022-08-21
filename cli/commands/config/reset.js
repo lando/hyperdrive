@@ -1,5 +1,3 @@
-const fs = require('fs');
-
 const {BaseCommand} = require('../../lib/base-command');
 
 class ConfigCommandReset extends BaseCommand {
@@ -8,16 +6,19 @@ class ConfigCommandReset extends BaseCommand {
   static strict = false;
 
   async run() {
+    // mods
+    const fs = require('fs');
+    // hyperdrive
     const {hyperdrive} = this.config;
-    const stores = hyperdrive.config.stores;
-    for (const store in stores) {
-      if (stores[store] && stores[store].type === 'file') {
-        const file = stores[store].file;
-        this.debug('resetting config at %o', file);
+
+    // loop through and remove config stores
+    for (const [store, data] of Object.entries(hyperdrive.config.stores)) {
+      if (data && data.type === 'file') {
+        this.debug('resetting %s config at %o', store, data.file);
         try {
-          fs.unlinkSync(file);
+          fs.unlinkSync(data.file);
         } catch (error) {
-          this.debug(error);
+          this.error(error);
         }
       }
     }
