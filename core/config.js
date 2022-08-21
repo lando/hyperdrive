@@ -7,7 +7,7 @@ const path = require('path');
 const set = require('lodash/set');
 const yaml = require('yaml');
 
-// Add some custom formatters
+// custom yaml formatter
 nconf.formats.yaml = {
   parse: (obj, options) => yaml.parse(obj, options),
   stringify: (obj, options) => yaml.stringify(obj, options),
@@ -275,10 +275,30 @@ class Config extends nconf.Provider {
       }
     }
 
-    // write the new file
-    const dest = this.stores[store].file;
-    this.stores[store].store = merge({}, this.stores[store].store, this.encode(data));
-    this.#writeFile(this.stores[store].store, dest);
+    // get the store destination
+    const dest = get(this.stores, `${store}.file`);
+    // throw error if no destination
+    if (!dest) throw new Error('something');
+
+    // if this is a yaml file then lets try to reconcile comments and data
+    if (this.#getFormat(dest) === 'yaml') {
+      // load the yaml doc
+      const yamlDoc = yaml.parseDocument(fs.readFileSync(dest, 'utf8'));
+      // go through the data and set it into the doc
+      for (const path of Config.keys(data)) {
+        yamlDoc.setIn(path.split('.'), get(data, path));
+      }
+
+      // write the result
+      fs.writeFileSync(dest, yamlDoc.toString());
+
+    // otherwise to the usual saving
+    } else {
+      this.stores[store].store = merge({}, this.stores[store].store, this.encode(data));
+      this.#writeFile(this.stores[store].store, dest);
+    }
+
+    // finally debug and reset
     this.debug('saved %o to %o', data, dest);
     this.reset();
   }
