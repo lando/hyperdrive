@@ -3,7 +3,6 @@ const {CliUx} = require('@oclif/core');
 
 class AddCommand extends PluginCommand {
   static description = 'installs a plugin';
-  static deps = ['core.engine'];
   static examples = [
     'hyperdrive add @lando/apache@0.5.0',
     'hyperdrive add @lando/apache@edge',
