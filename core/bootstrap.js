@@ -1,9 +1,8 @@
 const path = require('path');
 const Config = require('./config');
+const Plugin = require('./plugin');
 
 class Bootstrapper {
-  #engine
-
   static findApp(files, startFrom) {
     return require('./../utils/find-app')(files, startFrom);
   }
@@ -74,11 +73,10 @@ class Bootstrapper {
 
     // add the main config class and instance to the OCLIF config
     config.Config = Config;
+    // set Plugin.id
+    Plugin.id = 'hyperdrive';
 
     // Add a way to set the engine
-    this.setEngine = engine => {
-      this.#engine = engine;
-    };
 
     // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
     config[config.id] = {
@@ -87,16 +85,15 @@ class Bootstrapper {
       getClass: this.getClass,
       getComponent: this.getComponent,
       id: this.id,
-      installPlugin: (name, dest) => {
-        return Reflect.apply(this.getClass('plugin').add, this, [name, dest, this.#engine]);
+      installPlugin: async(name, dest = this.config.get('plugin.global-dir')) => {
+        const engine = await this.getComponent('core.engine');
+        return Plugin.add(name, dest, engine);
       },
       options: this.options,
       plugins: new Config(),
-      setEngine: engine => {
-        Reflect.apply(this.setEngine, this, [engine]);
-      },
       Bootstrapper,
       Config,
+      Plugin,
     };
   }
 }

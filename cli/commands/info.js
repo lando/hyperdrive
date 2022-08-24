@@ -57,7 +57,7 @@ class InfoCommand extends BaseCommand {
 
     // get hyperdrive stuff
     const {hyperdrive} = this.config;
-    const Plugin = hyperdrive.getClass('plugin');
+    const Plugin = hyperdrive.Plugin;
 
     const {args, flags} = await this.parse(InfoCommand);
     const data = await Plugin.info(args.plugin);

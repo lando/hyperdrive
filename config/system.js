@@ -47,7 +47,6 @@ module.exports = ({options}) => {
       lando: {
         landoCli: path.resolve(root, 'components/lando-cli'),
       },
-      plugin: path.resolve(root, 'components/plugin'),
     },
     system: {
       arch,

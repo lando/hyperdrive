@@ -11,7 +11,7 @@ module.exports = async({config}) => {
   const {plugin} = hyperdrive.config.get();
   // helper to return plugin information
   const getPlugins = (dirs = [], type = 'global') => {
-    const Plugin = hyperdrive.getClass('plugin');
+    const Plugin = hyperdrive.Plugin;
     return dirs
     .filter(dir => dir.type === type)
     .map(dir => ({type: dir.type, dirs: hyperdrive.bootstrap.findPlugins(dir.dir, dir.depth)}))

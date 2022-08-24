@@ -99,9 +99,6 @@
       ],
       "prerun": [
         "./cli/hooks/prerun.js"
-      ],
-      "prerun-deps": [
-        "./cli/hooks/engine.js"
       ]
     },
     "plugins": [],

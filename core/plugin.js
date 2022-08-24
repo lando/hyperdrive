@@ -8,9 +8,6 @@ const yaml = require('yaml');
  *
  */
 class Plugin {
-  static name = 'plugin';
-  static cspace = 'plugin';
-
   /**
    *
    * Install a plugin.
@@ -22,7 +19,7 @@ class Plugin {
    * @param {string} dest The plugin directory to install the plugin in.
    * @returns
    */
-  static async add(name, dest = Plugin.defaults.globalDir, engine = Plugin.engine) {
+  static async add(name, dest, engine) {
     const nameVersion = Plugin.mungeVersion(name);
     const pluginPath = `${dest}/${nameVersion.name}`;
 
@@ -91,22 +88,16 @@ class Plugin {
     return nameVersion;
   }
 
-  static setEngine(engine) {
-    Plugin.engine = engine;
-  }
-
   /**
    * @TODO: scripts shoudl be moved into the engine constructor
    */
   constructor({
     location,
     root,
+    id = Plugin.id || 'lando',
     type = 'app',
-    debugspace = Plugin.defaults.debugspace,
-    releaseChannel = Plugin.defaults.releaseChannel,
   } = {}) {
     // core props
-    this.channel = releaseChannel;
     this.root = root || location;
     this.type = type;
 
@@ -120,7 +111,7 @@ class Plugin {
       this.config = {...this.pjson.lando, ...this.#load()};
       // set top level things
       this.name = this.config.name || this.pjson.name;
-      this.debug = require('debug')(`${debugspace}:@lando/core:plugin:${this.name}`);
+      this.debug = require('debug')(`${id}:@lando/core:plugin:${this.name}`);
       this.package = this.pjson.name;
       this.version = this.pjson.version;
       // add some computed properties
@@ -254,6 +245,4 @@ class Plugin {
   // }
 }
 
-Plugin.defaults = {};
-Plugin.engine = undefined;
 module.exports = Plugin;

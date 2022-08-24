@@ -6,7 +6,7 @@ const slugify = require('slugify');
 const yaml = require('yaml');
 
 const Config = require('./../core/config');
-const Plugin = require('./plugin');
+const Plugin = require('./../core/plugin');
 
 /**
  * @NOTE: the purpose of the minapp is something we can just new MinApp() without a helper async load/init function
@@ -21,8 +21,8 @@ const Plugin = require('./plugin');
 class MinApp {
   static name = 'minapp';
   static cspace = 'minapp';
+
   // private props
-  #engine
   #landofile
   #landofiles
   #landofileExt
@@ -47,6 +47,7 @@ class MinApp {
     const mainfile = yaml.parse(fs.readFileSync(landofile, 'utf8'));
     this.name = slugify(mainfile.name, {lower: true, strict: true});
     this.root = path.dirname(landofile);
+    Plugin.id = this.name;
 
     // set other props that are name-dependent
     this.cacheDir = path.join(cacheDir, 'apps', this.name);
@@ -93,12 +94,24 @@ class MinApp {
     this.config.add(product, {type: 'literal', store: config});
   }
 
-  getClass(component, opts) {
-    return MinApp.getClass(component, opts);
+  // helper to get a class
+  getClass(component, {cache = true, defaults} = {}) {
+    return require('./../utils/get-class')(
+      component,
+      this.config,
+      this.registry,
+      {cache, defaults},
+    );
   }
 
-  getComponent(component, config, opts) {
-    return MinApp.getComponent(component, config, opts);
+  // helper to get a component (and config?) from the registry
+  async getComponent(component, constructor = {}, opts = {}) {
+    return require('./../utils/get-component')(
+      component,
+      constructor,
+      this.config,
+      {cache: opts.cache, defaults: opts.defaults, init: opts.init, registry: this.registry},
+    );
   }
 
   getLandofiles(files = []) {
@@ -128,9 +141,9 @@ class MinApp {
     .flat(Number.POSITIVE_INFINITY);
   }
 
-  installPlugin(name, dest) {
-    const Plugin = MinApp.getClass('plugin');
-    return Reflect.apply(Plugin.add, this, [name, dest, this.#engine]);
+  async installPlugin(name, dest = this.pluginsDir) {
+    const engine = await this.getComponent('core.engine');
+    return Plugin.add(name, dest, engine);
   }
 
   normalizePlugins(plugins = {}) {
@@ -155,10 +168,6 @@ class MinApp {
 
     // return objectification
     return Object.fromEntries(normalizedPlugins);
-  }
-
-  setEngine(engine) {
-    this.#engine = engine;
   }
 }
 
