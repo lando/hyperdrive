@@ -6,26 +6,23 @@ class PluginCommand extends BaseCommand {
     {
       name: 'plugin',
       required: true,
-      description: 'The plugin or dependency to act on.',
+      description: 'the plugin(s)',
     },
   ];
 
-  static flags = {...BaseCommand.globalFlags,
+  static flags = {
     global: Flags.boolean({
       char: 'g',
-      description: 'Modify the global Lando context (defaults for all projects).',
-      default: true, // @todo: temporary until we get context detection working.
+      description: 'force use of global context',
+      default: false,
     }),
     namespace: Flags.string({
+      hidden: true,
       char: 'n',
-      description: 'Modify the specified namespace context (defaults for projects using the namespace).',
+      description: 'force use of a particular namespace eg @namespace/plugin',
     }),
-    // @todo: do we need a version flag, or should that be specified in the plugin string if necessary?
+    ...BaseCommand.globalFlags,
   };
-
-  async init() {
-    // console.log('INIT')
-  }
 }
 
 module.exports = {PluginCommand};

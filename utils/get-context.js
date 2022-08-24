@@ -1,3 +1,6 @@
+/*
+ * TBD
+ */
 module.exports = () => {
   // probably running in a browser
   if (typeof window !== 'undefined' && typeof window.document !== 'undefined') return 'browser'; // eslint-disable-line no-undef

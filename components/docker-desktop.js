@@ -54,8 +54,8 @@ class DockerDesktop extends Dockerode {
     const dataDir = DockerDesktop.defaults.dataDir;
     this.scriptsSrc = DockerDesktop.defaults.scripts;
     this.scriptsDest = path.join(dataDir, DockerDesktop.name, 'scripts');
-    this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
-    fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
+    // this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
+    // fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
     moveConfig(this.scriptsSrc, this.scriptsDest);
 
     this.getVersion = this.getVersion();

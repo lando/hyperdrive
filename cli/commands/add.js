@@ -1,38 +1,31 @@
-const {PluginCommand} = require('../../lib/plugin-command');
+const {PluginCommand} = require('../lib/plugin-command');
 const {CliUx} = require('@oclif/core');
 
 class AddCommand extends PluginCommand {
-  // @TODO: For individual apps, you can create a .npmrc file to specify private registry.
-  // https://stackoverflow.com/questions/34652563/using-myproject-npmrc-with-registry
-  // For global context, we should have a global config option for specifying a .npmrc file OR allow the user to put .npmrc in your Hyperdrive config. Need to figure out precedence.
-  static description = 'Add a plugin or dependency to your current Lando context.';
-  static usage = 'usage';
-  static args = [
-    ...PluginCommand.args,
-  ];
-
-  static flags = {
-    ...PluginCommand.flags,
-  };
-
+  static description = 'installs a plugin';
+  static deps = ['core.engine'];
   static examples = [
-    'hyperdrive add @lando/apache --global',
     'hyperdrive add @lando/apache@0.5.0',
+    'hyperdrive add @lando/apache@edge',
+    'hyperdrive add @lando/apache --global',
   ];
+
+  static args = [...PluginCommand.args];
+  static flags = {...PluginCommand.flags};
 
   static strict = false;
 
   async run() {
     // mods
-    const map = require('../../../utils/map');
-    // get from config
-    const {hyperdrive} = this.config;
-    // get needed classes
-    const Plugin = hyperdrive.getClass('plugin');
+    const map = require('../../utils/map');
+    // args and flags
+    const {argv, flags} = await this.parse(AddCommand);
+    // get hyperdrive and app objects
+    const {hyperdrive, app} = this.config;
+    // get the correct plugin install function
+    const {installPlugin} = (app && !flags.global) ? app : hyperdrive;
 
     // weg
-    const {flags, argv} = await this.parse(AddCommand);
-
     // validate flags and args?
     // argv is now required?
     // @TODO: no argv maybe suggest hyperdrive install?
@@ -62,18 +55,16 @@ class AddCommand extends PluginCommand {
     CliUx.ux.action.start('Installing...');
 
     // Global install logic.
-    if (flags.global) {
-      // Run docker commands to install plugins.
-      try {
-        await map(argv, plugin => {
-          return Plugin.add(plugin);
-        });
-        CliUx.ux.action.stop('Install successful.');
-      } catch (error) {
-        // @TODO: Some sort of nice error message? What can we cull?
-        CliUx.ux.action.stop('Install failed.');
-        this.error(error);
-      }
+    // Run docker commands to install plugins.
+    try {
+      await map(argv, plugin => {
+        return installPlugin(plugin);
+      });
+      CliUx.ux.action.stop('Install successful.');
+    } catch (error) {
+      // @TODO: Some sort of nice error message? What can we cull?
+      CliUx.ux.action.stop('Install failed.');
+      this.error(error);
     }
   }
 }

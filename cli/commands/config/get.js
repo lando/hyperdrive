@@ -18,8 +18,6 @@ class ConfigCommandGet extends BaseCommand {
   }];
 
   static flags = {
-    ...BaseCommand.globalFlags,
-    extended,
     global: Flags.boolean({
       char: 'g',
       description: 'force use of global context',
@@ -29,6 +27,8 @@ class ConfigCommandGet extends BaseCommand {
       default: false,
       description: 'show protected system config',
     }),
+    extended,
+    ...BaseCommand.globalFlags,
   };
 
   async run() {

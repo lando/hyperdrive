@@ -34,7 +34,7 @@ module.exports = async({config}) => {
       },
       plugin: {
         'global-dir': globalDir,
-        'global-manifest': path.join(system.dataDir, 'global-plugins.json'),
+        'global-manifest': path.join(system.cacheDir, 'global-plugins.json'),
         'user-dir': userDir,
       },
     };

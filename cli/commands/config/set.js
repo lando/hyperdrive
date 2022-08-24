@@ -17,7 +17,6 @@ class ConfigCommandSet extends BaseCommand {
   }];
 
   static flags = {
-    ...BaseCommand.globalFlags,
     force: Flags.boolean({
       default: false,
       description: 'force setting of protected config',
@@ -28,6 +27,7 @@ class ConfigCommandSet extends BaseCommand {
       description: 'force use of global context',
       default: false,
     }),
+    ...BaseCommand.globalFlags,
   };
 
   async run() {

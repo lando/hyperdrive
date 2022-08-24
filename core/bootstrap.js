@@ -2,8 +2,10 @@ const path = require('path');
 const Config = require('./config');
 
 class Bootstrapper {
+  #engine
+
   static findApp(files, startFrom) {
-    return require('../utils/find-app')(files, startFrom);
+    return require('./../utils/find-app')(files, startFrom);
   }
 
   static findPlugins(dir, depth = 1) {
@@ -11,7 +13,7 @@ class Bootstrapper {
   }
 
   static normalizePlugins(plugins, options = {}) {
-    return require('../utils/normalize-plugins')(plugins, options);
+    return require('./../utils/normalize-plugins')(plugins, options);
   }
 
   constructor(options = {}) {
@@ -20,64 +22,30 @@ class Bootstrapper {
     this.config = new Config(options);
     // debugger
     this.debug = require('debug')(`${this.id}:@lando/core:bootstrap`);
-    // a registry of loaded component classes
-    this.registry = options.registry || {};
     // just save the options
     this.options = options;
+    // a registry of loaded component classes
+    this.registry = options.registry || {};
   }
 
   // helper to get a class
-  getClass(component, {config, cache = true, defaults = true} = {}) {
-    // first provide some nice handling around "core" components
-    // this lets you do stuff like getClass('core.engine') and get whatever that is set to
-    // @TODO: move below out into func since its also used in getComponent?
-    if (component.split('.')[0] === 'core' && component.split('.').length === 2) {
-      component = [component.split('.')[1], this.config.get(component)].join('.');
-    }
-
-    // if class is already loaded in registry and cache is true then just return the class
-    if (this.registry[component] && cache) {
-      this.debug('getting %o from component registry', component);
-      return this.registry[component];
-    }
-
-    // otherwise load the component from the config
-    // @TODO: do we want some better try/catch here?
-    const Component = require(this.config.get(`registry.${component}`));
-
-    // and set its defaults if applicable
-    if (defaults) {
-      const namespace = Component.cspace || Component.name || component.split('.')[component.split('.').length - 1];
-      Component.defaults = config || {
-        ...this.config.get('system'),
-        ...this.config.get('core'),
-        ...this.config.get(namespace),
-      };
-    }
-
-    // and set in cache if applicable
-    if (cache) {
-      this.debug('adding component %o into registry', component);
-      this.registry[component] = Component;
-    }
-
-    // and return
-    return Component;
+  getClass(component, {cache = true, defaults} = {}) {
+    return require('./../utils/get-class')(
+      component,
+      this.config,
+      this.registry,
+      {cache, defaults},
+    );
   }
 
   // helper to get a component (and config?) from the registry
-  async getComponent(component, constructor = {}, init = true, opts = {}) {
-    // get class component and instantiate
-    const Component = this.getClass(component, opts);
-    const instance = Array.isArray(constructor) ? new Component(...constructor) : new Component(constructor);
-
-    // and run its init func if applicable
-    if (instance.init && typeof instance.init === 'function' && init) {
-      await instance.init(constructor, opts);
-    }
-
-    // and return
-    return instance;
+  async getComponent(component, constructor = {}, opts = {}) {
+    return require('./../utils/get-component')(
+      component,
+      constructor,
+      this.config,
+      {cache: opts.cache, defaults: opts.defaults, init: opts.init, registry: this.registry},
+    );
   }
 
   findApp(files, startFrom) {
@@ -106,20 +74,27 @@ class Bootstrapper {
 
     // add the main config class and instance to the OCLIF config
     config.Config = Config;
+
+    // Add a way to set the engine
+    this.setEngine = engine => {
+      this.#engine = engine;
+    };
+
     // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
     config[config.id] = {
       bootstrap: this,
       config: this.config,
-      getClass: (component, opts) => {
-        return Reflect.apply(this.getClass, this, [component, opts]);
-      },
-      getComponent: (component, config, opts) => {
-        return Reflect.apply(this.getComponent, this, [component, config, opts]);
-      },
+      getClass: this.getClass,
+      getComponent: this.getComponent,
       id: this.id,
+      installPlugin: (name, dest) => {
+        return Reflect.apply(this.getClass('plugin').add, this, [name, dest, this.#engine]);
+      },
       options: this.options,
-      plugins: new Config({decode: false}),
-      registry: this.registry,
+      plugins: new Config(),
+      setEngine: engine => {
+        Reflect.apply(this.setEngine, this, [engine]);
+      },
       Bootstrapper,
       Config,
     };

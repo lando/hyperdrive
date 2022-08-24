@@ -22,8 +22,8 @@ class Plugin {
    * @param {string} dest The plugin directory to install the plugin in.
    * @returns
    */
-  static async add(name, dest = Plugin.defaults.globalInstallDir, engine = Plugin.engine) {
-    const nameVersion = this.mungeVersion(name);
+  static async add(name, dest = Plugin.defaults.globalDir, engine = Plugin.engine) {
+    const nameVersion = Plugin.mungeVersion(name);
     const pluginPath = `${dest}/${nameVersion.name}`;
 
     // @TODO: add the new plugin to a temp directory, if success then remove old one and replace with new one
