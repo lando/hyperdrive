@@ -19,7 +19,6 @@ class RemoveCommand extends PluginCommand {
 
   async run() {
     // mods
-    // const map = require('../../../utils/map');
     // // get from config
     // const {bootstrap} = this.config;
     // // get needed classes

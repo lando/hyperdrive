@@ -12,11 +12,3 @@ plugins:
   "@pirog/test-plugin": ./plugins/test-plugin
   "@lando/drupal": ^0.5.0
 
-# sepojg
-config:
-  core:
-    # sejghseg
-    engine: docker-desktop
-    test: thing
-
-#segseg

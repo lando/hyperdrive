@@ -17,13 +17,10 @@ class AddCommand extends PluginCommand {
 
   async run() {
     // mods
-    const map = require('../../utils/map');
     // args and flags
     const {argv, flags} = await this.parse(AddCommand);
     // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
-    // get the correct plugin install function
-    const {installPlugin} = (app && !flags.global) ? app : hyperdrive;
 
     // weg
     // validate flags and args?
@@ -53,19 +50,20 @@ class AddCommand extends PluginCommand {
 
     // Start the spinner
     CliUx.ux.action.start('Installing...');
+    await (app && !flags.global ? app.installPlugin(argv[0]) : hyperdrive.installPlugin(argv[0]));
 
     // Global install logic.
     // Run docker commands to install plugins.
-    try {
-      await map(argv, plugin => {
-        return installPlugin(plugin);
-      });
-      CliUx.ux.action.stop('Install successful.');
-    } catch (error) {
-      // @TODO: Some sort of nice error message? What can we cull?
-      CliUx.ux.action.stop('Install failed.');
-      this.error(error);
-    }
+    // try {
+    //   await map(argv, plugin => {
+    //     return installPlugin(plugin);
+    //   });
+    //   CliUx.ux.action.stop('Install successful.');
+    // } catch (error) {
+    //   // @TODO: Some sort of nice error message? What can we cull?
+    //   CliUx.ux.action.stop('Install failed.');
+    //   this.error(error);
+    // }
   }
 }
 
