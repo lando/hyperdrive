@@ -32,6 +32,7 @@ module.exports = async({id, argv, config}) => {
   // preemptively do a basic check for the config flag
   const {flags} = await Parser.parse(argv, {strict: false, flags: BaseCommand.globalFlags});
   // debug if flag config file doesnt exist
+  // @NOTE: should this be a proper error?
   if (flags.config && !fs.existsSync(flags.config)) {
     debug('tried to load %s into config but it doesnt exist', flags.config);
   }

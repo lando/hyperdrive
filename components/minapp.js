@@ -19,7 +19,10 @@ const Plugin = require('./plugin');
  * to use, that needs to be done outside of this but how do we do that? probably in the load app util function?
  */
 class MinApp {
+  static name = 'minapp';
+  static cspace = 'minapp';
   // private props
+  #engine
   #landofile
   #landofiles
   #landofileExt
@@ -49,6 +52,7 @@ class MinApp {
     this.cacheDir = path.join(cacheDir, 'apps', this.name);
     this.configDir = path.join(configDir, 'apps', this.name);
     this.dataDir = path.join(dataDir, 'apps', this.name);
+    this.pluginsDir = path.join(this.root, '.lando', 'plugins');
     this.debug = require('debug')(`${this.name}:@lando/core:minapp`);
     this.env = `${product}-${this.name}`.toUpperCase().replace(/-/gi, '_');
     this.id = slugify(crypto.createHash('sha1').update(`${landofile}:${this.name}`).digest('base64'));
@@ -89,6 +93,14 @@ class MinApp {
     this.config.add(product, {type: 'literal', store: config});
   }
 
+  getClass(component, opts) {
+    return MinApp.getClass(component, opts);
+  }
+
+  getComponent(component, config, opts) {
+    return MinApp.getComponent(component, config, opts);
+  }
+
   getLandofiles(files = []) {
     return files
     // assemble the filename/type
@@ -116,6 +128,11 @@ class MinApp {
     .flat(Number.POSITIVE_INFINITY);
   }
 
+  installPlugin(name, dest) {
+    const Plugin = MinApp.getClass('plugin');
+    return Reflect.apply(Plugin.add, this, [name, dest, this.#engine]);
+  }
+
   normalizePlugins(plugins = {}) {
     const normalizedPlugins = Object.entries(plugins)
     .map(entry => {
@@ -138,6 +155,10 @@ class MinApp {
 
     // return objectification
     return Object.fromEntries(normalizedPlugins);
+  }
+
+  setEngine(engine) {
+    this.#engine = engine;
   }
 }
 

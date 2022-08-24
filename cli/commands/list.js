@@ -11,12 +11,12 @@ class ListCommand extends BaseCommand {
   ];
 
   static flags = {
-    ...BaseCommand.globalFlags,
     global: Flags.boolean({
       char: 'g',
-      description: 'forces use of global context',
+      description: 'force use of global context',
       default: false,
     }),
+    ...BaseCommand.globalFlags,
   };
 
   async run() {

@@ -3,15 +3,19 @@
 module.exports = async({Command, config}) => {
   // get stuff we need
   // @TODO: what about command aliases?
-  const {id} = Command;
-  const {hyperdrive} = config;
+  const {app, hyperdrive} = config;
 
-  // Add the engine as a global thing if we need it
-  // @TODO: add more commands here?
-  // @TODO: does this make sense to do here?
-  if (id === 'add') {
-    const Plugin = hyperdrive.getClass('plugin');
+  // make sure the engine is set correct across contexts
+  if (Array.isArray(Command.deps) && Command.deps.includes('core.engine')) {
     const engine = await hyperdrive.getComponent('core.engine');
-    Plugin.setEngine(engine);
+    hyperdrive.setEngine(engine);
+
+    // if we have an app then also set its engine
+    if (app) {
+      const appEngine = app.config.get('core.engine') === hyperdrive.config.get('core.engine') ? engine : await app.getComponent('core.engine');
+      app.setEngine(appEngine);
+    }
+
+    // @TODO: what about ensuring installation?
   }
 };
