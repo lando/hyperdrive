@@ -82,6 +82,7 @@ class MinApp {
 
     // separate out the plugins and mix in global ones
     const appPlugins = this.normalizePlugins(this.appConfig.getUncoded('plugins'));
+
     this.plugins = new Config({id: this.name});
     this.plugins.add('app', {type: 'literal', store: appPlugins});
     this.plugins.add(product, {type: 'literal', store: plugins});
@@ -152,7 +153,7 @@ class MinApp {
       const name = entry[0];
       const data = entry[1];
       // compute some defaults
-      const location = path.join(this.root, '.plugins', name);
+      const location = path.join(this.pluginsDir, name);
       const defaults = (typeof data === 'object') ? {location, ...data} : {location};
 
       // override defaults as needed if we have data set as string
