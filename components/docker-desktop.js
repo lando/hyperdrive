@@ -54,8 +54,12 @@ class DockerDesktop extends Dockerode {
     const dataDir = DockerDesktop.defaults.dataDir;
     this.scriptsSrc = DockerDesktop.defaults.scripts;
     this.scriptsDest = path.join(dataDir, DockerDesktop.name, 'scripts');
-    // this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
-    // fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
+    if (DockerDesktop.defaults.npmrc) {
+      this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
+      fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
+    } else {
+      this.npmrcDest = false;
+    }
     moveConfig(this.scriptsSrc, this.scriptsDest);
 
     this.getVersion = this.getVersion();
@@ -79,15 +83,14 @@ class DockerDesktop extends Dockerode {
   /**
    * Add a Lando plugin.
    */
-  async addPlugin(plugin) {
-    const createOptions = {
+  async addPlugin(plugin, packageManager = 'npm') {
+    let createOptions = {
       WorkingDir: '/tmp',
       HostConfig: {
         AutoRemove: true,
         Binds: [
           `${plugin.path}:/plugins/${plugin.name}`,
           `${this.scriptsDest}:/scripts`,
-          `${this.npmrcDest}:/home/etc/npmrc`,
         ],
       },
       Env: [
@@ -95,12 +98,14 @@ class DockerDesktop extends Dockerode {
       ],
       // tty: false,
     };
-
+    if (this.npmrcDest) {
+      createOptions.HostConfig.Binds.push(`${this.npmrcDest}:/home/etc/npmrc`);
+    }
     try {
       // @todo: would be nice to pass in process.stderr to get that output...could try using demux helper
       // on debug statement to print that out at will.
-      super.run('node:14-alpine', ['sh', '-c', `/scripts/plugin-add.sh ${plugin.name}@${plugin.version} ${plugin.name}`], null, createOptions, function() {}).on('stream', function(stream) {
-        stream.on('data', buffer => {
+      super.run('node:14-alpine', ['sh', '-c', `/scripts/plugin-add-${packageManager}.sh ${plugin.name}@${plugin.version} ${plugin.name}`], null, createOptions, function() {}).on('stream', function(stream) {
+        return stream.on('data', buffer => {
           // @todo: way to clean the output up better?
           if (buffer.toString() !== '\u001B[1G\u001B[0K') {
             const debug = require('debug')('engine:@lando/hyperdrive');
@@ -109,7 +114,7 @@ class DockerDesktop extends Dockerode {
         });
       });
     } catch (error) {
-      console.log(error);
+      return error;
     }
   }
 
