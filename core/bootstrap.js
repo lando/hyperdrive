@@ -86,8 +86,7 @@ class Bootstrapper {
       getComponent: this.getComponent,
       id: this.id,
       installPlugin: async(name, dest = this.config.get('plugin.global-dir')) => {
-        const engine = await this.getComponent('core.engine');
-        return Plugin.add(name, dest, engine);
+        return Plugin.add(name, dest, await this.getComponent('core.engine'));
       },
       options: this.options,
       plugins: new Config(),

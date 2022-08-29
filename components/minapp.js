@@ -143,8 +143,7 @@ class MinApp {
   }
 
   async installPlugin(name, dest = this.pluginsDir) {
-    const engine = await this.getComponent('core.engine');
-    return Plugin.add(name, dest, engine);
+    return Plugin.add(name, dest, await this.getComponent('core.engine'));
   }
 
   normalizePlugins(plugins = {}) {

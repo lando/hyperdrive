@@ -1,5 +1,4 @@
 const {PluginCommand} = require('../lib/plugin-command');
-const {CliUx} = require('@oclif/core');
 
 class AddCommand extends PluginCommand {
   static description = 'installs a plugin';
@@ -15,6 +14,7 @@ class AddCommand extends PluginCommand {
   static strict = false;
 
   async run() {
+    const {CliUx} = require('@oclif/core');
     // mods
     // args and flags
     const {argv, flags} = await this.parse(AddCommand);

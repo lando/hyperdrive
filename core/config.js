@@ -125,11 +125,13 @@ class Config extends nconf.Provider {
       const rootKey = `${env}${separator}`;
       super.env({
         separator,
+        logicalSeparator: '.',
         lowerCase: true,
         parseValues: true,
         transform: obj => {
           if (obj.key.startsWith(rootKey.toLowerCase())) {
             obj.key = obj.key.replace(rootKey.toLowerCase(), '');
+            obj.key = obj.key.replace(new RegExp(separator, 'g'), '.');
             return obj;
           }
         },
@@ -236,13 +238,13 @@ class Config extends nconf.Provider {
   // overridden get method for easier deep path selection and key-case handling
   getUncoded(path, data = {}) {
     // log the actions
-    this.debug('getting %o from %o config with', path || 'everything', this.id);
+    this.debug('getting %o from %o config', path || 'everything', this.id);
 
     // if we are looking for a path to the default store
     if (typeof path === 'string' && path.split(':').length === 1) {
       data = get(this.#get(), path);
 
-    // if we are looking for a path to another store
+    // if we are looking for a path to another store or something
     } else if (typeof path === 'string' && path.split(':').length >= 2) {
       const store = path.split(':')[0];
       path = path.split(':')[1];
