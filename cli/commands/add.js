@@ -21,48 +21,19 @@ class AddCommand extends PluginCommand {
     // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
 
-    // weg
-    // validate flags and args?
-    // argv is now required?
+    // @TODO: modimodify the config file as needed?
     // @TODO: no argv maybe suggest hyperdrive install?
+    // @TODO: what about team context?
     // @TODO: what happens if we pull down a plugin that is not a lando plugin?
-    // is there some way for us to validate this first? maybe something on Plugin.info()?
-
-    // determine the context?
-    // if --global then just assume hyperdrive.config
-    // if not global then use app.config
-    // if not global and no app then throw an error
-    // @TODO: do we want helper methods like hyperdrive.plugin.add|remove|update or app.plugin.add|remove|update?
-
-    // do engine various checks to ensure we can actually install a plugin
-    // is the engine installed?
-    // if not then prompt for installation? and add as first thing on listr or install separatly?
-    // is the engine supported?
-    // if not then prompt for installation? and add as first thing on listr or install separatly?
-    // is the engine ready?
-    // if not then prompt to turn it on? and add as first thing on listr or install separatly?
+    // @TODO: move to listr?
+    // @TODO: run multiple args in parallel remove map function
 
     // intall the plugins based on context
-    // @TODO: what about team context?
     // modify the landofile as needed?
-    // @TODO: move to listr?
 
     // Start the spinner
     CliUx.ux.action.start('Installing...');
     await (app && !flags.global ? app.installPlugin(argv[0]) : hyperdrive.installPlugin(argv[0]));
-
-    // Global install logic.
-    // Run docker commands to install plugins.
-    // try {
-    //   await map(argv, plugin => {
-    //     return installPlugin(plugin);
-    //   });
-    //   CliUx.ux.action.stop('Install successful.');
-    // } catch (error) {
-    //   // @TODO: Some sort of nice error message? What can we cull?
-    //   CliUx.ux.action.stop('Install failed.');
-    //   this.error(error);
-    // }
   }
 }
 
