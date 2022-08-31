@@ -78,8 +78,8 @@ class DockerDesktop extends Dockerode {
    * const result = await engine.addPlugin() -> blocks and returns a result object
    * const runner = engine.addPlugin() -> returns event emitter for custom stuff
    */
-  addPlugin(plugin, packageManager = 'npm') {
-    const cmd = ['sh', '-c', `/scripts/plugin-add-${packageManager}.sh ${plugin.name}@${plugin.version} ${plugin.name}`];
+  addPlugin(plugin) {
+    const cmd = ['sh', '-c', `/scripts/plugin-add.sh ${plugin.name}@${plugin.version} ${plugin.name}`];
     const createOptions = {
       WorkingDir: '/tmp',
       HostConfig: {
