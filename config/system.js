@@ -11,6 +11,7 @@ module.exports = ({options}) => {
   // get other stuff
   const user = os.userInfo();
   const landoBin = which.sync('lando', {nothrow: true}) || 'lando';
+  const context = getContext();
 
   // return the system config
   return {
@@ -19,7 +20,7 @@ module.exports = ({options}) => {
       autoSync: false,
       debugspace: id || 'hyperdrive',
       debug: false,
-      engine: 'docker-desktop',
+      engine: context === 'local' ? 'docker-desktop' : 'docker-engine',
       lando: 'lando-cli',
       releaseChannel: 'stable',
       telemetry: true,
@@ -53,7 +54,7 @@ module.exports = ({options}) => {
       bin,
       cacheDir,
       configDir,
-      context: getContext(),
+      context: context,
       dataDir,
       env: Object.hasOwn(process, 'pkg') ? 'prod' : 'dev',
       errlog,
