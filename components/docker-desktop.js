@@ -60,6 +60,7 @@ class DockerDesktop extends Dockerode {
     } else {
       this.npmrcDest = false;
     }
+
     moveConfig(this.scriptsSrc, this.scriptsDest);
 
     this.getVersion = this.getVersion();
@@ -101,6 +102,7 @@ class DockerDesktop extends Dockerode {
     if (this.npmrcDest) {
       createOptions.HostConfig.Binds.push(`${this.npmrcDest}:/home/etc/npmrc`);
     }
+
     try {
       // @todo: would be nice to pass in process.stderr to get that output...could try using demux helper
       // on debug statement to print that out at will.
