@@ -45,6 +45,7 @@
     "is-docker": "^2",
     "is-root": "^2",
     "kebabcase-keys": "^1.0.0",
+    "listr": "^0.14.3",
     "lodash": "^4.17.21",
     "nanoid": "^3",
     "nconf": "^0.12.0",

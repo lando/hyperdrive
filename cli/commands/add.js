@@ -14,26 +14,32 @@ class AddCommand extends PluginCommand {
   static strict = false;
 
   async run() {
-    const {CliUx} = require('@oclif/core');
     // mods
+    const Listr = require('listr');
     // args and flags
     const {argv, flags} = await this.parse(AddCommand);
     // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
 
+    // @TODO: replaec defaults no arg error with no argv maybe suggest hyperdrive install?
+
+    // @TODO: move to listr?
+    const tasks = new Listr([], {concurrent: true, exitOnError: false});
+    for (const plugin of argv) {
+      tasks.add({
+        title: `Installing ${plugin}`,
+        task: async() => {
+          return (app && !flags.global) ? app.installPlugin(plugin) : hyperdrive.installPlugin(plugin);
+        },
+      });
+    }
+
+    // @TODO: need to try catch this
+    await tasks.run();
+
     // @TODO: modimodify the config file as needed?
-    // @TODO: no argv maybe suggest hyperdrive install?
     // @TODO: what about team context?
     // @TODO: what happens if we pull down a plugin that is not a lando plugin?
-    // @TODO: move to listr?
-    // @TODO: run multiple args in parallel remove map function
-
-    // intall the plugins based on context
-    // modify the landofile as needed?
-
-    // Start the spinner
-    CliUx.ux.action.start('Installing...');
-    await (app && !flags.global ? app.installPlugin(argv[0]) : hyperdrive.installPlugin(argv[0]));
   }
 }
 
