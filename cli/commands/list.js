@@ -1,6 +1,7 @@
 
 const {BaseCommand} = require('../lib/base-command');
 const {CliUx, Flags} = require('@oclif/core');
+const {sort, filter} = CliUx.ux.table.flags();
 
 class ListCommand extends BaseCommand {
   static description = 'gets installed plugins for given context';
@@ -16,8 +17,9 @@ class ListCommand extends BaseCommand {
       description: 'force use of global context',
       default: false,
     }),
+    sort,
+    filter,
     ...BaseCommand.globalFlags,
-    ...CliUx.ux.table.flags(),
   };
 
   async run() {
