@@ -14,55 +14,32 @@ class AddCommand extends PluginCommand {
   static strict = false;
 
   async run() {
-    const {CliUx} = require('@oclif/core');
     // mods
+    const Listr = require('listr');
     // args and flags
     const {argv, flags} = await this.parse(AddCommand);
     // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
 
-    // weg
-    // validate flags and args?
-    // argv is now required?
-    // @TODO: no argv maybe suggest hyperdrive install?
-    // @TODO: what happens if we pull down a plugin that is not a lando plugin?
-    // is there some way for us to validate this first? maybe something on Plugin.info()?
+    // @TODO: replaec defaults no arg error with no argv maybe suggest hyperdrive install?
 
-    // determine the context?
-    // if --global then just assume hyperdrive.config
-    // if not global then use app.config
-    // if not global and no app then throw an error
-    // @TODO: do we want helper methods like hyperdrive.plugin.add|remove|update or app.plugin.add|remove|update?
-
-    // do engine various checks to ensure we can actually install a plugin
-    // is the engine installed?
-    // if not then prompt for installation? and add as first thing on listr or install separatly?
-    // is the engine supported?
-    // if not then prompt for installation? and add as first thing on listr or install separatly?
-    // is the engine ready?
-    // if not then prompt to turn it on? and add as first thing on listr or install separatly?
-
-    // intall the plugins based on context
-    // @TODO: what about team context?
-    // modify the landofile as needed?
     // @TODO: move to listr?
+    const tasks = new Listr([], {concurrent: true, exitOnError: false});
+    for (const plugin of argv) {
+      tasks.add({
+        title: `Installing ${plugin}`,
+        task: async() => {
+          return (app && !flags.global) ? app.installPlugin(plugin) : hyperdrive.installPlugin(plugin);
+        },
+      });
+    }
 
-    // Start the spinner
-    CliUx.ux.action.start('Installing...');
-    await (app && !flags.global ? app.installPlugin(argv[0]) : hyperdrive.installPlugin(argv[0]));
+    // @TODO: need to try catch this
+    await tasks.run();
 
-    // Global install logic.
-    // Run docker commands to install plugins.
-    // try {
-    //   await map(argv, plugin => {
-    //     return installPlugin(plugin);
-    //   });
-    //   CliUx.ux.action.stop('Install successful.');
-    // } catch (error) {
-    //   // @TODO: Some sort of nice error message? What can we cull?
-    //   CliUx.ux.action.stop('Install failed.');
-    //   this.error(error);
-    // }
+    // @TODO: modimodify the config file as needed?
+    // @TODO: what about team context?
+    // @TODO: what happens if we pull down a plugin that is not a lando plugin?
   }
 }
 
