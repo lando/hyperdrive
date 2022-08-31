@@ -56,8 +56,12 @@ class DockerDesktop extends Dockerode {
     const dataDir = DockerDesktop.defaults.dataDir;
     this.scriptsSrc = DockerDesktop.defaults.scripts;
     this.scriptsDest = path.join(dataDir, DockerDesktop.name, 'scripts');
-    // this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
-    // fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
+    if (DockerDesktop.defaults.npmrc) {
+      this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
+      fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
+    } else {
+      this.npmrcDest = false;
+    }
     moveConfig(this.scriptsSrc, this.scriptsDest);
 
     this.getVersion = this.getVersion();
@@ -73,8 +77,8 @@ class DockerDesktop extends Dockerode {
    * const result = await engine.addPlugin() -> blocks and returns a result object
    * const runner = engine.addPlugin() -> returns event emitter for custom stuff
    */
-  addPlugin(plugin) {
-    const cmd = ['sh', '-c', `/scripts/plugin-add.sh ${plugin.name}@${plugin.version} ${plugin.name}`];
+  addPlugin(plugin, packageManager = 'npm') {
+    const cmd = ['sh', '-c', `/scripts/plugin-add-${packageManager}.sh ${plugin.name}@${plugin.version} ${plugin.name}`];
     const createOptions = {
       WorkingDir: '/tmp',
       HostConfig: {

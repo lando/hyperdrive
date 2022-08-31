@@ -91,6 +91,7 @@ module.exports = ({options}) => {
         // version: 'v1.25',
       },
       supported: '>=3.6.5 && <=4.10.5',
+      // npmrc: '//npm.pkg.github.com/:_authToken=GH_ACCESS_TOKEN\n@namespace:registry=https://npm.pkg.github.com',
     },
     dockerEngine: {
       // required: '>=3.6.5 && <=5.0.0',
