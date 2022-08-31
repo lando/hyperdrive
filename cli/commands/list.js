@@ -17,6 +17,7 @@ class ListCommand extends BaseCommand {
       default: false,
     }),
     ...BaseCommand.globalFlags,
+    ...CliUx.ux.table.flags(),
   };
 
   async run() {
@@ -41,7 +42,7 @@ class ListCommand extends BaseCommand {
     // otherwise cli table it
     this.log();
     // @TODO: add support for table flags
-    CliUx.ux.table(rows, {name: {}, package: {}, type: {}, location: {}, version: {}});
+    CliUx.ux.table(rows, {name: {}, package: {}, type: {}, location: {}, version: {}}, flags);
     this.log();
     // also throw warnings if there are any invalid plugins
     for (const invalidPlugin of rows.filter(plugin => !plugin.isValid)) {
