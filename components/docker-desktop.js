@@ -62,6 +62,7 @@ class DockerDesktop extends Dockerode {
     } else {
       this.npmrcDest = false;
     }
+
     moveConfig(this.scriptsSrc, this.scriptsDest);
 
     this.getVersion = this.getVersion();
