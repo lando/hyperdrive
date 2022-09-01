@@ -1,21 +1,20 @@
 // const debug = require('debug')('static@lando/core:docker-desktop');
 const fs = require('fs');
+const moveConfig = require('../utils/move-config');
 const merge = require('lodash/merge');
-const makeError = require('./../utils/make-error');
-const makeSuccess = require('./../utils/make-success');
-const mergePromise = require('./../utils/merge-promise');
+const mergePromise = require('../utils/merge-promise');
 const path = require('path');
 
 const Dockerode = require('dockerode');
-const {PassThrough} = require('stream');
 
 class DockerDesktop extends Dockerode {
   static name = 'docker-desktop';
   static cspace = 'docker-desktop';
 
-  constructor({
-    debugspace = DockerDesktop.defaults.debugspace,
-  } = {}) {
+  constructor(
+    // id = LandoCLI.defaults.id,
+    // product = LandoCLI.defaults.product,
+  ) {
     // start by figuring out our dockerode options and passing them upstream
 
     // then set/strip needed ENVVARS
@@ -53,15 +52,52 @@ class DockerDesktop extends Dockerode {
     */
 
     // pass options upstream
-    // @TODO: options?
     super();
     // @TODO: strip DOCKER ENV? and reset?
-    this.debug = require('debug')(`${debugspace}:@lando/core:docker-desktop`);
+
+    // set the rest of our stuff
+    // @TODO: what are our fallbacks here?
+    const dataDir = DockerDesktop.defaults.dataDir;
+    this.scriptsSrc = DockerDesktop.defaults.scripts;
+    this.scriptsDest = path.join(dataDir, DockerDesktop.name, 'scripts');
+    if (DockerDesktop.defaults.npmrc) {
+      this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
+      fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
+    } else {
+      this.npmrcDest = false;
+    }
+
+    moveConfig(this.scriptsSrc, this.scriptsDest);
+
     this.getVersion = this.getVersion();
     this.isInstalled = this.getInstalled();
 
     // @TODO: should these be static props?
     this.supportedOS = ['linux', 'windows', 'macos'];
+  }
+
+  /**
+   * Add a Lando plugin.
+   * @NOTE: this is a hidden async function, we do it this way so the following happens
+   * const result = await engine.addPlugin() -> blocks and returns a result object
+   * const runner = engine.addPlugin() -> returns event emitter for custom stuff
+   */
+  addPlugin(plugin) {
+    const cmd = ['sh', '-c', `/scripts/plugin-add.sh ${plugin.name}@${plugin.version} ${plugin.name}`];
+    const createOptions = {
+      WorkingDir: '/tmp',
+      HostConfig: {
+        Binds: [
+          `${plugin.path}:/plugins/${plugin.name}`,
+          `${this.scriptsDest}:/scripts`,
+          `${this.npmrcDest}:/home/etc/npmrc`,
+        ],
+      },
+      Env: [
+        'PREFIX=/home',
+      ],
+    };
+    return this.run(cmd, {createOptions});
   }
 
   async down() {}
@@ -123,11 +159,7 @@ class DockerDesktop extends Dockerode {
       createOptions = {},
       interactive = false,
       image = 'node:14-alpine',
-      attach = false,
-      stream = null,
-      stdouto = '',
-      stderro = '',
-      allo = '',
+      pipe = null,
     } = {}) {
     // @TODO: automatic image pulling? implement pull wrapper using same mergePromise pattern?
 
@@ -139,102 +171,34 @@ class DockerDesktop extends Dockerode {
       Tty: false || interactive,
     };
 
+    // figure out whether we should pipe the output somewhere
+    const stream = pipe === true ? [process.stdout, process.stderr] : pipe;
     // merge our create options over the defaults
     const copts = merge({}, defaultCreateOptions, createOptions);
 
-    const promiseHandler = async error => {
+    const promiseHandler = async err => {
       return new Promise((resolve, reject) => {
-        // collect some args we can merge into promise resolution
-        const args = {args: {command, image, copts, attach, stream}};
-
         // this handles errors that might happen before runner is set
         // eg docker server errors
         // @TODO: better error object?
         // @NOTE: because this runs in the super.run callback its hard to catch it on the outside with await
         // is there something we can do about that? does it even matter?
-        if (error) {
-          reject(makeError(merge({}, args, {error, command: 'docker api'})));
-        }
+        if (err) reject(err);
 
-        // if we get here we should have access to the container object so we should be able to collect output?
-        runner.on('container', container => {
-          runner.on('stream', stream => {
-            // extend the debugger
-            const debug = this.debug.extend(`${image}:${container.id.slice(0, 4)}`);
-
-            // if we are attached and cannot demultiplex then stream to stdout
-            if (attach && copts.Tty) stream.pipe(process.stdout);
-
-            // collect "all" output eg stdout AND stderr
-            stream.on('data', buffer => {
-              // collect
-              allo += String(buffer);
-
-              // only log if we are not piping output
-              // NOTE: does interactive make sense here?
-              // NOTE: we also need if tty = true, otherwise we can demux and log stdout/stderr separately downstream
-              if (!attach && copts.Tty) debug(String(buffer));
-            });
-
-            // if tty is false then we can separate out stdout and std err and collect and debug separately
-            if (!copts.Tty) {
-              // get some streams and extend the debugger
-              const stdout = new PassThrough();
-              const stderr = new PassThrough();
-              stdout.debug = debug.extend('stdout');
-              stderr.debug = debug.extend('stderr');
-
-              // collect and debug if applicable
-              stdout.on('data', buffer => {
-                stdouto += String(buffer);
-                if (!attach) stdout.debug(String(buffer));
-              });
-              stderr.on('data', buffer => {
-                stderro += String(buffer);
-                if (!attach) stderr.debug(String(buffer));
-              });
-
-              // make sure we close child streams when the parent is done
-              stream.on('end', () => {
-                try {
-                  stdout.end();
-                } catch {}
-
-                try {
-                  stderr.end();
-                } catch {}
-              });
-
-              // dont cross the streams
-              container.modem.demuxStream(stream, stdout, stderr);
-              // pipe to process stds if attached
-              if (attach) {
-                stdout.pipe(process.stdout);
-                stderr.pipe(process.stderr);
-              }
-            }
-          });
-
-          // otherwise resolve or reject result based on status code
-          runner.on('data', data => {
-            // get output
-            const result = {command: 'dockerode run', all: allo, stdout: stdouto, stderr: stderro};
-            // resolve or reject
-            if (data.StatusCode === 0) {
-              resolve(makeSuccess(merge({}, result, {args: command})));
-            } else {
-              reject(makeError(merge({}, args, result, {
-                error: new Error(data.Error),
-                exitCode: data.StatusCode || 1,
-              })));
-            }
-          });
+        // otherwise resolve or reject result based on status code
+        // @TODO: do we want to try to collect stdout/stderr and add them to the result?
+        // @TODO: is there other useful information on the stream/container/start events we can use?
+        runner.on('data', result => {
+          if (result.StatusCode === 0) resolve(result);
+          else reject(result);
         });
       });
     };
 
     // start by getting the event emiiter
     const runner = super.run(image, command, stream, copts, {}, promiseHandler);
+
+    // @TODO: handle streaming situation re debugging and output collection?
 
     // make this a hybrid async func and return
     return mergePromise(runner, promiseHandler);

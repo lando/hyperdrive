@@ -20,8 +20,25 @@ class AddCommand extends PluginCommand {
     const {argv, flags} = await this.parse(AddCommand);
     // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
-
     // @TODO: replaec defaults no arg error with no argv maybe suggest hyperdrive install?
+
+    const engine = await hyperdrive.getComponent('core.engine');
+    const result = await engine.run([
+      'node', '-e', "console.log(require('os').arch()); console.error(require('os').platform());",
+    ], {attach: false, createOptions: {Tty: false}});
+
+    this.log(result);
+
+    // try {
+    //   await engine.run([
+    //     'node', '-e', "console.log(require('os').arch()); console.error(require('os').platform()); process.exit(3);",
+    //   ]);
+    //   // await engine.run(['echo'])
+
+    // } catch (error) {
+    //   console.log(error);
+    //   this.exit(error.exitCode)
+    // }
 
     // @TODO: move to listr?
     const tasks = new Listr([], {concurrent: true, exitOnError: false});

@@ -18,7 +18,7 @@ module.exports = ({options}) => {
     core: {
       app: 'app',
       autoSync: false,
-      debugspace: id || 'hyperdrive',
+      debugspace: id || path.basename(process.argv[1]) || 'hyperdrive',
       debug: false,
       engine: context === 'local' ? 'docker-desktop' : 'docker-engine',
       lando: 'lando-cli',
