@@ -7,6 +7,7 @@ const mergePromise = require('./../utils/merge-promise');
 const path = require('path');
 
 const Dockerode = require('dockerode');
+const {EventEmitter} = require('events');
 const {PassThrough} = require('stream');
 
 class DockerDesktop extends Dockerode {
@@ -103,6 +104,89 @@ class DockerDesktop extends Dockerode {
   }
 
   /**
+   * This is intended for pulling images
+   * This is a wrapper around Dockerode.pull that provides either an await or return implementation eg:
+   *
+   * // get an EventEmitter
+   * const runner = engine.run(command);
+   * runner.on('stream' stream);
+   *
+   * // block and await result
+   * const result = await engine.run(command);
+   * console.log(result);
+   *
+   * @param {*} command
+   * @param {*} param1
+   */
+  pull(tag,
+    {
+      attach = false,
+      auth,
+    } = {}) {
+    // collect some args we can merge into promise resolution
+    // @TODO: obscure auth?
+    const args = {command: 'dockerode pull', args: {tag, auth, attach}};
+    // create an event emitter we can pass into the promisifier
+    const puller = new EventEmitter();
+
+    // handles the promisification of the merged return
+    const promiseHandler = async() => {
+      return new Promise((resolve, reject) => {
+        // if we are not attaching then lets log the progress to the debugger
+        if (!attach) {
+          puller.on('progress', progress => {
+            // extend debugger in appropriate way
+            const debug = progress.id ? this.debug.extend(`${tag}:${progress.id}`) : this.debug.extend(tag);
+            // only debug progress if we can
+            if (progress.progress) debug('%s %o', progress.status, progress.progress);
+            // otherwise just debug status
+            else debug('%s', progress.status);
+          });
+        }
+
+        // handle resolve/reject
+        puller.on('done', output => {
+          resolve(makeSuccess(merge({}, args, {stdout: output[output.length - 1].status})));
+        });
+        puller.on('error', error => {
+          reject(makeError(merge({}, args, {error})));
+        });
+      });
+    };
+
+    // handles the callback to super.pull
+    const callbackHandler = async(error, stream) => {
+      // this handles errors that might happen before pull begins eg docker server errors
+      if (error) throw makeError(merge({}, args, {error, command: 'docker api'}));
+      // if attach is on then lets stream output
+      if (attach) stream.pipe(process.stdout);
+
+      // finished event
+      const finished = (err, output) => { // eslint-disable-line unicorn/consistent-function-scoping
+        // if an error then fire error event
+        if (err) puller.emit('error', err, output);
+        // fire done no matter what?
+        puller.emit('done', output);
+        puller.emit('finished', output);
+        puller.emit('success', output);
+      };
+
+      // progress event
+      const progress = event => { // eslint-disable-line unicorn/consistent-function-scoping
+        puller.emit('progress', event);
+      };
+
+      // eventify the stream
+      this.modem.followProgress(stream, finished, progress);
+    };
+
+    // call the parent with clever stuff
+    super.pull(tag, {authconfig: auth}, callbackHandler);
+    // make this a hybrid async func and return
+    return mergePromise(puller, promiseHandler);
+  }
+
+  /**
    * This is intended for ephermeral none-interactive "one off" commands. Use `exec` if you want to run a command on a pre-existing container.
    * This is a wrapper around Dockerode.run that provides either an await or return implementation eg:
    *
@@ -117,8 +201,7 @@ class DockerDesktop extends Dockerode {
    * @param {*} command
    * @param {*} param1
    */
-  run(
-    command,
+  run(command,
     {
       createOptions = {},
       interactive = false,
@@ -147,11 +230,7 @@ class DockerDesktop extends Dockerode {
         // collect some args we can merge into promise resolution
         const args = {args: {command, image, copts, attach, stream}};
 
-        // this handles errors that might happen before runner is set
-        // eg docker server errors
-        // @TODO: better error object?
-        // @NOTE: because this runs in the super.run callback its hard to catch it on the outside with await
-        // is there something we can do about that? does it even matter?
+        // this handles errors that might happen before runner is set eg docker server errors
         if (error) {
           reject(makeError(merge({}, args, {error, command: 'docker api'})));
         }
@@ -235,7 +314,6 @@ class DockerDesktop extends Dockerode {
 
     // start by getting the event emiiter
     const runner = super.run(image, command, stream, copts, {}, promiseHandler);
-
     // make this a hybrid async func and return
     return mergePromise(runner, promiseHandler);
   }

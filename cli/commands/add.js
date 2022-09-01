@@ -23,12 +23,13 @@ class AddCommand extends PluginCommand {
     // @TODO: replaec defaults no arg error with no argv maybe suggest hyperdrive install?
 
     const engine = await hyperdrive.getComponent('core.engine');
-    const result = await engine.run([
-      'node', '-e', "console.log(require('os').arch()); console.error(require('os').platform());",
-    ], {attach: false, createOptions: {Tty: false}});
 
-    this.log(result);
+    // const result = await engine.run([
+    //   'node', '-e', "console.log(require('os').arch()); console.error(require('os').platform());",
+    // ], {attach: false, createOptions: {Tty: false}});
 
+    const result = await engine.pull('node:14');
+    console.log(result);
     // try {
     //   await engine.run([
     //     'node', '-e', "console.log(require('os').arch()); console.error(require('os').platform()); process.exit(3);",
