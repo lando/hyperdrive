@@ -136,7 +136,7 @@ class DockerDesktop extends Dockerode {
         if (!attach) {
           puller.on('progress', progress => {
             // extend debugger in appropriate way
-            const debug = progress.id ? this.debug.extend(`${tag}:${progress.id}`) : this.debug.extend(tag);
+            const debug = progress.id ? this.debug.extend(`pull:${tag}:${progress.id}`) : this.debug.extend(tag);
             // only debug progress if we can
             if (progress.progress) debug('%s %o', progress.status, progress.progress);
             // otherwise just debug status
@@ -239,7 +239,7 @@ class DockerDesktop extends Dockerode {
         runner.on('container', container => {
           runner.on('stream', stream => {
             // extend the debugger
-            const debug = this.debug.extend(`${image}:${container.id.slice(0, 4)}`);
+            const debug = this.debug.extend(`run:${image}:${container.id.slice(0, 4)}`);
 
             // if we are attached and cannot demultiplex then stream to stdout
             if (attach && copts.Tty) stream.pipe(process.stdout);
