@@ -4,6 +4,8 @@ const merge = require('lodash/merge');
 const makeError = require('./../utils/make-error');
 const makeSuccess = require('./../utils/make-success');
 const mergePromise = require('./../utils/merge-promise');
+const slugify = require('slugify');
+const stringArgv = require('string-argv').default;
 
 const Dockerode = require('dockerode');
 
@@ -109,7 +111,7 @@ class DockerEngine extends Dockerode {
     fs.mkdirSync(context, {recursive: true});
 
     // create the build context
-    for (const source of [dockerfile, sources].flat(Number.POSITIVE_INFINITY)) {
+    for (const source of [dockerfile, sources].flat(Number.POSITIVE_INFINITY).filter(Boolean)) {
       fs.copySync(source, path.join(context, path.basename(source)));
       debug('copied %o into build context %o', source, context);
     }
@@ -118,6 +120,22 @@ class DockerEngine extends Dockerode {
     super.buildImage({context, src: fs.readdirSync(context)}, {t: tag}, callbackHandler);
     // make this a hybrid async func and return
     return mergePromise(builder, promiseHandler);
+  }
+
+  /**
+   * A helper method that automatically will pull the image needed for the run command
+   * NOTE: this is only available as async/await so you cannot return directly and access events
+   *
+   * @param {*} command
+   * @param {*} param1
+   */
+  async buildNRun(dockerfile, command, {sources, tag, createOptions = {}, attach = false} = {}) {
+    // if we dont have a tag we need to set something
+    if (!tag) tag = slugify(nanoid()).toLowerCase();
+    // build the image
+    await this.build(dockerfile, {attach, sources, tag});
+    // run the command
+    await this.run(command, {attach, createOptions, tag});
   }
 
   /**
@@ -139,7 +157,7 @@ class DockerEngine extends Dockerode {
    * @param {*} command
    * @param {*} param1
    */
-  pull(tag,
+  pull(image,
     {
       auth,
       attach = false,
@@ -151,7 +169,7 @@ class DockerEngine extends Dockerode {
         if (!attach) {
           puller.on('progress', progress => {
             // extend debugger in appropriate way
-            const debug = progress.id ? this.debug.extend(`pull:${tag}:${progress.id}`) : this.debug.extend(`pull:${tag}`);
+            const debug = progress.id ? this.debug.extend(`pull:${image}:${progress.id}`) : this.debug.extend(`pull:${image}`);
             // only debug progress if we can
             if (progress.progress) debug('%s %o', progress.status, progress.progress);
             // otherwise just debug status
@@ -196,17 +214,31 @@ class DockerEngine extends Dockerode {
     };
 
     // error if no command
-    if (!tag) throw new Error('you must pass an image (repo/image:tag) into engine.pull');
+    if (!image) throw new Error('you must pass an image (repo/image:tag) into engine.pull');
 
     // collect some args we can merge into promise resolution
     // @TODO: obscure auth?
-    const args = {command: 'dockerode pull', args: {tag, auth, attach}};
+    const args = {command: 'dockerode pull', args: {image, auth, attach}};
     // create an event emitter we can pass into the promisifier
     const puller = new EventEmitter();
     // call the parent with clever stuff
-    super.pull(tag, {authconfig: auth}, callbackHandler);
+    super.pull(image, {authconfig: auth}, callbackHandler);
     // make this a hybrid async func and return
     return mergePromise(puller, promiseHandler);
+  }
+
+  /**
+   * A helper method that automatically will pull the image needed for the run command
+   * NOTE: this is only available as async/await so you cannot return directly and access events
+   *
+   * @param {*} command
+   * @param {*} param1
+   */
+  async pullNRun(image, command, {auth, attach = false, createOptions = {}} = {}) {
+    // pull the image
+    await this.pull(image, {attach, authconfig: auth});
+    // run the command
+    await this.run(command, {attach, createOptions, image});
   }
 
   /**
@@ -236,9 +268,7 @@ class DockerEngine extends Dockerode {
         const args = {args: {command, image, copts, attach, stream}};
 
         // this handles errors that might happen before runner is set eg docker server errors
-        if (error) {
-          reject(makeError(merge({}, args, {error, command: 'docker api'})));
-        }
+        if (error) reject(makeError(merge({}, args, {error, command: 'docker api'})));
 
         // if we get here we should have access to the container object so we should be able to collect output?
         runner.on('container', container => {
@@ -318,6 +348,8 @@ class DockerEngine extends Dockerode {
 
     // error if no command
     if (!command) throw new Error('you must pass a command into engine.run');
+    // arrayify commands that are strings
+    if (typeof command === 'string') command = stringArgv(command);
 
     // some good default createOpts
     const defaultCreateOptions = {

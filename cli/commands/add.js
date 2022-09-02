@@ -25,9 +25,18 @@ class AddCommand extends PluginCommand {
 
     const engine = await hyperdrive.getComponent('core.engine');
 
-    const result = await engine.run(['bash', '-c', 'apt update && apt install vim -y'], {image: 'ubuntu', attach: false})
+    // const result = await engine.pullNRun('ubun2', 'bash -c "apt update && apt install vim -y"', {attach: false})
+    try {
+      const result = await engine.buildNRun(
+        'Dockerfile',
+        ['node', '-e', "console.log(require('os').arch()); console.error(require('os').platform()); process.exit(3);"],
+        {attach: true},
+      );
+    } catch (error) {
+      console.log(error)
+    }
+      //   ])
 
-    console.log(result)
     process.exit(1)
     // try {
     //   await engine.run([
