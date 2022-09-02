@@ -22,6 +22,7 @@ module.exports = ({options}) => {
       debug: false,
       engine: context === 'local' ? 'docker-desktop' : 'docker-engine',
       lando: 'lando-cli',
+      pluginInstaller: 'docker-npm',
       releaseChannel: 'stable',
       telemetry: true,
     },
@@ -47,6 +48,9 @@ module.exports = ({options}) => {
       },
       lando: {
         landoCli: path.resolve(root, 'components/lando-cli'),
+      },
+      pluginInstaller: {
+        dockerNpm: path.resolve(root, 'components/docker-npm'),
       },
     },
     system: {

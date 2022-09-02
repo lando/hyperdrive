@@ -25,8 +25,16 @@ module.exports = (component, config, registry = {}, {cache = true, configDefault
   }
 
   // otherwise load the component from the config
-  // @TODO: do we want some better try/catch here?
-  const Component = require(config.get(`registry.${component}`));
+  const loader = require(config.get(`registry.${component}`));
+  const isDynamic = loader.extends && typeof loader.getClass === 'function';
+
+  // if component is "dynamically extended" then use that first
+  // we use this instead of the usual class extension when the components parent is not static and is not known until
+  // the configuration has been compiled. an example would be the docker-npm plugin-installer component which extends
+  // whatever core.engine is
+  //
+  // otherwise assume the loader is the class itself
+  const Component = isDynamic ? loader.getClass(module.exports(loader.extends, config, registry, {cache, configDefaults})) : loader;
 
   // and set its defaults if applicable
   const namespace = Component.cspace || Component.name || component.split('.')[component.split('.').length - 1];
