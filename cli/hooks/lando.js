@@ -12,7 +12,7 @@ module.exports = async({config}) => {
   // get the core classes we need
   const LandoCLI = hyperdrive.getClass('core.lando');
   // deconstruct some defaults
-  const {configCommand, bin} = LandoCLI.defaults;
+  const {configCommand, bin} = LandoCLI.config;
 
   // dump the landoconfig file if we have to and rebase our managed config on it
   if (!core.landofile || !core.landofiles || !plugin.globalDir || !plugin.globalManifest || core.autoSync) {

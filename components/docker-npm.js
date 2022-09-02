@@ -5,15 +5,15 @@ const merge = require('lodash/merge');
 const mergePromise = require('../utils/merge-promise');
 const path = require('path');
 
-const Dockerode = require('dockerode');
-
-class DockerDesktop extends Dockerode {
-  static name = 'docker-desktop';
-  static cspace = 'docker-desktop';
+class DockerNpm {
+  static name = 'docker-npm';
+  static cspace = 'docker-npm';
+  static config = {};
+  static extends = 'core.engine';
 
   constructor(
-    // id = LandoCLI.defaults.id,
-    // product = LandoCLI.defaults.product,
+    // id = LandoCLI.config.id,
+    // product = LandoCLI.config.product,
   ) {
     // start by figuring out our dockerode options and passing them upstream
 
@@ -25,8 +25,8 @@ class DockerDesktop extends Dockerode {
 
     // determine is
     // @TODO: set upstream ops for dockerode eg host/socket?
-    // console.log(DockerDesktop.defaults)
-    // DockerDesktop.defaults
+    // console.log(DockerDesktop.config)
+    // DockerDesktop.config
     /*
       // Set defaults if we have to
       if (_.isEmpty(engineConfig)) {
@@ -52,17 +52,17 @@ class DockerDesktop extends Dockerode {
     */
 
     // pass options upstream
-    super();
+    this.super();
     // @TODO: strip DOCKER ENV? and reset?
 
     // set the rest of our stuff
     // @TODO: what are our fallbacks here?
-    const dataDir = DockerDesktop.defaults.dataDir;
-    this.scriptsSrc = DockerDesktop.defaults.scripts;
-    this.scriptsDest = path.join(dataDir, DockerDesktop.name, 'scripts');
-    if (DockerDesktop.defaults.npmrc) {
-      this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
-      fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
+    const dataDir = DockerNpm.config.dataDir;
+    this.scriptsSrc = DockerNpm.config.scripts;
+    this.scriptsDest = path.join(dataDir, DockerNpm.name, 'scripts');
+    if (DockerNpm.config.npmrc) {
+      this.npmrcDest = path.join(dataDir, DockerNpm.name, '.npmrc');
+      fs.writeFileSync(this.npmrcDest, DockerNpm.config.npmrc);
     } else {
       this.npmrcDest = false;
     }
@@ -242,5 +242,4 @@ class DockerDesktop extends Dockerode {
   }
 }
 
-DockerDesktop.defaults = {};
-module.exports = DockerDesktop;
+module.exports = DockerNpm;

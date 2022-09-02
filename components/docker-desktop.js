@@ -6,12 +6,12 @@ const DockerEngine = require('./docker-engine');
 class DockerDesktop extends DockerEngine {
   static name = 'docker-desktop';
   static cspace = 'docker-desktop';
+  static config = {};
   static supportedPlatforms = ['darwin', 'linux', 'win32', 'wsl'];
 
   constructor({
-    debugspace = DockerDesktop.defaults.debugspace,
+    debugspace = DockerDesktop.config.debugspace,
   } = {}) {
-    console.log(DockerDesktop.defaults);
     // start by figuring out our dockerode options and passing them upstream
 
     // then set/strip needed ENVVARS
@@ -22,8 +22,8 @@ class DockerDesktop extends DockerEngine {
 
     // determine is
     // @TODO: set upstream ops for dockerode eg host/socket?
-    // console.log(DockerDesktop.defaults)
-    // DockerDesktop.defaults
+    // console.log(DockerDesktop.config)
+    // DockerDesktop.config
     /*
       // Set defaults if we have to
       if (_.isEmpty(engineConfig)) {
@@ -133,5 +133,4 @@ class DockerDesktop extends DockerEngine {
   }
 }
 
-DockerDesktop.defaults = {};
 module.exports = DockerDesktop;

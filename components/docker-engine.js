@@ -14,11 +14,12 @@ const {PassThrough} = require('stream');
 class DockerEngine extends Dockerode {
   static name = 'docker-engine';
   static cspace = 'docker-engine';
+  static config = {};
   // @NOTE: is wsl accurate here?
   static supportedPlatforms = ['linux', 'wsl'];
 
   constructor({
-    debugspace = DockerEngine.defaults.debugspace,
+    debugspace = DockerEngine.config.debugspace,
   } = {}) {
     super();
 
@@ -327,5 +328,4 @@ class DockerEngine extends Dockerode {
   }
 }
 
-DockerEngine.defaults = {};
 module.exports = DockerEngine;

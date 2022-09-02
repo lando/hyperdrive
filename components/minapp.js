@@ -21,6 +21,7 @@ const Plugin = require('./../core/plugin');
 class MinApp {
   static name = 'minapp';
   static cspace = 'minapp';
+  static config = {};
 
   // private props
   #landofile
@@ -32,14 +33,14 @@ class MinApp {
    */
   constructor({
     landofile,
-    cacheDir = MinApp.defaults.cacheDir,
+    cacheDir = MinApp.config.cacheDir,
     config = {},
-    configDir = MinApp.defaults.configDir,
-    dataDir = MinApp.defaults.dataDir,
-    instance = MinApp.defaults.instance,
-    landofiles = MinApp.defaults.landofiles,
+    configDir = MinApp.config.configDir,
+    dataDir = MinApp.config.dataDir,
+    instance = MinApp.config.instance,
+    landofiles = MinApp.config.landofiles,
     plugins = {},
-    product = MinApp.defaults.product,
+    product = MinApp.config.product,
   } = {}) {
     // @TODO: throw error if no landofile or doesnt exist
     // @TODO: if no name then we should throw an error
@@ -171,5 +172,4 @@ class MinApp {
   }
 }
 
-MinApp.defaults = {};
 module.exports = MinApp;

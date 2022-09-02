@@ -14,6 +14,7 @@ const {satisfies} = require('semver');
 class LandoCLI {
   static name = 'lando-cli';
   static cspace = 'lando-cli';
+  static config = {};
 
   static info(cmd = 'lando --hyperdrive') {
     try {
@@ -31,15 +32,15 @@ class LandoCLI {
    */
   constructor({
     version,
-    bin = LandoCLI.defaults.bin,
-    debugspace = LandoCLI.defaults.debugspace,
-    id = LandoCLI.defaults.id,
-    product = LandoCLI.defaults.product,
-    autoSync = LandoCLI.defaults.autoSync,
-    install = LandoCLI.defaults.install,
-    name = LandoCLI.defaults.name,
-    required = LandoCLI.defaults.required,
-    releaseChannel = LandoCLI.defaults.releaseChannel,
+    bin = LandoCLI.config.bin,
+    debugspace = LandoCLI.config.debugspace,
+    id = LandoCLI.config.id,
+    product = LandoCLI.config.product,
+    autoSync = LandoCLI.config.autoSync,
+    install = LandoCLI.config.install,
+    name = LandoCLI.config.name,
+    required = LandoCLI.config.required,
+    releaseChannel = LandoCLI.config.releaseChannel,
   } = {}) {
     // set top level props
     this.autoSync = autoSync;
@@ -145,5 +146,4 @@ class LandoCLI {
   // }
 }
 
-LandoCLI.defaults = {};
 module.exports = LandoCLI;

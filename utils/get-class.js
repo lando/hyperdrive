@@ -1,7 +1,7 @@
 /*
  * TBD
  */
-module.exports = (component, config, registry = {}, {cache = true, defaults} = {}) => {
+module.exports = (component, config, registry = {}, {cache = true, configDefaults} = {}) => {
   // throw error if config is not a Config class
   if (!config.constructor || config.constructor.name !== 'Config') {
     throw new Error('getClass requires config be a Config class');
@@ -30,7 +30,7 @@ module.exports = (component, config, registry = {}, {cache = true, defaults} = {
 
   // and set its defaults if applicable
   const namespace = Component.cspace || Component.name || component.split('.')[component.split('.').length - 1];
-  Component.defaults = defaults || {
+  Component.config = configDefaults || {
     ...config.get('system'),
     ...config.get('core'),
     ...config.get(namespace),
