@@ -4,7 +4,7 @@ const {CliUx, Flags} = require('@oclif/core');
 const {sort, filter} = CliUx.ux.table.flags();
 
 class ListCommand extends BaseCommand {
-  static description = 'gets installed plugins for given context';
+  static description = 'lists installed plugins for given context';
   static examples = [
     'hyperdrive config list',
     'hyperdrive config list --global',
@@ -12,13 +12,13 @@ class ListCommand extends BaseCommand {
   ];
 
   static flags = {
+    filter,
     global: Flags.boolean({
       char: 'g',
       description: 'force use of global context',
       default: false,
     }),
     sort,
-    filter,
     ...BaseCommand.globalFlags,
   };
 

@@ -15,6 +15,7 @@ class AddCommand extends PluginCommand {
 
   async run() {
     // mods
+    const path = require('path');
     const Listr = require('listr');
     // args and flags
     const {argv, flags} = await this.parse(AddCommand);
@@ -24,12 +25,10 @@ class AddCommand extends PluginCommand {
 
     const engine = await hyperdrive.getComponent('core.engine');
 
-    // const result = await engine.run([
-    //   'node', '-e', "console.log(require('os').arch()); console.error(require('os').platform());",
-    // ], {attach: false, createOptions: {Tty: false}});
+    const result = await engine.run(['bash', '-c', 'apt update && apt install vim -y'], {image: 'ubuntu', attach: false})
 
-    const result = await engine.pull('node:14');
-    console.log(result);
+    console.log(result)
+    process.exit(1)
     // try {
     //   await engine.run([
     //     'node', '-e', "console.log(require('os').arch()); console.error(require('os').platform()); process.exit(3);",

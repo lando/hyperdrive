@@ -41,6 +41,7 @@
     "dockerode": "^3.3.2",
     "download": "^8.0.0",
     "execa": "^6.1.0",
+    "fs-extra": "^10.1.0",
     "hash-sum": "^2.0.0",
     "is-docker": "^2",
     "is-root": "^2",
