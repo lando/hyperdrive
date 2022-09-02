@@ -41,14 +41,6 @@ class DockerEngine extends Dockerode {
       tag,
       attach = false,
     } = {}) {
-    // collect some args we can merge into promise resolution
-    // @TODO: obscure auth?
-    const args = {command: 'dockerode buildImage', args: {dockerfile, tag, sources}};
-    // create an event emitter we can pass into the promisifier
-    const builder = new EventEmitter();
-    // extend debugger in appropriate way
-    const debug = tag ? this.debug.extend(`build:${tag}`) : this.debug.extend('build');
-
     // handles the promisification of the merged return
     const promiseHandler = async() => {
       return new Promise((resolve, reject) => {
@@ -100,6 +92,18 @@ class DockerEngine extends Dockerode {
       this.modem.followProgress(stream, finished, progress);
     };
 
+    // error if no dockerfile
+    if (!dockerfile) throw new Error('you must pass a dockerfile into engine.build');
+    // error if no dockerfile exits
+    if (!fs.existsSync(dockerfile)) throw new Error(`${dockerfile} does not exist`);
+
+    // collect some args we can merge into promise resolution
+    // @TODO: obscure auth?
+    const args = {command: 'dockerode buildImage', args: {dockerfile, tag, sources}};
+    // create an event emitter we can pass into the promisifier
+    const builder = new EventEmitter();
+    // extend debugger in appropriate way
+    const debug = tag ? this.debug.extend(`build:${tag}`) : this.debug.extend('build');
     // get a build directory dialed
     const context = path.join(require('os').tmpdir(), nanoid());
     fs.mkdirSync(context, {recursive: true});
@@ -140,12 +144,6 @@ class DockerEngine extends Dockerode {
       auth,
       attach = false,
     } = {}) {
-    // collect some args we can merge into promise resolution
-    // @TODO: obscure auth?
-    const args = {command: 'dockerode pull', args: {tag, auth, attach}};
-    // create an event emitter we can pass into the promisifier
-    const puller = new EventEmitter();
-
     // handles the promisification of the merged return
     const promiseHandler = async() => {
       return new Promise((resolve, reject) => {
@@ -197,6 +195,14 @@ class DockerEngine extends Dockerode {
       this.modem.followProgress(stream, finished, progress);
     };
 
+    // error if no command
+    if (!tag) throw new Error('you must pass an image (repo/image:tag) into engine.pull');
+
+    // collect some args we can merge into promise resolution
+    // @TODO: obscure auth?
+    const args = {command: 'dockerode pull', args: {tag, auth, attach}};
+    // create an event emitter we can pass into the promisifier
+    const puller = new EventEmitter();
     // call the parent with clever stuff
     super.pull(tag, {authconfig: auth}, callbackHandler);
     // make this a hybrid async func and return
@@ -223,19 +229,8 @@ class DockerEngine extends Dockerode {
       stdouto = '',
       stderro = '',
     } = {}) {
-    // some good default createOpts
-    // @TODO: best way to provide stdin func? test on running vim or something?
-    const defaultCreateOptions = {
-      AttachStdin: interactive,
-      HostConfig: {AutoRemove: true},
-      Tty: false || interactive || attach,
-      OpenStdin: true,
-    };
-
-    // merge our create options over the defaults
-    const copts = merge({}, defaultCreateOptions, createOptions);
-
     const promiseHandler = async error => {
+      // handles the promisification of the merged return
       return new Promise((resolve, reject) => {
         // collect some args we can merge into promise resolution
         const args = {args: {command, image, copts, attach, stream}};
@@ -321,6 +316,19 @@ class DockerEngine extends Dockerode {
       });
     };
 
+    // error if no command
+    if (!command) throw new Error('you must pass a command into engine.run');
+
+    // some good default createOpts
+    const defaultCreateOptions = {
+      AttachStdin: interactive,
+      HostConfig: {AutoRemove: true},
+      Tty: false || interactive || attach,
+      OpenStdin: true,
+    };
+
+    // merge our create options over the defaults
+    const copts = merge({}, defaultCreateOptions, createOptions);
     // start by getting the event emiiter
     const runner = super.run(image, command, stream, copts, {}, promiseHandler);
     // make this a hybrid async func and return
