@@ -22,6 +22,10 @@ class MinApp {
   static name = 'minapp';
   static cspace = 'minapp';
   static config = {};
+  static deps = [
+    'core.engine',
+    'core.plugin-installer',
+  ];
 
   // private props
   #landofile

@@ -1,7 +1,12 @@
+const fs = require('fs');
+
 /*
  * TBD
  */
 module.exports = (component, config, registry = {}, {cache = true, configDefaults} = {}) => {
+  // save the orignal component before it is mutated
+  const originalComponent = component;
+
   // throw error if config is not a Config class
   if (!config.constructor || config.constructor.name !== 'Config') {
     throw new Error('getClass requires config be a Config class');
@@ -24,11 +29,17 @@ module.exports = (component, config, registry = {}, {cache = true, configDefault
     return registry[component];
   }
 
-  // otherwise load the component from the config
+  // if there is no component or it does not exist then throw an error
+  if (!config.get(`registry.${component}`) || !fs.existsSync(config.get(`registry.${component}`) + '.js')) {
+    throw new Error(`could not find component ${originalComponent} (${component})`);
+  }
+
+  // otherwise try to load the component from the config
   const loader = require(config.get(`registry.${component}`));
   const isDynamic = loader.extends && typeof loader.getClass === 'function';
 
-  // if component is "dynamically extended" then use that first
+  // if component is "dynamically extended" then get its parent and run its getClass function
+  //
   // we use this instead of the usual class extension when the components parent is not static and is not known until
   // the configuration has been compiled. an example would be the docker-npm plugin-installer component which extends
   // whatever core.engine is
@@ -36,7 +47,10 @@ module.exports = (component, config, registry = {}, {cache = true, configDefault
   // otherwise assume the loader is the class itself
   const Component = isDynamic ? loader.getClass(module.exports(loader.extends, config, registry, {cache, configDefaults})) : loader;
 
-  // and set its defaults if applicable
+  // if Component is not a class then error
+  if (!require('is-class')(Component)) throw new Error(`component ${originalComponent} (${component}) needs to be a class`);
+
+  // set some static config onto the class
   const namespace = Component.cspace || Component.name || component.split('.')[component.split('.').length - 1];
   Component.config = configDefaults || {
     ...config.get('system'),

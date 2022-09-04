@@ -24,6 +24,7 @@ class AddCommand extends PluginCommand {
     // @TODO: replaec defaults no arg error with no argv maybe suggest hyperdrive install?
 
     const pluginInstaller = await hyperdrive.getComponent('core.plugin-installer');
+
     console.log(pluginInstaller)
 
     process.exit(1)

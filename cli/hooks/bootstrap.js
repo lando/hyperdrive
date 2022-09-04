@@ -92,7 +92,8 @@ module.exports = async({id, argv, config}) => {
     // @NOTE: about .14-.15s here
     debug('bootstrap-setup completed successfully!');
   } catch (error) {
-    hookHandler(new Error(`Bootstrap failed! ${error.message}`));
+    console.error('Bootstrap failed!'); // eslint-disable-line no-console
+    hookHandler(error);
   }
 
   // final hooks to modify the config, all representing different bootstrap considerations
