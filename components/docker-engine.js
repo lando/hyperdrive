@@ -118,6 +118,8 @@ class DockerEngine extends Dockerode {
 
     // call the parent
     super.buildImage({context, src: fs.readdirSync(context)}, {t: tag}, callbackHandler);
+    // log
+    this.debug('building image %o from %o', tag, context);
     // make this a hybrid async func and return
     return mergePromise(builder, promiseHandler);
   }
@@ -223,6 +225,8 @@ class DockerEngine extends Dockerode {
     const puller = new EventEmitter();
     // call the parent with clever stuff
     super.pull(image, {authconfig: auth}, callbackHandler);
+    // log
+    this.debug('pulling image %o', image);
     // make this a hybrid async func and return
     return mergePromise(puller, promiseHandler);
   }
@@ -363,6 +367,8 @@ class DockerEngine extends Dockerode {
     const copts = merge({}, defaultCreateOptions, createOptions);
     // start by getting the event emiiter
     const runner = super.run(image, command, stream, copts, {}, promiseHandler);
+    // log
+    this.debug('running command %o on image %o with create opts %o', command, image, copts);
     // make this a hybrid async func and return
     return mergePromise(runner, promiseHandler);
   }

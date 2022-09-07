@@ -25,7 +25,12 @@ class AddCommand extends PluginCommand {
 
     const pluginInstaller = await hyperdrive.getComponent('core.plugin-installer');
 
-    console.log(pluginInstaller)
+
+
+    const result = await hyperdrive.installPlugin(argv[0]);
+    console.log('result');
+
+
 
     process.exit(1)
     // try {

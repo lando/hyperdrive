@@ -22,7 +22,7 @@ module.exports = ({options}) => {
       debug: false,
       engine: context === 'local' ? 'docker-desktop' : 'docker-engine',
       lando: 'lando-cli',
-      pluginInstaller: 'docker-npm',
+      pluginInstaller: 'docker-plugin-installer',
       releaseChannel: 'stable',
       telemetry: true,
     },
@@ -50,7 +50,7 @@ module.exports = ({options}) => {
         landoCli: path.resolve(root, 'components/lando-cli'),
       },
       pluginInstaller: {
-        dockerNpm: path.resolve(root, 'components/docker-npm'),
+        dockerPluginInstaller: path.resolve(root, 'components/docker-plugin-installer'),
       },
     },
     system: {
@@ -111,6 +111,9 @@ module.exports = ({options}) => {
       //   // version: 'v1.25',
       // },
       // supported: '>=3.6.5 && <=4.10.5',
+    },
+    dockerPluginInstaller: {
+      image: 'node:16-alpine2',
     },
     // Allows you to pass env value to Docker, Docker Compose, etc.
     // @TODO: figure out how to implement this exactly

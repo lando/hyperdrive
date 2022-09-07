@@ -16,7 +16,7 @@ module.exports = async({config}) => {
     return dirs
     .filter(dir => dir.type === type)
     .map(dir => ({type: dir.type, dirs: hyperdrive.bootstrap.findPlugins(dir.dir, dir.depth)}))
-    .map(dirs => dirs.dirs.map(dir => new Plugin({root: dir, type: dirs.type})))
+    .map(dirs => dirs.dirs.map(dir => new Plugin(dir, {type: dirs.type})))
     .flat(Number.POSITIVE_INFINITY)
     .map(plugin => plugin.getStripped());
   };

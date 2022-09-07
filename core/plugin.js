@@ -1,37 +1,105 @@
 const chalk = require('chalk');
-const fs = require('fs');
+const debug = require('debug')('static@lando/core:plugin');
+const fs = require('fs-extra');
 const has = require('lodash/has');
+const makeError = require('./../utils/make-error');
+const os = require('os');
 const path = require('path');
+const parsePkgName = require('./../utils/parse-package-name');
 const yaml = require('yaml');
 
 /**
  *
  */
 class Plugin {
+  static channel = 'stable';
+  static globalPluginDir = os.tmpdir();
+  static installer;
+
+  /**
+   *
+   * TBD
+   */
+  static async info(plugin) {
+    // mods
+    const {manifest} = require('pacote');
+
+    // parse the plugin name
+    const pkg = parsePkgName(plugin, {defaultTag: Plugin.channel});
+
+    // try to get info about the package
+    try {
+      // @TODO: how do we auth?
+      const info = await manifest(pkg.raw, {fullMetadata: true, preferOnline: true});
+      debug('retrieved plugin information for %o from %o', pkg.raw, info._resolved);
+
+      // if not a "lando plugin" then throw an error
+      if (!info.lando && !info.keywords.includes('lando-plugin')) {
+        const error = new Error(`${pkg.raw} does not seem to be a valid plugin.`);
+        error.ref = 'docs to plugin requirements dev page';
+        error.suggestions = ['tbd'];
+        throw error;
+      }
+
+      return info;
+
+    // handle errors
+    } catch (error) {
+      throw makeError({error});
+    }
+  }
+
   /**
    *
    * Install a plugin.
-   *
-   * @todo: Some (or all) of this may belong in the engine object.
-   * @todo: Get rid of scripts...bootstrapped config?
-   *
-   * @param {string} name Valid name/version string for NPM to fetch the plugin.
-   * @param {string} dest The plugin directory to install the plugin in.
-   * @returns
    */
-  static async add(name, dest, engine) {
-    const nameVersion = Plugin.mungeVersion(name);
-    const pluginPath = `${dest}/${nameVersion.name}`;
+  static async install(plugin, {
+    channel = Plugin.channel,
+    dest = Plugin.globalPluginDir,
+    installer = Plugin.installer,
+  } = {}) {
+    // mods
+    const {extract} = require('pacote');
+    const {nanoid} = require('nanoid');
 
-    // @TODO: add the new plugin to a temp directory, if success then remove old one and replace with new one
-    if (fs.existsSync(pluginPath)) fs.rmSync(pluginPath, {recursive: true});
+    // parse the package name
+    const pkg = parsePkgName(plugin, {defaultTag: channel});
+    // get the info so we can determine whether this is a lando package or not
+    const {_id, name} = await Plugin.info(pkg.raw);
+    // update dest with info
+    dest = path.join(dest, name);
 
-    fs.mkdirSync(pluginPath, {recursive: true});
-    const plugin = {
-      ...nameVersion,
-      path: pluginPath,
-    };
-    return engine.addPlugin(plugin);
+    // make sure we have a place to extract the plugin
+    const tmp = path.join(os.tmpdir(), nanoid());
+    fs.mkdirSync(tmp, {recursive: true});
+
+    // try to extract the plugin
+    const {resolved} = await extract(pkg.raw, tmp);
+    debug('extracted plugin %o to %o from %o', _id, tmp, resolved);
+
+    // if we get this far then we can safely move the plugin to dest
+    fs.rmSync(dest, {recursive: true, force: true});
+    fs.mkdirSync(dest, {recursive: true});
+    fs.copySync(tmp, dest);
+    debug('moved plugin from %o to %o', tmp, dest);
+
+    // instantiate plugin
+    plugin = new Plugin(dest, {installer, type: dest === path.join(Plugin.globalPluginDir, name) ? 'global' : 'app'});
+
+    // if not installed and we can install it then install it
+    if (!plugin.isInstalled && plugin.installer) {
+      try {
+        await plugin.install();
+        this.isInstalled = true;
+        debug('plugin is not  %o to %o', tmp, dest);
+      } catch (error) {
+        debug('plugin is not  %o to %o', tmp, dest);
+        throw error;
+      }
+    }
+
+    // return the installed plugin object
+    return plugin;
   }
 
   /**
@@ -41,91 +109,76 @@ class Plugin {
    * @param {object} info Return output from pacote.
    * @returns {object}    Formatted plugin info.
    */
-  static formatInfo(name, info) {
-    return {
-      // MVP plugin.yml
-      name: name,
-      description: info.description,
-      releaseNotesUrl: 'https://URL/to/CHANGELOG.yml',
-      // @todo: should we query for this?
-      // installedVersion: this.isInstalled ? this.version : 'Not Installed',
-      version: info.version,
-      repositoryUrl: info.repository,
-      author: info.author,
-      contributors: info.maintainers,
-      keywords: info.keywords,
-    };
-  }
-
-  static async info(name) {
-    const {manifest} = require('pacote');
-    const nameVersion = this.mungeVersion(name);
-    const config = {
-      fullMetadata: true,
-      preferOnline: true,
-    };
-    const info = await manifest(name, config);
-    return this.formatInfo(nameVersion.name, info);
-  }
-
-  /**
-   *
-   * Separate a provided plugin's name and version strings.
-   *
-   * @param {string} name A string containing the name and optional version info for a plugin.
-   */
-  static mungeVersion(name) {
-    let nameVersion = {};
-    nameVersion.version = name.match('(?:[^@]*@\s*){2}(.*)'); // eslint-disable-line no-useless-escape
-    if (nameVersion.version === null) {
-      nameVersion.version = '';
-      nameVersion.name = name;
-    } else {
-      nameVersion.version = nameVersion.version[1];
-      nameVersion.name = name.replace(`@${nameVersion.version}`, '');
-    }
-
-    return nameVersion;
-  }
+  // static formatInfo(name, info) {
+  //   return {
+  //     // MVP plugin.yml
+  //     name: name,
+  //     description: info.description,
+  //     releaseNotesUrl: 'https://URL/to/CHANGELOG.yml',
+  //     // @todo: should we query for this?
+  //     // installedVersion: this.isInstalled ? this.version : 'Not Installed',
+  //     version: info.version,
+  //     repositoryUrl: info.repository,
+  //     author: info.author,
+  //     contributors: info.maintainers,
+  //     keywords: info.keywords,
+  //   };
+  // }
 
   /**
    * @TODO: scripts shoudl be moved into the engine constructor
    */
-  constructor({
-    location,
-    root,
+  constructor(location, {
+    installer = Plugin.installer,
     id = Plugin.id || 'lando',
     type = 'app',
   } = {}) {
     // core props
-    this.root = root || location;
+    this.root = location;
     this.type = type;
+    this.installer = installer;
 
-    // config props
+    // throw error if plugin does not seem to exist
+    if (!fs.existsSync(path.join(this.root, 'package.json'))) throw new Error(`Could not find a plugin in ${this.root}`);
+
+    // set top level things
     this.location = this.root;
-    this.isInstalled = fs.existsSync(path.join(this.root, 'package.json'));
+    this.pjson = require(path.join(this.root, 'package.json'));
+    this.config = {...this.pjson.lando, ...this.#load()};
+    this.name = this.config.name || this.pjson.name;
+    this.nm = path.join(this.root, 'node_modules');
+    this.debug = require('debug')(`${id}:@lando/core:plugin:${this.name}`);
+    this.package = this.pjson.name;
+    this.updateAvailable = undefined;
+    this.version = this.pjson.version;
 
-    // if installed we can get more info
-    if (this.isInstalled) {
-      this.pjson = require(path.join(this.root, 'package.json'));
-      this.config = {...this.pjson.lando, ...this.#load()};
-      // set top level things
-      this.name = this.config.name || this.pjson.name;
-      this.debug = require('debug')(`${id}:@lando/core:plugin:${this.name}`);
-      this.package = this.pjson.name;
-      this.version = this.pjson.version;
-      // add some computed properties
-      this.isValid = Object.keys(this.config).length > 0 || has(this.pjson, 'lando');
-      this.updateAvailable = undefined;
-      // log
-      const status = this.isValid ? chalk.green('valid') : chalk.red('invalid');
-      this.debug('instantiated %s plugin from %s', status, this.root);
+    // add some computed properties
+    this.isInstalled = false;
+    this.isValid = Object.keys(this.config).length > 0 || has(this.pjson, 'lando') || this.pjson.keywords.includes('lando-plugin');
+
+    // if the plugin does not have any dependencies then consider it installed
+    // @TODO: what about dev deps?
+    if (!this.pjson.dependencies || Object.keys(this.pjson.dependencies).length === 0) {
+      this.isInstalled = true;
     }
+
+    // if plugin has a non-empty node_modules folder then consider it installed
+    // @NOTE: is this good enough?
+    if (fs.existsSync(this.nm) && fs.readdirSync(this.nm).length > 0) {
+      this.isInstalled = true;
+    }
+
+    // log result
+    const validStatus = this.isValid ? chalk.green('valid') : chalk.red('invalid');
+    const installStatus = this.isInstalled ? chalk.green('installed') : chalk.yellow('uninstalled');
+    this.debug('instantiated %s and %s plugin from %s', validStatus, installStatus, this.root);
   }
 
   // Internal method to help load config
   // @TODO: we might want to put more stuff in here at some point.
   // @NOTE: this will differ from "init" which should require in all needed files?
+  // @TODO: we might want to replace this with Config?
+  // @TODO: how will plugin config merge with the global/app config?
   #load() {
     const {root, options} = this;
     // return the plugin.js return first
@@ -136,23 +189,6 @@ class Plugin {
     if (fs.existsSync(path.join(root, 'plugin.yml'))) return yaml.parse(fs.readFileSync(path.join(root, 'plugin.yml'), 'utf8'));
     // otherwise return uh, nothing?
     return {};
-  }
-
-  async add() {
-    // @todo: move the removing of the old plugin to after the plugin install; possibly run inside the Docker script.
-    if (fs.existsSync(this.root)) {
-      fs.rmSync(this.root, {recursive: true});
-    }
-
-    fs.mkdirSync(this.root, {recursive: true});
-    const run = this.engine.addPlugin(this);
-    run[1].attach({stream: true, stdout: true, stderr: true}, function(err, stream) {
-      stream.on('data', buffer => {
-        const debug = require('debug')(`add-${this.name}:@lando/hyperdrive`);
-        debug(String(buffer));
-      });
-    });
-    return run;
   }
 
   getStripped() {
@@ -171,78 +207,22 @@ class Plugin {
     return this.formatInfo(this.name, info);
   }
 
-  // update(version) {
+  /**
+   *
+   * Install a plugin.
+   */
+  async install() {
+    // @TODO: throw error if no installer
 
-  // }
+    return this.installer.installPlugin(this.root, this.config.installer);
+  }
 
   /**
    * Remove a plugin.
-   *
    */
   remove() {
     return fs.rmSync(this.root, {recursive: true});
   }
-
-  // update(version) {
-
-  // }
-
-  /**
-   * Get metadata on a plugin.
-   *
-   */
-  // async info() {
-  //   const {manifest} = require('pacote');
-  //   // const opts = {
-  //   // Integrate config file npm section that allows you to define npmrc options to pass in to here/other npm-related commands.
-  //   // npm-registry-fetch commands: https://www.npmjs.com/package/npm-registry-fetch
-  //   // npm config: https://docs.npmjs.com/cli/v8/using-npm/config
-  //   /*       registry: '',
-  //   agent: this.config['user-agent'],
-  //   gzip: 'does not exist',
-  //   headers: 'does not exist',
-  //   ignoreBody: 'does not exist',
-  //   integrity: 'does not exist',
-  //   mapJSON: 'does not exist',
-  //   maxSockets: this.config['maxsockets'],
-  //   method: 'does not exist',
-  //   npmSession: 'does not exist',
-  //   npmCommand: 'does not exist',
-  //   otpPrompt: 'does not exist; maybe want a default function here?',
-  //   // Basic auth password...I'm not sure if this is supported in modern npm config
-  //   password: this.config['_auth'],
-  //   query: 'does not exist',
-  //   retry: 'does not exist; this is just an object-value alternative to pass in values provided a single properties by config...not needed',
-  //   spec: 'does not exist',
-  //   timeout: this.config['fetch-timeout'],
-  //   // I think this is the correct mapping
-  //   _authToken: this.config['_auth'],
-  //   username: 'does not exist; believe basic auth is not supported in modern npm config',
-  //   */
-  //   // This is the format required for authing with an authtoken...maybe put this in a demo config file.
-  //   //  '//<npm.pkg.github.com>/:_authToken': 'THE AUTH TOKEN',
-  //   // };
-  //   const query = `${this.pluginName}@${this.version}`;
-  //   const config = {
-  //     fullMetadata: true,
-  //     preferOnline: true,
-  //   };
-  //   const info = await manifest(query, config);
-
-  //   return {
-  //     // MVP plugin.yml
-  //     name: this.pluginName,
-  //     description: info.description,
-  //     releaseNotesUrl: 'https://URL/to/CHANGELOG.yml',
-  //     // @todo: should we query for this?
-  //     // installedVersion: this.isInstalled ? this.version : 'Not Installed',
-  //     version: info.version,
-  //     repositoryUrl: info.repository,
-  //     author: info.author,
-  //     contributors: info.maintainers,
-  //     keywords: info.keywords,
-  //   };
-  // }
 }
 
 module.exports = Plugin;

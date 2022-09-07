@@ -167,7 +167,7 @@ class MinApp {
       }
 
       // at this point we should have an object and we should merge over default values
-      const plugin = new Plugin({name, type: 'app', ...defaults});
+      const plugin = new Plugin(defaults.location, {name, type: 'app', ...defaults});
       return [name, {name, ...defaults, ...plugin.getStripped()}];
     });
 
