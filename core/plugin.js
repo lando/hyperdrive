@@ -17,6 +17,41 @@ class Plugin {
   static installer;
 
   /**
+   * fetches a plugin from a registry/git repo
+   */
+  static async fetch(plugin, dest = Plugin.globalPluginDir, {
+    channel = Plugin.channel,
+  } = {}) {
+    // mods
+    const {extract} = require('pacote');
+    const {nanoid} = require('nanoid');
+
+    // parse the package name
+    const pkg = parsePkgName(plugin, {defaultTag: channel});
+    // get the info so we can determine whether this is a lando package or not
+    const {_id, name} = await Plugin.info(pkg.raw);
+    // update dest with info
+    dest = path.join(dest, name);
+
+    // make sure we have a place to extract the plugin
+    const tmp = path.join(os.tmpdir(), nanoid());
+    fs.mkdirSync(tmp, {recursive: true});
+
+    // try to extract the plugin
+    const {resolved} = await extract(pkg.raw, tmp);
+    debug('extracted plugin %o to %o from %o', _id, tmp, resolved);
+
+    // if we get this far then we can safely move the plugin to dest
+    fs.rmSync(dest, {recursive: true, force: true});
+    fs.mkdirSync(dest, {recursive: true});
+    fs.copySync(tmp, dest);
+    debug('moved plugin from %o to %o', tmp, dest);
+
+    // return instantiated plugin
+    return new Plugin(dest, {type: dest === path.join(Plugin.globalPluginDir, name) ? 'global' : 'app'});
+  }
+
+  /**
    *
    * TBD
    */
@@ -45,61 +80,11 @@ class Plugin {
 
     // handle errors
     } catch (error) {
+      // better 404 message
+      if (error.statusCode === 404) error.message = `could not find a plugin called ${pkg.raw}`;
+      // throw
       throw makeError({error});
     }
-  }
-
-  /**
-   *
-   * Install a plugin.
-   */
-  static async install(plugin, {
-    channel = Plugin.channel,
-    dest = Plugin.globalPluginDir,
-    installer = Plugin.installer,
-  } = {}) {
-    // mods
-    const {extract} = require('pacote');
-    const {nanoid} = require('nanoid');
-
-    // parse the package name
-    const pkg = parsePkgName(plugin, {defaultTag: channel});
-    // get the info so we can determine whether this is a lando package or not
-    const {_id, name} = await Plugin.info(pkg.raw);
-    // update dest with info
-    dest = path.join(dest, name);
-
-    // make sure we have a place to extract the plugin
-    const tmp = path.join(os.tmpdir(), nanoid());
-    fs.mkdirSync(tmp, {recursive: true});
-
-    // try to extract the plugin
-    const {resolved} = await extract(pkg.raw, tmp);
-    debug('extracted plugin %o to %o from %o', _id, tmp, resolved);
-
-    // if we get this far then we can safely move the plugin to dest
-    fs.rmSync(dest, {recursive: true, force: true});
-    fs.mkdirSync(dest, {recursive: true});
-    fs.copySync(tmp, dest);
-    debug('moved plugin from %o to %o', tmp, dest);
-
-    // instantiate plugin
-    plugin = new Plugin(dest, {installer, type: dest === path.join(Plugin.globalPluginDir, name) ? 'global' : 'app'});
-
-    // if not installed and we can install it then install it
-    if (!plugin.isInstalled && plugin.installer) {
-      try {
-        await plugin.install();
-        this.isInstalled = true;
-        debug('plugin is not  %o to %o', tmp, dest);
-      } catch (error) {
-        debug('plugin is not  %o to %o', tmp, dest);
-        throw error;
-      }
-    }
-
-    // return the installed plugin object
-    return plugin;
   }
 
   /**
@@ -211,10 +196,8 @@ class Plugin {
    *
    * Install a plugin.
    */
-  async install() {
-    // @TODO: throw error if no installer
-
-    return this.installer.installPlugin(this.root, this.config.installer);
+  async install({installer = this.installer || Plugin.installer} = {}) {
+    return installer.installPlugin(this.root, this.config.installer);
   }
 
   /**

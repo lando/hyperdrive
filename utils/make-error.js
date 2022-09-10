@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /*
  * Attempts to produce a standardized error object
  */
@@ -24,12 +25,12 @@ module.exports = ({
   short = short ||
     (error && error.reason) ||
     (error && error.body && error.body.error);
-  const message = [short, stdout, stderr].filter(Boolean).join('\n');
+  const message = [stdout, stderr].filter(Boolean).join('\n') || all;
 
   // repurpose original error if we have one
   if (Object.prototype.toString.call(error) === '[object Error]') {
     error.originalMessage = error.message;
-    error.message = message || error.originalMessage;
+    error.message = message || error.originalMessage || short || stdout || stderr || all;
 
   // otherwise begin anew
   } else {
@@ -43,7 +44,7 @@ module.exports = ({
   error.args = args;
   error.errorCode = errorCode;
   error.exitCode = exitCode;
-  error.short = short;
+  error.short = short || message || stdout || stderr || all;
   error.statusCode = statusCode;
   error.stdout = stdout;
   error.stderr = stderr;

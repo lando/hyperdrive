@@ -86,11 +86,8 @@ class Bootstrapper {
       getClass: this.getClass,
       getComponent: this.getComponent,
       id: this.id,
-      installPlugin: async(plugin, dest = Plugin.globalPluginDir) => {
-        // get the plugin installer
-        Plugin.installer = await this.getComponent('core.plugin-installer');
-        // run the install command
-        return Plugin.install(plugin, {dest, installer: Plugin.installer});
+      fetchPlugin: async(plugin, dest = Plugin.globalPluginDir) => {
+        return Plugin.fetch(plugin, dest, {channel: Plugin.channel});
       },
       options: this.options,
       plugins: new Config(),

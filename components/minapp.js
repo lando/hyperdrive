@@ -58,6 +58,7 @@ class MinApp {
     this.cacheDir = path.join(cacheDir, 'apps', this.name);
     this.configDir = path.join(configDir, 'apps', this.name);
     this.dataDir = path.join(dataDir, 'apps', this.name);
+    this.logsDir = path.join(this.dataDir, 'logs');
     this.pluginsDir = path.join(this.root, '.lando', 'plugins');
     this.debug = require('debug')(`${this.name}:@lando/core:minapp`);
     this.env = `${product}-${this.name}`.toUpperCase().replace(/-/gi, '_');
@@ -71,7 +72,7 @@ class MinApp {
     this.#landofiles = this.getLandofiles(get(mainfile, 'config.core.landofiles', landofiles));
 
     // created needed dirs
-    for (const dir of [this.cacheDir, this.configDir, this.dataDir]) {
+    for (const dir of [this.cacheDir, this.configDir, this.dataDir, this.logsDir]) {
       fs.mkdirSync(path.dirname(dir), {recursive: true});
       this.debug('ensured directory %o exists', dir);
     }

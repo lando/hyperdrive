@@ -34,7 +34,7 @@ const getClass = Parent => {
         command = 'npm ci --omit=dev --no-audit --no-progress';
       // otherwise npm install
       } else {
-        command = 'npm install --omit=dev --no-audit --no-progress';
+        command = 'npm install --omit=dev --no-audit --no-progress --no-package-lock';
       }
 
       // Get a set of current volume names
@@ -59,10 +59,11 @@ const getClass = Parent => {
             `${dest}:/plugin`,
             `${npmCache}:/root/.npm`,
             `${yarnCache}:/cache/yarn`,
+            `${DockerPluginInstaller.config.logsDir}:/root/.npm/_logs`,
             // `${this.npmrcDest}:/home/etc/npmrc`,
           ],
         },
-        Tty: command.startsWith('npm'),
+        // Tty: command.startsWith('npm'),
         Env: [
           'PREFIX=/home',
         ],

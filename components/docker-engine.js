@@ -69,14 +69,15 @@ class DockerEngine extends Dockerode {
     };
 
     // handles the callback to super.pull
-    const callbackHandler = async(error, stream) => {
-      // this handles errors that might happen before pull begins eg docker server errors
-      if (error) throw makeError(merge({}, args, {error, command: 'docker api'}));
+    const callbackHandler = (error, stream) => {
+      // this ensures we have a consistent way of returning errors
+      if (error) builder.emit('error', error);
+
       // if attach is on then lets stream output
-      if (attach) stream.pipe(process.stdout);
+      if (stream && attach) stream.pipe(process.stdout);
 
       // finished event
-      const finished = (err, output) => { // eslint-disable-line unicorn/consistent-function-scoping
+      const finished = (err, output) => {
         // if an error then fire error event
         if (err) builder.emit('error', err, output);
         // fire done no matter what?
@@ -86,12 +87,13 @@ class DockerEngine extends Dockerode {
       };
 
       // progress event
-      const progress = event => { // eslint-disable-line unicorn/consistent-function-scoping
+      const progress = event => {
+        builder.emit('data', event);
         builder.emit('progress', event);
       };
 
       // eventify the stream
-      this.modem.followProgress(stream, finished, progress);
+      if (stream) this.modem.followProgress(stream, finished, progress);
     };
 
     // error if no dockerfile
@@ -191,13 +193,14 @@ class DockerEngine extends Dockerode {
 
     // handles the callback to super.pull
     const callbackHandler = async(error, stream) => {
-      // this handles errors that might happen before pull begins eg docker server errors
-      if (error) throw makeError(merge({}, args, {error, command: 'docker api'}));
+      // this ensures we have a consistent way of returning errors
+      if (error) puller.emit('error', error);
+
       // if attach is on then lets stream output
-      if (attach) stream.pipe(process.stdout);
+      if (stream && attach) stream.pipe(process.stdout);
 
       // finished event
-      const finished = (err, output) => { // eslint-disable-line unicorn/consistent-function-scoping
+      const finished = (err, output) => {
         // if an error then fire error event
         if (err) puller.emit('error', err, output);
         // fire done no matter what?
@@ -207,19 +210,19 @@ class DockerEngine extends Dockerode {
       };
 
       // progress event
-      const progress = event => { // eslint-disable-line unicorn/consistent-function-scoping
+      const progress = event => {
+        puller.emit('data', event);
         puller.emit('progress', event);
       };
 
-      // eventify the stream
-      this.modem.followProgress(stream, finished, progress);
+      // eventify the stream if we can
+      if (stream) this.modem.followProgress(stream, finished, progress);
     };
 
     // error if no command
     if (!image) throw new Error('you must pass an image (repo/image:tag) into engine.pull');
 
     // collect some args we can merge into promise resolution
-    // @TODO: obscure auth?
     const args = {command: 'dockerode pull', args: {image, auth, attach}};
     // create an event emitter we can pass into the promisifier
     const puller = new EventEmitter();
@@ -265,89 +268,86 @@ class DockerEngine extends Dockerode {
       stdouto = '',
       stderro = '',
     } = {}) {
-    const promiseHandler = async error => {
-      // handles the promisification of the merged return
+    const promiseHandler = async() => {
       return new Promise((resolve, reject) => {
-        // collect some args we can merge into promise resolution
-        const args = {args: {command, image, copts, attach, stream}};
-
-        // this handles errors that might happen before runner is set eg docker server errors
-        if (error) reject(makeError(merge({}, args, {error, command: 'docker api'})));
-
-        // if we get here we should have access to the container object so we should be able to collect output?
         runner.on('container', container => {
           runner.on('stream', stream => {
-            // extend the debugger
-            const debug = this.debug.extend(`run:${image}:${container.id.slice(0, 4)}`);
-            // if we are attached and cannot demultiplex then stream to stdout
-            if (attach && copts.Tty) stream.pipe(process.stdout);
+            const stdout = new PassThrough();
+            const stderr = new PassThrough();
 
-            // collect "all" output eg stdout AND stderr
-            stream.on('data', buffer => {
-              // collect
-              allo += String(buffer);
-
-              // only log if we are not piping output
-              // NOTE: does interactive make sense here?
-              // NOTE: we also need if tty = true, otherwise we can demux and log stdout/stderr separately downstream
-              if (!attach && copts.Tty) debug(String(buffer));
-            });
-
-            // if tty is false then we can separate out stdout and std err and collect and debug separately
-            if (!copts.Tty) {
-              // get some streams and extend the debugger
-              const stdout = new PassThrough();
-              const stderr = new PassThrough();
-              stdout.debug = debug.extend('stdout');
-              stderr.debug = debug.extend('stderr');
-
-              // collect and debug if applicable
-              stdout.on('data', buffer => {
-                stdouto += String(buffer);
-                if (!attach) stdout.debug(String(buffer));
-              });
-              stderr.on('data', buffer => {
-                stderro += String(buffer);
-                if (!attach) stderr.debug(String(buffer));
-              });
-
-              // make sure we close child streams when the parent is done
-              stream.on('end', () => {
-                try {
-                  stdout.end();
-                } catch {}
-
-                try {
-                  stderr.end();
-                } catch {}
-              });
-
-              // dont cross the streams
-              container.modem.demuxStream(stream, stdout, stderr);
-              // pipe to process stds if attached
-              if (attach) {
+            // handle attach dynamics
+            if (attach) {
+              // if tty and just pipe everthing to stdout
+              if (copts.Tty) stream.pipe(process.stdout);
+              // otherwise we should be able to pipe both
+              else {
                 stdout.pipe(process.stdout);
                 stderr.pipe(process.stderr);
               }
             }
+
+            // handle tty case
+            if (copts.Tty) stream.on('data', buffer => runner.emit('stdout', buffer));
+            // handle demultiplexing
+            else {
+              stdout.on('data', buffer => runner.emit('stdout', buffer));
+              stderr.on('data', buffer => runner.emit('stderr', buffer));
+              container.modem.demuxStream(stream, stdout, stderr);
+            }
+
+            // make sure we close child streams when the parent is done
+            stream.on('end', () => {
+              try {
+                stdout.end();
+              } catch {}
+
+              try {
+                stderr.end();
+              } catch {}
+            });
           });
 
-          // otherwise resolve or reject result based on status code
+          // if we get here we should have access to the container object so we should be able to collect output?
+          // extend the debugger
+          const debug = this.debug.extend(`run:${image}:${container.id.slice(0, 4)}`);
+          // collect and debug stdout
+          runner.on('stdout', buffer => {
+            stdouto += String(buffer);
+            allo += String(buffer);
+            if (!attach) debug.extend('stdout')(String(buffer));
+          });
+          // collect and debug stderr
+          runner.on('stderr', buffer => {
+            stderro += String(buffer);
+            allo += String(buffer);
+            if (!attach) debug.extend('stderr')(String(buffer));
+          });
+
           runner.on('data', data => {
-            // get output
-            const result = {command: 'dockerode run', all: allo, stdout: stdouto, stderr: stderro};
-            // resolve or reject
-            if (data.StatusCode === 0) {
-              resolve(makeSuccess(merge({}, result, {args: command})));
-            } else {
-              reject(makeError(merge({}, args, result, {
-                error: new Error(data.Error),
-                exitCode: data.StatusCode || 1,
-              })));
-            }
+            // emit error first
+            if (data.StatusCode !== 0) runner.emit('error', data);
+            // fire done no matter what?
+            runner.emit('done', data);
+            runner.emit('finished', data);
+            runner.emit('success', data);
           });
         });
+
+        // handle resolve/reject
+        runner.on('done', data => {
+          // @TODO: what about data?
+          resolve(makeSuccess(merge({}, data, {command: 'dockerode run', all: allo, stdout: stdouto, stderr: stderro}, {args: command})));
+        });
+        runner.on('error', error => {
+          reject(makeError(merge({}, args, {command: 'dockerode run', all: allo, stdout: stdouto, stderr: stderro}, {args: command}, {error})));
+        });
       });
+    };
+
+    // handles the callback to super.run
+    // we basically need this just to handle dockerode modem errors
+    const callbackHandler = error => {
+      if (error) runner.emit('error', error);
     };
 
     // error if no command
@@ -362,11 +362,12 @@ class DockerEngine extends Dockerode {
       Tty: false || interactive || attach,
       OpenStdin: true,
     };
-
     // merge our create options over the defaults
     const copts = merge({}, defaultCreateOptions, createOptions);
-    // start by getting the event emiiter
-    const runner = super.run(image, command, stream, copts, {}, promiseHandler);
+    // collect some args we can merge into promise resolution
+    const args = {args: {command, image, copts, attach, stream}};
+    // call the parent with clever stuff
+    const runner = super.run(image, command, stream, copts, {}, callbackHandler);
     // log
     this.debug('running command %o on image %o with create opts %o', command, image, copts);
     // make this a hybrid async func and return
