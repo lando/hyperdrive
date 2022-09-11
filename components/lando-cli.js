@@ -1,5 +1,5 @@
 const chalk = require('chalk');
-const debug = require('debug')('static@lando/core:deps:lando-cli');
+const debug = require('debug')('static@lando/core:lando-cli');
 const parseStdoutJson = require('../utils/parse-stdout-json');
 const fs = require('fs');
 const get = require('lodash/get');
@@ -14,6 +14,7 @@ const {satisfies} = require('semver');
 class LandoCLI {
   static name = 'lando-cli';
   static cspace = 'lando-cli';
+  static config = {};
 
   static info(cmd = 'lando --hyperdrive') {
     try {
@@ -31,15 +32,15 @@ class LandoCLI {
    */
   constructor({
     version,
-    bin = LandoCLI.defaults.bin,
-    debugspace = LandoCLI.defaults.debugspace,
-    id = LandoCLI.defaults.id,
-    product = LandoCLI.defaults.product,
-    autoSync = LandoCLI.defaults.autoSync,
-    install = LandoCLI.defaults.install,
-    name = LandoCLI.defaults.name,
-    required = LandoCLI.defaults.required,
-    releaseChannel = LandoCLI.defaults.releaseChannel,
+    bin = LandoCLI.config.bin,
+    debugspace = LandoCLI.config.debugspace,
+    id = LandoCLI.config.id,
+    product = LandoCLI.config.product,
+    autoSync = LandoCLI.config.autoSync,
+    install = LandoCLI.config.install,
+    name = LandoCLI.config.name,
+    required = LandoCLI.config.required,
+    releaseChannel = LandoCLI.config.releaseChannel,
   } = {}) {
     // set top level props
     this.autoSync = autoSync;
@@ -54,7 +55,7 @@ class LandoCLI {
     // computed props
     this.isInstalled = fs.existsSync(this.bin);
     this.configCommand = `${this.bin} --${this.id}`;
-    this.debug = require('debug')(`${debugspace}:@lando/core:deps:lando-cli`);
+    this.debug = require('debug')(`${debugspace}:@lando/core:lando-cli`);
 
     // attempt to refresh info if we can
     // NOTE: this will not work if the actual version is less than the required 3.6.5
@@ -145,5 +146,4 @@ class LandoCLI {
   // }
 }
 
-LandoCLI.defaults = {};
 module.exports = LandoCLI;

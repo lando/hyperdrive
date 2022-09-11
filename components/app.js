@@ -1,6 +1,7 @@
 const MinApp = require('./minapp.js');
 
-class App extends MinApp {}
+class App extends MinApp {
+  static config = {};
+}
 
-App.defaults = {};
 module.exports = App;

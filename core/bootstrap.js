@@ -73,10 +73,11 @@ class Bootstrapper {
 
     // add the main config class and instance to the OCLIF config
     config.Config = Config;
-    // set Plugin.id
-    Plugin.id = 'hyperdrive';
 
-    // Add a way to set the engine
+    // set some plugin defaults
+    Plugin.channel = this.config.get('core.release-channel');
+    Plugin.globalPluginDir = this.config.get('plugin.global-dir');
+    Plugin.id = 'hyperdrive';
 
     // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
     config[config.id] = {
@@ -85,8 +86,8 @@ class Bootstrapper {
       getClass: this.getClass,
       getComponent: this.getComponent,
       id: this.id,
-      installPlugin: async(name, dest = this.config.get('plugin.global-dir')) => {
-        return Plugin.add(name, dest, await this.getComponent('core.engine'));
+      fetchPlugin: async(plugin, dest = Plugin.globalPluginDir) => {
+        return Plugin.fetch(plugin, dest, {channel: Plugin.channel});
       },
       options: this.options,
       plugins: new Config(),

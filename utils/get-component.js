@@ -9,6 +9,8 @@ module.exports = async(component, constructor, config, {cache = true, defaults, 
     registry,
     {cache, defaults},
   );
+
+  // get an instance
   const instance = Array.isArray(constructor) ? new Component(...constructor) : new Component(constructor);
 
   // and run its init func if applicable

@@ -1,16 +1,17 @@
-const fs = require('fs');
-const moveConfig = require('./../utils/move-config');
-const merge = require('lodash/merge');
-const mergePromise = require('./../utils/merge-promise');
+const fs = require('fs-extra');
 const path = require('path');
 
-const Dockerode = require('dockerode');
+const DockerEngine = require('./docker-engine');
 
-class DockerDesktop extends Dockerode {
+class DockerDesktop extends DockerEngine {
   static name = 'docker-desktop';
   static cspace = 'docker-desktop';
+  static config = {};
+  static supportedPlatforms = ['darwin', 'linux', 'win32', 'wsl'];
 
-  constructor(options = {}) {
+  constructor({
+    debugspace = DockerDesktop.config.debugspace,
+  } = {}) {
     // start by figuring out our dockerode options and passing them upstream
 
     // then set/strip needed ENVVARS
@@ -21,8 +22,8 @@ class DockerDesktop extends Dockerode {
 
     // determine is
     // @TODO: set upstream ops for dockerode eg host/socket?
-    // console.log(DockerDesktop.defaults)
-    // DockerDesktop.defaults
+    // console.log(DockerDesktop.config)
+    // DockerDesktop.config
     /*
       // Set defaults if we have to
       if (_.isEmpty(engineConfig)) {
@@ -48,52 +49,12 @@ class DockerDesktop extends Dockerode {
     */
 
     // pass options upstream
-    super(options);
+    // @TODO: options?
+    super();
     // @TODO: strip DOCKER ENV? and reset?
-
-    // set the rest of our stuff
-    // @TODO: what are our fallbacks here?
-    const dataDir = DockerDesktop.defaults.dataDir;
-    this.scriptsSrc = DockerDesktop.defaults.scripts;
-    this.scriptsDest = path.join(dataDir, DockerDesktop.name, 'scripts');
-    if (DockerDesktop.defaults.npmrc) {
-      this.npmrcDest = path.join(dataDir, DockerDesktop.name, '.npmrc');
-      fs.writeFileSync(this.npmrcDest, DockerDesktop.defaults.npmrc);
-    } else {
-      this.npmrcDest = false;
-    }
-
-    moveConfig(this.scriptsSrc, this.scriptsDest);
-
-    this.getVersion = this.getVersion();
-    this.isInstalled = this.getInstalled();
-
-    // @TODO: should these be static props?
-    this.supportedOS = ['linux', 'windows', 'macos'];
-  }
-
-  /**
-   * Add a Lando plugin.
-   * @NOTE: this is a hidden async function, we do it this way so the following happens
-   * const result = await engine.addPlugin() -> blocks and returns a result object
-   * const runner = engine.addPlugin() -> returns event emitter for custom stuff
-   */
-  addPlugin(plugin) {
-    const cmd = ['sh', '-c', `/scripts/plugin-add.sh ${plugin.name}@${plugin.version} ${plugin.name}`];
-    const createOptions = {
-      WorkingDir: '/tmp',
-      HostConfig: {
-        Binds: [
-          `${plugin.path}:/plugins/${plugin.name}`,
-          `${this.scriptsDest}:/scripts`,
-          `${this.npmrcDest}:/home/etc/npmrc`,
-        ],
-      },
-      Env: [
-        'PREFIX=/home',
-      ],
-    };
-    return this.run(cmd, {createOptions});
+    this.debug = require('debug')(`${debugspace}:@lando/core:docker-desktop`);
+    // this.getVersion = this.getVersion();
+    // this.isInstalled = this.getInstalled();
   }
 
   async down() {}
@@ -134,72 +95,6 @@ class DockerDesktop extends Dockerode {
     // @todo: docker info or ping, does it give a response?
   }
 
-  /**
-   * This is intended for ephermeral none-interactive "one off" commands. Use `exec` if you want to run a command on a pre-existing container.
-   * This is a wrapper around Dockerode.run that provides either an await or return implementation eg:
-   *
-   * // get an EventEmitter
-   * const runner = engine.run(command);
-   * runner.on('stream' stream);
-   *
-   * // block and await result
-   * const result = await engine.run(command);
-   * console.log(result);
-   *
-   * @param {*} command
-   * @param {*} param1
-   */
-  run(
-    command,
-    {
-      createOptions = {},
-      interactive = false,
-      image = 'node:14-alpine',
-      pipe = null,
-    } = {}) {
-    // @TODO: automatic image pulling? implement pull wrapper using same mergePromise pattern?
-
-    // some good default createOpts
-    // @TODO: best way to provide stdin func? test on running vim or something?
-    const defaultCreateOptions = {
-      AttachStdin: interactive,
-      HostConfig: {AutoRemove: true},
-      Tty: false || interactive,
-    };
-
-    // figure out whether we should pipe the output somewhere
-    const stream = pipe === true ? [process.stdout, process.stderr] : pipe;
-    // merge our create options over the defaults
-    const copts = merge({}, defaultCreateOptions, createOptions);
-
-    const promiseHandler = async err => {
-      return new Promise((resolve, reject) => {
-        // this handles errors that might happen before runner is set
-        // eg docker server errors
-        // @TODO: better error object?
-        // @NOTE: because this runs in the super.run callback its hard to catch it on the outside with await
-        // is there something we can do about that? does it even matter?
-        if (err) reject(err);
-
-        // otherwise resolve or reject result based on status code
-        // @TODO: do we want to try to collect stdout/stderr and add them to the result?
-        // @TODO: is there other useful information on the stream/container/start events we can use?
-        runner.on('data', result => {
-          if (result.StatusCode === 0) resolve(result);
-          else reject(result);
-        });
-      });
-    };
-
-    // start by getting the event emiiter
-    const runner = super.run(image, command, stream, copts, {}, promiseHandler);
-
-    // @TODO: handle streaming situation re debugging and output collection?
-
-    // make this a hybrid async func and return
-    return mergePromise(runner, promiseHandler);
-  }
-
   async up() {}
 
   getVersion() {}
@@ -238,5 +133,4 @@ class DockerDesktop extends Dockerode {
   }
 }
 
-DockerDesktop.defaults = {};
 module.exports = DockerDesktop;

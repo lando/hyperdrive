@@ -1,3 +1,4 @@
+const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const which = require('which');
@@ -9,19 +10,24 @@ module.exports = ({options}) => {
   const {arch, bin, cacheDir, configDir, dataDir,  errlog, home, platform, root, shell, version, windows, userAgent} = oclif;
 
   // get other stuff
-  const user = os.userInfo();
-  const landoBin = which.sync('lando', {nothrow: true}) || 'lando';
   const context = getContext();
+  const landoBin = which.sync('lando', {nothrow: true}) || 'lando';
+  const logsDir = path.join(dataDir, 'logs');
+  const user = os.userInfo();
+
+  // create dirs
+  fs.mkdirSync(path.dirname(logsDir), {recursive: true});
 
   // return the system config
   return {
     core: {
       app: 'app',
       autoSync: false,
-      debugspace: id || 'hyperdrive',
+      debugspace: id || path.basename(process.argv[1]) || 'hyperdrive',
       debug: false,
       engine: context === 'local' ? 'docker-desktop' : 'docker-engine',
       lando: 'lando-cli',
+      pluginInstaller: 'docker-plugin-installer',
       releaseChannel: 'stable',
       telemetry: true,
     },
@@ -48,6 +54,9 @@ module.exports = ({options}) => {
       lando: {
         landoCli: path.resolve(root, 'components/lando-cli'),
       },
+      pluginInstaller: {
+        dockerPluginInstaller: path.resolve(root, 'components/docker-plugin-installer'),
+      },
     },
     system: {
       arch,
@@ -64,6 +73,7 @@ module.exports = ({options}) => {
       interface: 'cli',
       leia: Object.hasOwn(process.env, 'LEIA_PARSER_RUNNING'),
       landoConfig: path.join(cacheDir, 'lando.json'),
+      logsDir,
       packaged: Object.hasOwn(process, 'pkg'),
       platform,
       product: id || 'hyperdrive',
@@ -107,6 +117,9 @@ module.exports = ({options}) => {
       //   // version: 'v1.25',
       // },
       // supported: '>=3.6.5 && <=4.10.5',
+    },
+    dockerPluginInstaller: {
+      image: 'node:16-alpine',
     },
     // Allows you to pass env value to Docker, Docker Compose, etc.
     // @TODO: figure out how to implement this exactly

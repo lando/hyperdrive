@@ -79,20 +79,18 @@ module.exports = async({id, argv, config}) => {
   //
   await config.runHook('bootstrap-setup', {minstrapper, config});
   debug('bootstrap-setup complete, using %s as bootstrapper', minstrapper.loader);
-  // @NOTE: about .11-.12s here
 
   // get the boostrapper and run it
   const Bootstrapper = require(minstrapper.loader);
   const bootstrap = new Bootstrapper(minstrapper.config);
-  // @NOTE: about .13-.14s here
 
   // Initialize
   try {
     await bootstrap.run(config);
-    // @NOTE: about .14-.15s here
     debug('bootstrap-setup completed successfully!');
   } catch (error) {
-    hookHandler(new Error(`Bootstrap failed! ${error.message}`));
+    console.error('Bootstrap failed!'); // eslint-disable-line no-console
+    hookHandler(error);
   }
 
   // final hooks to modify the config, all representing different bootstrap considerations

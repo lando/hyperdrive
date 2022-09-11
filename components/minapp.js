@@ -21,6 +21,11 @@ const Plugin = require('./../core/plugin');
 class MinApp {
   static name = 'minapp';
   static cspace = 'minapp';
+  static config = {};
+  static deps = [
+    'core.engine',
+    'core.plugin-installer',
+  ];
 
   // private props
   #landofile
@@ -32,14 +37,14 @@ class MinApp {
    */
   constructor({
     landofile,
-    cacheDir = MinApp.defaults.cacheDir,
+    cacheDir = MinApp.config.cacheDir,
     config = {},
-    configDir = MinApp.defaults.configDir,
-    dataDir = MinApp.defaults.dataDir,
-    instance = MinApp.defaults.instance,
-    landofiles = MinApp.defaults.landofiles,
+    configDir = MinApp.config.configDir,
+    dataDir = MinApp.config.dataDir,
+    instance = MinApp.config.instance,
+    landofiles = MinApp.config.landofiles,
     plugins = {},
-    product = MinApp.defaults.product,
+    product = MinApp.config.product,
   } = {}) {
     // @TODO: throw error if no landofile or doesnt exist
     // @TODO: if no name then we should throw an error
@@ -53,6 +58,7 @@ class MinApp {
     this.cacheDir = path.join(cacheDir, 'apps', this.name);
     this.configDir = path.join(configDir, 'apps', this.name);
     this.dataDir = path.join(dataDir, 'apps', this.name);
+    this.logsDir = path.join(this.dataDir, 'logs');
     this.pluginsDir = path.join(this.root, '.lando', 'plugins');
     this.debug = require('debug')(`${this.name}:@lando/core:minapp`);
     this.env = `${product}-${this.name}`.toUpperCase().replace(/-/gi, '_');
@@ -66,7 +72,7 @@ class MinApp {
     this.#landofiles = this.getLandofiles(get(mainfile, 'config.core.landofiles', landofiles));
 
     // created needed dirs
-    for (const dir of [this.cacheDir, this.configDir, this.dataDir]) {
+    for (const dir of [this.cacheDir, this.configDir, this.dataDir, this.logsDir]) {
       fs.mkdirSync(path.dirname(dir), {recursive: true});
       this.debug('ensured directory %o exists', dir);
     }
@@ -162,7 +168,7 @@ class MinApp {
       }
 
       // at this point we should have an object and we should merge over default values
-      const plugin = new Plugin({name, type: 'app', ...defaults});
+      const plugin = new Plugin(defaults.location, {name, type: 'app', ...defaults});
       return [name, {name, ...defaults, ...plugin.getStripped()}];
     });
 
@@ -171,5 +177,4 @@ class MinApp {
   }
 }
 
-MinApp.defaults = {};
 module.exports = MinApp;
