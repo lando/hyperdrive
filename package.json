@@ -105,6 +105,9 @@
       ],
       "prerun": [
         "./cli/hooks/prerun.js"
+      ],
+      "prerun-start": [
+        "./cli/hooks/context.js"
       ]
     },
     "plugins": [],
