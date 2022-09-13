@@ -22,7 +22,7 @@ class AddCommand extends PluginCommand {
     // get hyperdrive and app objects
     const {hyperdrive, app, context} = this.config;
     // pass this in to the listr context to collect plugin/error information
-    const status = {plugins: [], errors: []};
+    const status = {plugins: [], errors: [], added: 0};
 
     // @TODO: check plugin-installer status and ask to install if needed
     // @TODO: add --non-interactive
@@ -47,7 +47,14 @@ class AddCommand extends PluginCommand {
               await task.plugin.install();
             }
 
-            // and return
+            // @TODO: modimodify the config file as needed?
+            // @TODO: can we resolve something like ^.0.5.0? YES?
+            // @TODO: we need to resolve the tag and use ^version
+            // @TODO: what about team context?
+
+            // update and and return
+            task.title = `Installed ${name}`;
+            ctx.status.added++;
             return task.plugin;
 
           // if we have an error then add it to the status object and throw
@@ -66,14 +73,27 @@ class AddCommand extends PluginCommand {
     // try to fetch the plugins
     try {
       await fetchs.run({status});
-    // if we have errors then lets print them out
-    } catch ({errors}) {
-      // ADD SUGGESTIONS HERE: docker-restart/run with debug
-      if (errors.length > 0) this.error('Some plugins could not be installed correctly. Look above for errors.');
-    }
+      // json response
+      if (flags.json) return status;
 
-    // @TODO: modimodify the config file as needed?
-    // @TODO: what about team context?
+    // if we have errors then lets print them out
+    } finally {
+      // otherwise
+      this.log();
+      this.log('added %s of %s plugins with %s errors', status.added, status.plugins.length, status.errors.length);
+      this.log();
+
+      // handle errors here
+      if (status.errors.length > 0) {
+        // log the full error
+        for (const error of status.errors) this.debug(error);
+        this.error('Some plugins could not be installed correctly.', {
+          suggestions: ['Run command again with --debug flag'],
+          ref: 'https://docs.lando.dev/hyperdrive/cli/config.html#get',
+          exit: 1,
+        });
+      }
+    }
   }
 }
 

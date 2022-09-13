@@ -59,6 +59,10 @@ class Plugin {
     // mods
     const {manifest} = require('pacote');
 
+    // @TODO: release channel handling
+    // if the plugin has a non-standard release channel then we need to figure out the correct tag to pull
+    // basically it should be the higher versioned tag between latest and edge
+
     // parse the plugin name
     const pkg = parsePkgName(plugin, {defaultTag: Plugin.channel});
 
@@ -197,7 +201,10 @@ class Plugin {
    * Install a plugin.
    */
   async install({installer = this.installer || Plugin.installer} = {}) {
-    return installer.installPlugin(this.root, this.config.installer);
+    // try teh install
+    await installer.installPlugin(this.root, this.config.installer);
+    // if we get here then we can update isInstalled
+    this.isInstalled = true;
   }
 
   /**
