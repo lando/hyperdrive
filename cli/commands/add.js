@@ -20,76 +20,80 @@ class AddCommand extends PluginCommand {
     // args and flags
     const {argv, flags} = await this.parse(AddCommand);
     // get hyperdrive and app objects
-    const {hyperdrive, app} = this.config;
-    // get the context
-    const appContext = app && !flags.global;
-    // pass this in to the listr context to collect plugin information
-    const plugins = [];
+    const {hyperdrive, app, context} = this.config;
+    // pass this in to the listr context to collect plugin/error information
+    const status = {plugins: [], errors: [], added: 0};
+
+    // @TODO: check plugin-installer status and ask to install if needed
+    // @TODO: add --non-interactive
 
     // run the fetch tasks first
     const fetchs = new Listr([], {concurrent: true, exitOnError: false, renderer: flags.json ? 'silent' : 'default'});
     for (const name of argv) {
       fetchs.add({
         title: `Fetching ${name}`,
-        task: async ctx => {
-          // get the plugin and set it into context
-          const plugin = appContext ? await app.fetchPlugin(name) : await hyperdrive.fetchPlugin(name);
-          // add the plugin to the context so we can fetch it in the result
-          ctx.plugins.push(plugin);
-          // add the raw name for downstream stuff
-          plugin.raw = name;
-          // and return
-          return plugin;
+        task: async(ctx, task) => {
+          try {
+            // download the plugin
+            task.plugin = context.app ? await app.fetchPlugin(name) : await hyperdrive.fetchPlugin(name);
+            // add the raw name for downstream stuff
+            task.plugin.raw = name;
+
+            // if the plugin is not installed then run additional installation command
+            if (!task.plugin.isInstalled) {
+              task.title = `Installing ${name} deps`;
+              const installer = 'core.plugin-installer';
+              task.plugin.installer = context.app ? app.getComponent(installer) : await hyperdrive.getComponent(installer);
+              await task.plugin.install();
+            }
+
+            // @TODO: modimodify the config file as needed?
+            // @TODO: can we resolve something like ^.0.5.0? YES?
+            // @TODO: we need to resolve the tag and use ^version
+            // @TODO: what about team context?
+
+            // update and and return
+            task.title = `Installed ${name}`;
+            ctx.status.added++;
+            return task.plugin;
+
+          // if we have an error then add it to the status object and throw
+          } catch (error) {
+            ctx.status.errors.push(error);
+            throw error;
+
+          // add the plugin regardless of the status
+          } finally {
+            ctx.status.plugins.push(task.plugin);
+          }
         },
       });
     }
 
     // try to fetch the plugins
     try {
-      await fetchs.run({plugins});
+      await fetchs.run({status});
+      // json response
+      if (flags.json) return status;
+
     // if we have errors then lets print them out
-    } catch ({errors}) {
-      if (errors.length > 0) this.error('Some plugins could not be fetched. Look above for errors.');
-    }
+    } finally {
+      // otherwise
+      this.log();
+      this.log('added %s of %s plugins with %s errors', status.added, status.plugins.length, status.errors.length);
+      this.log();
 
-    // get list of uninstalled plugins
-    const uninstalledPlugins = plugins.filter(plugin => plugin.isInstalled === false);
-    // iterate through uninstalled plugins and run another listr for uninstalled plugins?
-    if (uninstalledPlugins.length > 0) {
-      this.log('Some plugins require dependency installation...');
-      // @TODO: check plugin-installer status and ask to install if needed
-      // @TODO: add --non-interactive
-
-      // @TODO: install errors not showing, make sure we know what NRuns are returning?
-      // @TODO: json output mode? listr-silent-renderer?
-      // @TODO: fix installer package.json ENOENT bug
-
-      // run the fetch tasks first
-      const installs = new Listr([], {concurrent: true, exitOnError: false, renderer: flags.json ? 'silent' : 'default'});
-      for (const uninstalledPlugin of uninstalledPlugins) {
-        installs.add({
-          title: `Installing ${uninstalledPlugin.raw}`,
-          task: async() => {
-            // get and set the plugin installer
-            uninstalledPlugin.installer = appContext ?
-              await app.getComponent('core.plugin-installer') : await hyperdrive.getComponent('core.plugin-installer');
-            // and install
-            return uninstalledPlugin.install();
-          },
-        }, {concurrent: true});
-      }
-
-      // try to fetch the plugins
-      try {
-        await installs.run();
-      // if we have errors then lets print them out
-      } catch ({errors}) {
-        if (errors.length > 0) this.error('Some plugins could not be installed. Look above for errors.');
+      // handle errors here
+      if (status.errors.length > 0) {
+        // log the full error
+        for (const error of status.errors) this.debug(error);
+        this.error('Some plugins could not be installed correctly.', {
+          suggestions: ['Run command again with --debug flag'],
+          ref: 'https://docs.lando.dev/hyperdrive/cli/config.html#get',
+          exit: 1,
+        });
       }
     }
-
-    // @TODO: modimodify the config file as needed?
-    // @TODO: what about team context?
   }
 }
 
