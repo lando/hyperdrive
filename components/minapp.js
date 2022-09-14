@@ -111,6 +111,11 @@ class MinApp {
     );
   }
 
+  // convenience shorthandwrapper for above
+  gCls(component, {cache = true, defaults} = {}) {
+    return this.getClass(component, {cache, defaults});
+  }
+
   // helper to get a component (and config?) from the registry
   async getComponent(component, constructor = {}, opts = {}) {
     return require('./../utils/get-component')(
@@ -119,6 +124,11 @@ class MinApp {
       this.config,
       {cache: opts.cache, defaults: opts.defaults, init: opts.init, registry: this.registry},
     );
+  }
+
+  // convenience shorthandwrapper for above
+  async gCpt(component, constructor = {}, opts = {}) {
+    return this.getComponent(component, constructor, opts);
   }
 
   getLandofiles(files = []) {

@@ -42,14 +42,15 @@ class AddCommand extends PluginCommand {
             // if the plugin is not installed then run additional installation command
             if (!task.plugin.isInstalled) {
               task.title = `Installing ${name} deps`;
-              const installer = 'core.plugin-installer';
-              task.plugin.installer = context.app ? app.getComponent(installer) : await hyperdrive.getComponent(installer);
               await task.plugin.install();
             }
 
+            // @TODO: where do we store the plugin manifest location?
             // @TODO: modimodify the config file as needed?
+
             // @TODO: can we resolve something like ^.0.5.0? YES?
             // @TODO: we need to resolve the tag and use ^version
+
             // @TODO: what about team context?
 
             // update and and return

@@ -12,15 +12,16 @@ const yaml = require('yaml');
  *
  */
 class Plugin {
-  static channel = 'stable';
-  static globalPluginDir = os.tmpdir();
+  static id = 'lando';
   static installer;
 
   /**
    * fetches a plugin from a registry/git repo
    */
-  static async fetch(plugin, dest = Plugin.globalPluginDir, {
-    channel = Plugin.channel,
+  static async fetch(plugin, dest = os.tmpdir(), {
+    channel = 'stable',
+    installer = Plugin.installer,
+    type = 'app',
   } = {}) {
     // mods
     const {extract} = require('pacote');
@@ -29,7 +30,7 @@ class Plugin {
     // parse the package name
     const pkg = parsePkgName(plugin, {defaultTag: channel});
     // get the info so we can determine whether this is a lando package or not
-    const {_id, name} = await Plugin.info(pkg.raw);
+    const {_id, name} = await Plugin.info(pkg.raw, {channel});
     // update dest with info
     dest = path.join(dest, name);
 
@@ -48,14 +49,14 @@ class Plugin {
     debug('moved plugin from %o to %o', tmp, dest);
 
     // return instantiated plugin
-    return new Plugin(dest, {type: dest === path.join(Plugin.globalPluginDir, name) ? 'global' : 'app'});
+    return new Plugin(dest, {channel, installer, type});
   }
 
   /**
    *
    * TBD
    */
-  static async info(plugin) {
+  static async info(plugin, {channel = 'stable'} = {}) {
     // mods
     const {manifest} = require('pacote');
 
@@ -64,7 +65,7 @@ class Plugin {
     // basically it should be the higher versioned tag between latest and edge
 
     // parse the plugin name
-    const pkg = parsePkgName(plugin, {defaultTag: Plugin.channel});
+    const pkg = parsePkgName(plugin, {defaultTag: channel});
 
     // try to get info about the package
     try {
@@ -118,12 +119,14 @@ class Plugin {
    * @TODO: scripts shoudl be moved into the engine constructor
    */
   constructor(location, {
-    installer = Plugin.installer,
+    channel = 'stable',
     id = Plugin.id || 'lando',
+    installer = Plugin.installer,
     type = 'app',
   } = {}) {
     // core props
     this.root = location;
+    this.channel = channel;
     this.type = type;
     this.installer = installer;
 

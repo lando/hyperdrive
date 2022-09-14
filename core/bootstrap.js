@@ -47,6 +47,16 @@ class Bootstrapper {
     );
   }
 
+  // @TODO: the point of this is to have a high level way to "fetch" a certain kind of plugin eg global and
+  // have it return a fully armed and operational instantiated plugin eg has the installer
+  async fetchPlugin(plugin, dest = this.config.get('plugin.global-dir')) {
+    return this.Plugin.fetch(plugin, dest, {
+      channel: this.config.get('core.release-channel'),
+      installer: await this.getComponent('core.plugin-installer'),
+      type: 'global',
+    });
+  }
+
   findApp(files, startFrom) {
     return require('../utils/find-app')(files, startFrom);
   }
@@ -75,20 +85,18 @@ class Bootstrapper {
     config.Config = Config;
 
     // set some plugin defaults
-    Plugin.channel = this.config.get('core.release-channel');
-    Plugin.globalPluginDir = this.config.get('plugin.global-dir');
     Plugin.id = 'hyperdrive';
 
     // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
     config[config.id] = {
       bootstrap: this,
       config: this.config,
+      fetchPlugin: this.fetchPlugin,
       getClass: this.getClass,
+      gCls: this.getClass,
       getComponent: this.getComponent,
+      gCpt: this.getComponent,
       id: this.id,
-      fetchPlugin: async(plugin, dest = Plugin.globalPluginDir) => {
-        return Plugin.fetch(plugin, dest, {channel: Plugin.channel});
-      },
       options: this.options,
       plugins: new Config(),
       Bootstrapper,
