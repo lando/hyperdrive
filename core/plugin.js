@@ -19,7 +19,6 @@ class Plugin {
    * fetches a plugin from a registry/git repo
    */
   static async fetch(plugin, dest = os.tmpdir(), {
-    manifest,
     channel = 'stable',
     installer = Plugin.installer,
     type = 'app',
@@ -50,7 +49,7 @@ class Plugin {
     debug('moved plugin from %o to %o', tmp, dest);
 
     // return instantiated plugin
-    return new Plugin(dest, {channel, installer, manifest, type});
+    return new Plugin(dest, {channel, installer, type});
   }
 
   /**
@@ -120,7 +119,6 @@ class Plugin {
    * @TODO: scripts shoudl be moved into the engine constructor
    */
   constructor(location, {
-    manifest,
     channel = 'stable',
     id = Plugin.id || 'lando',
     installer = Plugin.installer,
@@ -130,7 +128,6 @@ class Plugin {
     this.root = location;
     this.channel = channel;
     this.installer = installer;
-    this.manifest = manifest;
     this.type = type;
 
     // throw error if plugin does not seem to exist
@@ -150,7 +147,10 @@ class Plugin {
     // add some computed properties
     // @TODO: this.attached? this.detached?
     this.isInstalled = false;
-    this.isValid = Object.keys(this.config).length > 0 || has(this.pjson, 'lando') || this.pjson.keywords.includes('lando-plugin');
+    this.isValid = false ||
+      Object.keys(this.config).length > 0 ||
+      has(this.pjson, 'lando') ||
+      (this.pjson.keywords && this.pjson.keywords.includes('lando-plugin'));
 
     // if the plugin does not have any dependencies then consider it installed
     // @TODO: what about dev deps?

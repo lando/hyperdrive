@@ -15,7 +15,7 @@ module.exports = async({config}) => {
   const {configCommand, bin} = LandoCLI.config;
 
   // dump the landoconfig file if we have to and rebase our managed config on it
-  if (!core.landofile || !core.landofiles || !plugin.globalDir || !plugin.globalManifest || core.autoSync) {
+  if (!core.landofile || !core.landofiles || !plugin.globalDir || core.autoSync) {
     // run the config get command
     const result = get(LandoCLI.info(configCommand), bin);
 
@@ -33,7 +33,6 @@ module.exports = async({config}) => {
       },
       plugin: {
         'global-dir': globalDir,
-        'global-manifest': path.join(system.cacheDir, 'global-plugins.json'),
       },
     };
 

@@ -42,7 +42,6 @@ class Bootstrapper {
     return this.Plugin.fetch(plugin, dest, {
       channel: this.config.get('core.release-channel'),
       installer: await this.getComponent('core.plugin-installer'),
-      manifest: this.config.get('plugin.global-manifest'),
       type: 'global',
     });
   }

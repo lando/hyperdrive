@@ -47,11 +47,7 @@ class AddCommand extends PluginCommand {
 
             // -> app type: detached by default?
             // attach command?
-            //
-
-            /*
-            attach(installFile, manifest)
-            */
+            // hyperdrive.pluginAdd, pluginRemove?
 
             // -> pass in
             // -> checks for landofile first and modifies?

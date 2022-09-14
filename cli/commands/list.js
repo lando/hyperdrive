@@ -7,9 +7,9 @@ const {sort, filter} = CliUx.ux.table.flags();
 class ListCommand extends BaseCommand {
   static description = 'lists installed plugins for given context';
   static examples = [
-    'hyperdrive config list',
-    'hyperdrive config list --global',
-    'hyperdrive config list -g --json',
+    'hyperdrive list',
+    'hyperdrive list --global',
+    'hyperdrive list -g --json',
   ];
 
   static flags = {
@@ -30,8 +30,7 @@ class ListCommand extends BaseCommand {
     const {flags} = await this.parse(ListCommand);
     // get needed helpers things
     const {hyperdrive, app, context} = this.config;
-
-    // if we have app context and this isn't global then
+    // get the correct plugin loading command
     const plugins = context.app ? app.getPlugins() : hyperdrive.getPlugins();
 
     // filter out invalid and hidden plugins
