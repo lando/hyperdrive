@@ -120,7 +120,7 @@ class Config extends nconf.Provider {
 
     // environment is next in line
     // @TODO: make separator configuration?
-    if (env) {
+    if (options.env) {
       const separator = '_';
       const rootKey = `${env}${separator}`;
       super.env({

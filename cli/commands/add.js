@@ -45,7 +45,22 @@ class AddCommand extends PluginCommand {
               await task.plugin.install();
             }
 
+            // -> app type: detached by default?
+            // attach command?
+            //
+
+            /*
+            attach(installFile, manifest)
+            */
+
+            // -> pass in
+            // -> checks for landofile first and modifies?
+            // -> checks for manifest
+            // -> how do we remove from manifest?
+
             // @TODO: where do we store the plugin manifest location?
+            // @TODO: modify getStripped?
+            // -> Plugin.manifestDump()?
             // @TODO: modimodify the config file as needed?
 
             // @TODO: can we resolve something like ^.0.5.0? YES?

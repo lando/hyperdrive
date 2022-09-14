@@ -29,10 +29,10 @@ class ListCommand extends BaseCommand {
     // get args and flags
     const {flags} = await this.parse(ListCommand);
     // get needed helpers things
-    const {hyperdrive, app} = this.config;
+    const {hyperdrive, app, context} = this.config;
 
     // if we have app context and this isn't global then
-    const plugins = !flags.global && app ? app.plugins.get() : hyperdrive.plugins.get();
+    const plugins = context.app ? app.getPlugins() : hyperdrive.getPlugins();
 
     // filter out invalid and hidden plugins
     const rows = sortBy(Object.keys(plugins)

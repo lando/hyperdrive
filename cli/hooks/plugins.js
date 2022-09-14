@@ -10,16 +10,6 @@ module.exports = async({config}) => {
   const {hyperdrive} = config;
   // get some config we need
   const {plugin} = hyperdrive.config.get();
-  // helper to return plugin information
-  const getPlugins = (dirs = [], type = 'global') => {
-    const Plugin = hyperdrive.Plugin;
-    return dirs
-    .filter(dir => dir.type === type)
-    .map(dir => ({type: dir.type, dirs: hyperdrive.bootstrap.findPlugins(dir.dir, dir.depth)}))
-    .map(dirs => dirs.dirs.map(dir => new Plugin(dir, {type: dirs.type})))
-    .flat(Number.POSITIVE_INFINITY)
-    .map(plugin => plugin.getStripped());
-  };
 
   // do a quick hash comparison to see if we need to regenerate the global manifest file
   // NOTE: is this stupid to do? do we really save time here?
@@ -42,21 +32,31 @@ module.exports = async({config}) => {
 
   // if we dont have a global plugin manifest then create it
   if (!fs.existsSync(plugin.globalManifest) && has(hyperdrive, 'lando.pluginDirs')) {
-    debug('no global plugin manifest at %o looking for plugins in %o', plugin.globalManifest, hyperdrive.lando.pluginDirs);
+    debug('global plugin manifest does not appear to exist at', plugin.globalManifest);
+
+    // get global plugin dirs
+    const globalPluginDirs = get(hyperdrive, 'lando.pluginDirs', []).filter(dir => dir.type === 'global');
+    debug('looking for global plugins in %o', globalPluginDirs);
+
     // look for global plugins
-    const globalPlugins = getPlugins(get(hyperdrive, 'lando.pluginDirs', []), 'global');
+    const globalPlugins = globalPluginDirs
+    .map(dir => hyperdrive.bootstrap.findPlugins(dir.dir, dir.depth))
+    .flat(Number.POSITIVE_INFINITY)
+    .map(dir => ({location: dir, type: 'global'}));
+
     // do the dump
     fs.mkdirSync(path.dirname(plugin.globalManifest), {recursive: true});
     fs.writeFileSync(plugin.globalManifest, JSON.stringify(globalPlugins, null, 2));
+    debug('generated global plugin manifest at %o', plugin.globalManifest);
   }
 
   // get our global plugins
   const globalPlugins = fs.existsSync(plugin.globalManifest) ? require(plugin.globalManifest) : [];
   debug('discovered %o global %o plugins', globalPlugins.length, get(hyperdrive, 'lando.product', 'lando'));
-  hyperdrive.plugins.add('global', {type: 'literal', store: hyperdrive.bootstrap.normalizePlugins(globalPlugins)});
+  hyperdrive._plugins.add('global', {type: 'literal', store: hyperdrive.bootstrap.normalizePlugins(globalPlugins, 'location')});
 
   // then see if we have any core plugins
   const corePlugins = get(hyperdrive, 'lando.plugins', []);
   debug('discovered %o core %o plugins', corePlugins.length, get(hyperdrive, 'lando.product', 'lando'));
-  hyperdrive.plugins.add('core', {type: 'literal', store: hyperdrive.bootstrap.normalizePlugins(corePlugins)});
+  hyperdrive._plugins.add('core', {type: 'literal', store: hyperdrive.bootstrap.normalizePlugins(corePlugins, 'location')});
 };
