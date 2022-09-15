@@ -31,7 +31,7 @@ class ListCommand extends BaseCommand {
     // get needed helpers things
     const {hyperdrive, app, context} = this.config;
     // get the correct plugin loading command
-    const plugins = context.app ? app.getPlugins() : hyperdrive.getPlugins();
+    const plugins = context.app ? await app.getPlugins() : await hyperdrive.getPlugins();
 
     // filter out invalid and hidden plugins
     const rows = sortBy(Object.keys(plugins)

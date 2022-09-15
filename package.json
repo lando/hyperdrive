@@ -97,9 +97,6 @@
         "./cli/hooks/nanoid.js",
         "./cli/hooks/lando.js"
       ],
-      "bootstrap-plugins-pre": [
-        "./cli/hooks/plugins.js"
-      ],
       "bootstrap-app-pre": [
         "./cli/hooks/app.js"
       ],

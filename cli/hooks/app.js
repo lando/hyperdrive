@@ -9,7 +9,7 @@ module.exports = async({config}) => {
 
   // try to discover if we have app context or not
   const landofiles = [`${landofile}.yaml`, `${landofile}.yml`];
-  const landofilePath = hyperdrive.bootstrap.findApp(landofiles, process.cwd());
+  const landofilePath = hyperdrive.findApp(landofiles, process.cwd());
 
   // if we have an file then lets set it in the config for downstream purposes
   if (fs.existsSync(landofilePath)) {

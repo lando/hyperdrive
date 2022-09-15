@@ -15,7 +15,7 @@ module.exports = async({config}) => {
   const {configCommand, bin} = LandoCLI.config;
 
   // dump the landoconfig file if we have to and rebase our managed config on it
-  if (!core.landofile || !core.landofiles || !plugin.globalDir || core.autoSync) {
+  if (!core.landofile || !core.landofiles || !plugin.globalInstallDir || !plugin.globalPluginDirs || core.autoSync) {
     // run the config get command
     const result = get(LandoCLI.info(configCommand), bin);
 
@@ -32,7 +32,10 @@ module.exports = async({config}) => {
         landofiles: get(result, 'app.landofiles', ['base', 'dist', 'recipe', 'upstream', '', 'local', 'user']),
       },
       plugin: {
-        'global-dir': globalDir,
+        globalInstallDir: globalDir,
+        globalPluginDirs: get(result, 'lando.pluginDirs', [{dir: globalDir, depth: 2}])
+        .filter(plugin => plugin.type === 'global')
+        .map(plugin => ({dir: plugin.dir, depth: plugin.depth})),
       },
     };
 
@@ -41,7 +44,7 @@ module.exports = async({config}) => {
   }
 
   // add the lando config
-  if (fs.existsSync(system.landoConfig)) {
-    hyperdrive.lando = require(system.landoConfig)[bin].lando;
-  }
+  if (fs.existsSync(system.landoConfig)) hyperdrive.lando = require(system.landoConfig)[bin].lando;
+  // set the core plugins if we have them
+  hyperdrive.setCorePlugins(get(hyperdrive, 'lando.plugins', []));
 };

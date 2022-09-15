@@ -11,14 +11,14 @@ module.exports = async({config}) => {
 
   // get our global plugins
   const globalPlugins = globalPluginDirs
-  .map(dir => hyperdrive.bootstrap.findPlugins(dir.dir, dir.depth))
+  .map(dir => hyperdrive.findPlugins(dir.dir, dir.depth))
   .flat(Number.POSITIVE_INFINITY)
   .map(dir => ({location: dir, type: 'global'}));
   debug('discovered %o global %o plugins', globalPlugins.length, get(hyperdrive, 'lando.product', 'lando'));
-  hyperdrive._plugins.add('global', {type: 'literal', store: hyperdrive.bootstrap.normalizePlugins(globalPlugins, 'location')});
+  hyperdrive._plugins.add('global', {type: 'literal', store: hyperdrive.normalizePlugins(globalPlugins, 'location')});
 
   // then see if we have any core plugins
   const corePlugins = get(hyperdrive, 'lando.plugins', []);
   debug('discovered %o core %o plugins', corePlugins.length, get(hyperdrive, 'lando.product', 'lando'));
-  hyperdrive._plugins.add('core', {type: 'literal', store: hyperdrive.bootstrap.normalizePlugins(corePlugins, 'location')});
+  hyperdrive._plugins.add('core', {type: 'literal', store: hyperdrive.normalizePlugins(corePlugins, 'location')});
 };
