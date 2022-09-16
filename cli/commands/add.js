@@ -1,12 +1,12 @@
 const {PluginCommand} = require('../lib/plugin-command');
 
-class AddCommand extends PluginCommand {
-  static description = 'installs a plugin';
+class PluginAdd extends PluginCommand {
+  static description = 'adds a plugin';
   static examples = [
-    'hyperdrive add @lando/apache@0.5.0',
-    'hyperdrive add @lando/apache@edge',
+    'hyperdrive add @lando/apache',
+    'hyperdrive add @lando/apache@^0.5.0',
+    'hyperdrive add @lando/apache lando/php git://github.com/lando/drupal#main',
     'hyperdrive add @lando/apache --global',
-    'hyperdrive add @lando/apache @lando/php -g',
   ];
 
   static args = [...PluginCommand.args];
@@ -18,7 +18,7 @@ class AddCommand extends PluginCommand {
     // mods
     const Listr = require('listr');
     // args and flags
-    const {argv, flags} = await this.parse(AddCommand);
+    const {argv, flags} = await this.parse(PluginAdd);
     // get hyperdrive and app objects
     const {hyperdrive, app, context} = this.config;
     // pass this in to the listr context to collect plugin/error information
@@ -28,36 +28,28 @@ class AddCommand extends PluginCommand {
     // @TODO: add --non-interactive
 
     // run the fetch tasks first
-    const fetchs = new Listr([], {concurrent: true, exitOnError: false, renderer: flags.json ? 'silent' : 'default'});
+    const tasks = new Listr([], {concurrent: true, exitOnError: false, renderer: flags.json ? 'silent' : 'default'});
     for (const name of argv) {
-      fetchs.add({
+      tasks.add({
         title: `Fetching ${name}`,
         task: async(ctx, task) => {
           try {
-            // download the plugin
-            task.plugin = context.app ? await app.fetchPlugin(name) : await hyperdrive.fetchPlugin(name);
-            // add the raw name for downstream stuff
-            task.plugin.raw = name;
+            // add the plugin
+            task.plugin = context.app ? await app.addPlugin(name) : await hyperdrive.addPlugin(name);
 
             // if the plugin is not installed then run additional installation command
             if (!task.plugin.isInstalled) {
-              task.title = `Installing ${name} deps`;
-              const installer = 'core.plugin-installer';
-              task.plugin.installer = context.app ? app.getComponent(installer) : await hyperdrive.getComponent(installer);
+              task.title = `Installing ${task.plugin.name} deps`;
               await task.plugin.install();
             }
 
-            // @TODO: modimodify the config file as needed?
-            // @TODO: can we resolve something like ^.0.5.0? YES?
-            // @TODO: we need to resolve the tag and use ^version
-            // @TODO: what about team context?
-
             // update and and return
-            task.title = `Installed ${name}`;
+            task.title = `Installed ${task.plugin.name}@${task.plugin.version}`;
             ctx.status.added++;
             return task.plugin;
 
           // if we have an error then add it to the status object and throw
+          // @TODO: make sure we force remove any errered plugins?
           } catch (error) {
             ctx.status.errors.push(error);
             throw error;
@@ -72,7 +64,7 @@ class AddCommand extends PluginCommand {
 
     // try to fetch the plugins
     try {
-      await fetchs.run({status});
+      await tasks.run({status});
       // json response
       if (flags.json) return status;
 
@@ -97,4 +89,4 @@ class AddCommand extends PluginCommand {
   }
 }
 
-module.exports = AddCommand;
+module.exports = PluginAdd;

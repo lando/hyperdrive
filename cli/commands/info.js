@@ -1,7 +1,7 @@
 const {BaseCommand} = require('../lib/base-command');
 const {Flags} = require('@oclif/core');
 
-class InfoCommand extends BaseCommand {
+class PluginInfo extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
@@ -59,7 +59,7 @@ class InfoCommand extends BaseCommand {
     const {hyperdrive} = this.config;
     const Plugin = hyperdrive.Plugin;
 
-    const {args, flags} = await this.parse(InfoCommand);
+    const {args, flags} = await this.parse(PluginInfo);
     const data = await Plugin.info(args.plugin);
     if (flags.json) return data;
 
@@ -80,4 +80,4 @@ class InfoCommand extends BaseCommand {
   }
 }
 
-module.exports = InfoCommand;
+module.exports = PluginInfo;

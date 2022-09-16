@@ -1,6 +1,6 @@
 const {BaseCommand} = require('../lib/base-command');
 
-class StatusCommand extends BaseCommand {
+class Status extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
@@ -33,10 +33,10 @@ class StatusCommand extends BaseCommand {
   // static
 
   async run() {
-    const {flags} = this.parse(StatusCommand);
+    const {flags} = this.parse(Status);
     const name = flags.name || 'world';
     this.log(`hello ${name} from ./src/commands/hello.js`);
   }
 }
 
-module.exports = StatusCommand;
+module.exports = Status;

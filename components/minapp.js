@@ -5,6 +5,8 @@ const path = require('path');
 const slugify = require('slugify');
 const yaml = require('yaml');
 
+const parsePkgName = require('./../utils/parse-package-name');
+
 const Config = require('./../core/config');
 const Plugin = require('./../core/plugin');
 
@@ -27,10 +29,15 @@ class MinApp {
     'core.plugin-installer',
   ];
 
-  // private props
+  // landofilestuff
   #landofile
   #landofiles
   #landofileExt
+
+  // plugin stuff
+  #corePlugins;
+  #invalidPlugins;
+  #plugins;
 
   /**
    * @TODO: options? channel?
@@ -43,7 +50,6 @@ class MinApp {
     dataDir = MinApp.config.dataDir,
     instance = MinApp.config.instance,
     landofiles = MinApp.config.landofiles,
-    plugins = {},
     product = MinApp.config.product,
   } = {}) {
     // @TODO: throw error if no landofile or doesnt exist
@@ -53,6 +59,7 @@ class MinApp {
     this.name = slugify(mainfile.name, {lower: true, strict: true});
     this.root = path.dirname(landofile);
     Plugin.id = this.name;
+    this.Plugin = Plugin;
 
     // set other props that are name-dependent
     this.cacheDir = path.join(cacheDir, 'apps', this.name);
@@ -64,6 +71,7 @@ class MinApp {
     this.env = `${product}-${this.name}`.toUpperCase().replace(/-/gi, '_');
     this.id = slugify(crypto.createHash('sha1').update(`${landofile}:${this.name}`).digest('base64'));
     this.instance = instance;
+    this.registry = [];
 
     // private props
     this.#landofileExt = landofile.split('.').pop();
@@ -72,7 +80,7 @@ class MinApp {
     this.#landofiles = this.getLandofiles(get(mainfile, 'config.core.landofiles', landofiles));
 
     // created needed dirs
-    for (const dir of [this.cacheDir, this.configDir, this.dataDir, this.logsDir]) {
+    for (const dir of [this.cacheDir, this.configDir, this.dataDir, this.logsDir, this.pluginsDir]) {
       fs.mkdirSync(path.dirname(dir), {recursive: true});
       this.debug('ensured directory %o exists', dir);
     }
@@ -86,19 +94,35 @@ class MinApp {
       sources: Object.fromEntries(this.#landofiles.map(landofile => ([landofile.type, landofile.path]))),
     });
 
-    // separate out the plugins and mix in global ones
-    const appPlugins = this.normalizePlugins(this.appConfig.getUncoded('plugins'));
-
-    this.plugins = new Config({id: this.name});
-    this.plugins.add('app', {type: 'literal', store: appPlugins});
-    this.plugins.add(product, {type: 'literal', store: plugins});
-
     // separate out the config and mix in the global ones
     // @TODO: what other props should we include in here?
     const appStuff = {name: this.name, location: this.root};
     this.config = new Config({id: this.name});
-    this.config.add('app', {type: 'literal', store: {app: appStuff, ...this.appConfig.get('config')}});
+    this.config.add('app', {type: 'literal', store: {app: appStuff, ...this.appConfig.getUncoded('config')}});
     this.config.add(product, {type: 'literal', store: config});
+  }
+
+  // @TODO: the point of this is to have a high level way to "fetch" a certain kind of plugin eg global and
+  // have it return a fully armed and operational instantiated plugin eg has the installer
+  async addPlugin(name, dest = this.pluginsDir) {
+    // attempt to add the plugin
+    const plugin = await this.Plugin.fetch(name, dest, {
+      channel: this.config.get('core.release-channel'),
+      installer: await this.getComponent('core.plugin-installer'),
+      type: 'app',
+    });
+
+    // try to figure out the source to drop into the landofile
+    const request = parsePkgName(name);
+    const source = request.peg ? request.peg : `^${plugin.version}`;
+    // modify the landofile with the updated plugin
+    this.appConfig.save({plugins: {[plugin.name]: source}});
+
+    // reset the plugin cache
+    this.#plugins = undefined;
+    this.#invalidPlugins = undefined;
+    // return the plugin
+    return plugin;
   }
 
   // helper to get a class
@@ -148,32 +172,74 @@ class MinApp {
     .flat(Number.POSITIVE_INFINITY);
   }
 
-  async installPlugin(name, dest = this.pluginsDir) {
-    return Plugin.add(name, dest, await this.getComponent('core.engine'));
+  getPlugin(name) {
+    // strip any additional metadata and return just the plugin name
+    const data = parsePkgName(name);
+    // @TODO: do we want to throw an error if not found?
+    return this.getPlugins()[data.name];
   }
 
-  normalizePlugins(plugins = {}) {
-    const normalizedPlugins = Object.entries(plugins)
-    .map(entry => {
-      const name = entry[0];
-      const data = entry[1];
-      // compute some defaults
-      const location = path.join(this.pluginsDir, name);
-      const defaults = (typeof data === 'object') ? {location, ...data} : {location};
+  // @TODO: we probably will also need dirs for core plugins for lando
+  // @TODO: we probably will also need a section for "team" plugins
+  getPlugins(options = {}) {
+    // if we've already done this then return the result
+    if (this.#plugins) return this.#plugins;
+    // if we get here then we need to do plugin discovery
+    this.debug('running app plugin discovery...');
 
-      // override defaults as needed if we have data set as string
-      if (typeof data === 'string') {
-        if (fs.existsSync(path.join(this.root, data))) defaults.location = path.join(this.root, data);
-        else defaults.version = data;
-      }
+    // before we do the discovery we need to check to see if we have any
+    // local app plugins
+    const localAppPlugins = Object.entries(this.appConfig.getUncoded('plugins'))
+    .filter(plugin => fs.existsSync(path.join(this.root, plugin[1])))
+    .map(plugin => new this.Plugin(path.join(this.root, plugin[1]), {type: 'app', ...options}));
 
-      // at this point we should have an object and we should merge over default values
-      const plugin = new Plugin(defaults.location, {name, type: 'app', ...defaults});
-      return [name, {name, ...defaults, ...plugin.getStripped()}];
-    });
+    // do the discovery
+    const {plugins, invalids} = require('./../utils/get-plugins')(
+      [
+        {store: 'app', plugins: localAppPlugins, dirs: [{dir: this.pluginsDir, depth: 2}]},
+        {store: 'global', dirs: this.config.get('plugin.global-plugin-dirs')},
+        {store: 'core', plugins: this.#corePlugins},
+      ],
+      this.Plugin,
+      {channel: this.config.get('core.release-channel'), ...options},
+    );
 
-    // return objectification
-    return Object.fromEntries(normalizedPlugins);
+    // set things
+    this.#plugins = plugins;
+    this.#invalidPlugins = invalids;
+    // return
+    return this.#plugins;
+  }
+
+  // helper to remove a plugin
+  removePlugin(name) {
+    // map plugin name to object
+    const plugin = this.getPlugin(name);
+
+    // throw error if there is no plugin to remove
+    if (!plugin) throw new Error(`could not find a plugin called ${name}`);
+    // throw error if plugin is a core plugin
+    if (plugin.type !== 'app') throw new Error(`${plugin.name} is a ${plugin.type} plugin and cannot be removed from here`);
+    // throw error if this is a local app plugin
+    if (plugin.location !== path.join(this.pluginsDir, plugin.name)) {
+      throw new Error('cannot remove local app plugins, please remove manually');
+    }
+
+    // if we get here then remove the plugin
+    plugin.remove();
+    // and remove it from the landofile
+    this.appConfig.remove(`plugins.${plugin.name}`);
+
+    // reset cache
+    this.#plugins = undefined;
+    this.#invalidPlugins = undefined;
+    // return the plugin
+    return plugin;
+  }
+
+  // helper to set internal corePlugins prop
+  setCorePlugins(plugins) {
+    this.#corePlugins = plugins;
   }
 }
 

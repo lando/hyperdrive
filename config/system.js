@@ -40,7 +40,9 @@ module.exports = ({options}) => {
       // # @TODO: need to bump this once we release a lando with `lando --hyperdrive`
       required: '>=3.6.5',
     },
-    plugin: {},
+    plugin: {
+      showCore: true,
+    },
     registry: {
       app: {
         app: path.resolve(root, 'components/app'),

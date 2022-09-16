@@ -4,12 +4,12 @@ const {CliUx, Flags} = require('@oclif/core');
 
 const {sort, filter} = CliUx.ux.table.flags();
 
-class ListCommand extends BaseCommand {
-  static description = 'lists installed plugins for given context';
+class PluginList extends BaseCommand {
+  static description = 'lists valid plugins for given context';
   static examples = [
-    'hyperdrive config list',
-    'hyperdrive config list --global',
-    'hyperdrive config list -g --json',
+    'hyperdrive list',
+    'hyperdrive list --global',
+    'hyperdrive list -g --json',
   ];
 
   static flags = {
@@ -27,12 +27,11 @@ class ListCommand extends BaseCommand {
     // modes
     const sortBy = require('lodash/sortBy');
     // get args and flags
-    const {flags} = await this.parse(ListCommand);
+    const {flags} = await this.parse(PluginList);
     // get needed helpers things
-    const {hyperdrive, app} = this.config;
-
-    // if we have app context and this isn't global then
-    const plugins = !flags.global && app ? app.plugins.get() : hyperdrive.plugins.get();
+    const {hyperdrive, app, context} = this.config;
+    // get the correct plugin loading command
+    const plugins = context.app ? app.getPlugins() : hyperdrive.getPlugins();
 
     // filter out invalid and hidden plugins
     const rows = sortBy(Object.keys(plugins)
@@ -56,4 +55,4 @@ class ListCommand extends BaseCommand {
   }
 }
 
-module.exports = ListCommand;
+module.exports = PluginList;

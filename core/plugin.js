@@ -12,15 +12,16 @@ const yaml = require('yaml');
  *
  */
 class Plugin {
-  static channel = 'stable';
-  static globalPluginDir = os.tmpdir();
+  static id = 'lando';
   static installer;
 
   /**
    * fetches a plugin from a registry/git repo
    */
-  static async fetch(plugin, dest = Plugin.globalPluginDir, {
-    channel = Plugin.channel,
+  static async fetch(plugin, dest = os.tmpdir(), {
+    channel = 'stable',
+    installer = Plugin.installer,
+    type = 'app',
   } = {}) {
     // mods
     const {extract} = require('pacote');
@@ -29,7 +30,8 @@ class Plugin {
     // parse the package name
     const pkg = parsePkgName(plugin, {defaultTag: channel});
     // get the info so we can determine whether this is a lando package or not
-    const {_id, name} = await Plugin.info(pkg.raw);
+    const {_id, name} = await Plugin.info(pkg.raw, {channel});
+
     // update dest with info
     dest = path.join(dest, name);
 
@@ -48,14 +50,14 @@ class Plugin {
     debug('moved plugin from %o to %o', tmp, dest);
 
     // return instantiated plugin
-    return new Plugin(dest, {type: dest === path.join(Plugin.globalPluginDir, name) ? 'global' : 'app'});
+    return new Plugin(dest, {channel, installer, type});
   }
 
   /**
    *
    * TBD
    */
-  static async info(plugin) {
+  static async info(plugin, {channel = 'stable'} = {}) {
     // mods
     const {manifest} = require('pacote');
 
@@ -64,7 +66,7 @@ class Plugin {
     // basically it should be the higher versioned tag between latest and edge
 
     // parse the plugin name
-    const pkg = parsePkgName(plugin, {defaultTag: Plugin.channel});
+    const pkg = parsePkgName(plugin, {defaultTag: channel});
 
     // try to get info about the package
     try {
@@ -118,14 +120,16 @@ class Plugin {
    * @TODO: scripts shoudl be moved into the engine constructor
    */
   constructor(location, {
-    installer = Plugin.installer,
+    channel = 'stable',
     id = Plugin.id || 'lando',
+    installer = Plugin.installer,
     type = 'app',
   } = {}) {
     // core props
     this.root = location;
-    this.type = type;
+    this.channel = channel;
     this.installer = installer;
+    this.type = type;
 
     // throw error if plugin does not seem to exist
     if (!fs.existsSync(path.join(this.root, 'package.json'))) throw new Error(`Could not find a plugin in ${this.root}`);
@@ -142,8 +146,12 @@ class Plugin {
     this.version = this.pjson.version;
 
     // add some computed properties
+    // @TODO: this.attached? this.detached?
     this.isInstalled = false;
-    this.isValid = Object.keys(this.config).length > 0 || has(this.pjson, 'lando') || this.pjson.keywords.includes('lando-plugin');
+    this.isValid = false ||
+      Object.keys(this.config).length > 0 ||
+      has(this.pjson, 'lando') ||
+      (this.pjson.keywords && this.pjson.keywords.includes('lando-plugin'));
 
     // if the plugin does not have any dependencies then consider it installed
     // @TODO: what about dev deps?
@@ -180,11 +188,6 @@ class Plugin {
     return {};
   }
 
-  getStripped() {
-    const {channel, config, debug, installDir, pjson, root, updateAvailable, ...stripped} = this;
-    return stripped;
-  }
-
   async info() {
     const {manifest} = require('pacote');
     const query = `${this.name}@${this.version}`;
@@ -211,7 +214,7 @@ class Plugin {
    * Remove a plugin.
    */
   remove() {
-    return fs.rmSync(this.root, {recursive: true});
+    return fs.rmSync(this.root, {recursive: true, force: true});
   }
 }
 

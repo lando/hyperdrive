@@ -1,11 +1,11 @@
 const {BaseCommand} = require('../../lib/base-command');
 const {Flags} = require('@oclif/core');
 
-class ConfigCommandSet extends BaseCommand {
+class ConfigSet extends BaseCommand {
   static description = 'sets configuration';
   static examples = [
     'hyperdrive config set core.telemetry=false',
-    'hyperdrive config set core.telemetry=false updates.notify=false',
+    'hyperdrive config set core.telemetry=false updates.notify=false --global',
     'hyperdrive config set --config defaults.yaml',
   ];
 
@@ -36,7 +36,7 @@ class ConfigCommandSet extends BaseCommand {
     const set = require('lodash/set');
 
     // args and flags
-    const {argv, flags} = await this.parse(ConfigCommandSet);
+    const {argv, flags} = await this.parse(ConfigSet);
 
     // if no argv and no --config then throw error
     if (argv.length === 0 && !flags.config) {
@@ -46,7 +46,7 @@ class ConfigCommandSet extends BaseCommand {
       const {loadHelpClass} = require('@oclif/core');
       const Help = await loadHelpClass(this.config);
       const help = new Help(this.config, this.config.pjson.helpOptions);
-      await help.showHelp(['config']);
+      await help.showHelp(['config:set']);
     }
 
     // get hyperdrive and app objects
@@ -85,4 +85,4 @@ class ConfigCommandSet extends BaseCommand {
   }
 }
 
-module.exports = ConfigCommandSet;
+module.exports = ConfigSet;

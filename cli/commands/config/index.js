@@ -1,7 +1,7 @@
 const {loadHelpClass} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
 
-class ConfigCommand extends BaseCommand {
+class Config extends BaseCommand {
   static description = 'manages configuration';
   static flags = {...BaseCommand.globalFlags};
   static usage = 'config [CMD] [-c <value>] [--debug] [--help] [--json]';
@@ -13,4 +13,4 @@ class ConfigCommand extends BaseCommand {
   }
 }
 
-module.exports = ConfigCommand;
+module.exports = Config;

@@ -1,2 +1,3 @@
 plugins:
   "@pirog/otherthing": pirog/php#main
+  "@pirog/test-plugin": ./plugins/test-plugin

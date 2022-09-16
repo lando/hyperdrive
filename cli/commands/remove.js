@@ -1,52 +1,80 @@
-// const path = require('path');
-
-// const {CliUx} = require('@oclif/core');
 const {PluginCommand} = require('../lib/plugin-command');
 
-class RemoveCommand extends PluginCommand {
-  static description = 'Remove a plugin or dependency from your Lando installation.';
+class PluginRemove extends PluginCommand {
+  static description = 'removes a plugin';
+  static examples = [
+    'hyperdrive remove @lando/apache',
+    'hyperdrive remove @lando/apache@^0.5.0',
+    'hyperdrive remove @lando/php @lando/apache --global',
+  ];
 
-  static usage = 'lando remove @lando/apache';
-
-  static aliases = ['uninstall'];
+  static args = [...PluginCommand.args];
+  static flags = {...PluginCommand.flags};
 
   static strict = false;
 
-  // static args
-  // static plugin
-  // static examples
-  // static parserOptions
-
   async run() {
     // mods
-    // // get from config
-    // const {bootstrap} = this.config;
-    // // get needed classes
-    // const Plugin = bootstrap.getClass('plugin');
-    // // get argv
-    // const {argv} = await this.parse(RemoveCommand);
+    const Listr = require('listr');
+    // args and flags
+    const {argv, flags} = await this.parse(PluginRemove);
+    // get hyperdrive and app objects
+    const {hyperdrive, app, context} = this.config;
+    // pass this in to the listr context to collect plugin/error information
+    const status = {plugins: [], errors: [], removed: 0};
 
-    // @TODO: to remove we need a list of all plugins so we can search by argv and return the root/location
-    // and then use that to remove
+    // run the fetch tasks first
+    const tasks = new Listr([], {concurrent: true, exitOnError: false, renderer: flags.json ? 'silent' : 'default'});
+    for (const name of argv) {
+      tasks.add({
+        title: `Removing ${name}`,
+        task: async(ctx, task) => {
+          try {
+            // remove the plugin
+            task.plugin = context.app ? await app.removePlugin(name) : await hyperdrive.removePlugin(name);
+            // update and and return
+            task.title = `Removed ${task.plugin.name}`;
+            ctx.status.removed++;
+            return task.plugin;
 
-    //   const home = this.config.home;
-    //   const pluginsFolder = `${home}/.lando/plugins`;
-    //   const scripts = path.join(this.config.dataDir, 'scripts');
+          // if we have an error then add it to the status object and throw
+          } catch (error) {
+            ctx.status.errors.push(error);
+            throw error;
 
-    //   // Start the spinner
-    //   CliUx.ux.action.start('Uninstalling...');
+          // add the plugin regardless of the status
+          } finally {
+            ctx.status.plugins.push(task.plugin);
+          }
+        },
+      });
+    }
 
-    //   try {
-    //     await map(argv, function(pluginName) {
-    //       const plugin = new Plugin(pluginName, pluginsFolder, null, 'latest', scripts);
-    //       return plugin.remove();
-    //     });
-    //     CliUx.ux.action.stop('Uninstall successful.');
-    //   } catch (error) {
-    //     CliUx.ux.action.stop('Uninstall failed.');
-    //     this.error(error);
-    //   }
+    // try to fetch the plugins
+    try {
+      await tasks.run({status});
+      // json response
+      if (flags.json) return status;
+
+    // if we have errors then lets print them out
+    } finally {
+      // otherwise
+      this.log();
+      this.log('removed %s of %s plugins with %s errors', status.removed, status.plugins.length, status.errors.length);
+      this.log();
+
+      // handle errors here
+      if (status.errors.length > 0) {
+        // log the full error
+        for (const error of status.errors) this.debug(error);
+        this.error('Some plugins could not be removed correctly.', {
+          suggestions: ['Run command again with --debug flag'],
+          ref: 'https://docs.lando.dev/hyperdrive/cli/config.html#get',
+          exit: 1,
+        });
+      }
+    }
   }
 }
 
-module.exports = RemoveCommand;
+module.exports = PluginRemove;
