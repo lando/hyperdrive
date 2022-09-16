@@ -213,7 +213,7 @@ class Plugin {
    * Remove a plugin.
    */
   remove() {
-    return fs.rmSync(this.root, {recursive: true});
+    return fs.rmSync(this.root, {recursive: true, force: true});
   }
 }
 

@@ -2,7 +2,7 @@ const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
 const {extended} = CliUx.ux.table.flags();
 
-class ConfigCommandGet extends BaseCommand {
+class ConfigGet extends BaseCommand {
   static description = 'gets configuration';
   static examples = [
     'hyperdrive config get',
@@ -38,7 +38,7 @@ class ConfigCommandGet extends BaseCommand {
     const sortBy = require('lodash/sortBy');
 
     // args and flags
-    const {argv, flags} = await this.parse(ConfigCommandGet);
+    const {argv, flags} = await this.parse(ConfigGet);
     // get hyperdrive and app objects
     const {hyperdrive, app} = this.config;
     // get the starting data from the correct context
@@ -98,4 +98,4 @@ class ConfigCommandGet extends BaseCommand {
   }
 }
 
-module.exports = ConfigCommandGet;
+module.exports = ConfigGet;

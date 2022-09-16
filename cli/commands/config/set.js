@@ -1,7 +1,7 @@
 const {BaseCommand} = require('../../lib/base-command');
 const {Flags} = require('@oclif/core');
 
-class ConfigCommandSet extends BaseCommand {
+class ConfigSet extends BaseCommand {
   static description = 'sets configuration';
   static examples = [
     'hyperdrive config set core.telemetry=false',
@@ -36,7 +36,7 @@ class ConfigCommandSet extends BaseCommand {
     const set = require('lodash/set');
 
     // args and flags
-    const {argv, flags} = await this.parse(ConfigCommandSet);
+    const {argv, flags} = await this.parse(ConfigSet);
 
     // if no argv and no --config then throw error
     if (argv.length === 0 && !flags.config) {
@@ -85,4 +85,4 @@ class ConfigCommandSet extends BaseCommand {
   }
 }
 
-module.exports = ConfigCommandSet;
+module.exports = ConfigSet;
