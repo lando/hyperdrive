@@ -98,7 +98,7 @@ class MinApp {
     // @TODO: what other props should we include in here?
     const appStuff = {name: this.name, location: this.root};
     this.config = new Config({id: this.name});
-    this.config.add('app', {type: 'literal', store: {app: appStuff, ...this.appConfig.get('config')}});
+    this.config.add('app', {type: 'literal', store: {app: appStuff, ...this.appConfig.getUncoded('config')}});
     this.config.add(product, {type: 'literal', store: config});
   }
 

@@ -5,7 +5,7 @@ class ConfigSet extends BaseCommand {
   static description = 'sets configuration';
   static examples = [
     'hyperdrive config set core.telemetry=false',
-    'hyperdrive config set core.telemetry=false updates.notify=false',
+    'hyperdrive config set core.telemetry=false updates.notify=false --global',
     'hyperdrive config set --config defaults.yaml',
   ];
 
@@ -46,7 +46,7 @@ class ConfigSet extends BaseCommand {
       const {loadHelpClass} = require('@oclif/core');
       const Help = await loadHelpClass(this.config);
       const help = new Help(this.config, this.config.pjson.helpOptions);
-      await help.showHelp(['config']);
+      await help.showHelp(['config:set']);
     }
 
     // get hyperdrive and app objects

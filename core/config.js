@@ -5,6 +5,7 @@ const nconf = require('nconf');
 const merge = require('lodash/merge');
 const path = require('path');
 const set = require('lodash/set');
+const unset = require('lodash/unset');
 const yaml = require('yaml');
 
 // custom yaml formatter
@@ -262,6 +263,34 @@ class Config extends nconf.Provider {
   // returns the resulting object with camelcase keys
   get(path) {
     return this.decode(this.getUncoded(path));
+  }
+
+  // removes a property and saves the store
+  remove(path, store = this.managed) {
+    // get the store destination
+    const dest = get(this.stores, `${store}.file`);
+    // throw error if no destination
+    if (!dest) throw new Error('something');
+
+    // if this is a yaml file then lets try to reconcile comments and data
+    if (this.#getFormat(dest) === 'yaml') {
+      // load the yaml doc
+      const yamlDoc = yaml.parseDocument(fs.readFileSync(dest, 'utf8'));
+      // remove the prop
+      yamlDoc.deleteIn(path.split('.'));
+
+      // write the result
+      fs.writeFileSync(dest, yamlDoc.toString());
+
+    // otherwise to the usual removal
+    } else {
+      unset(this.stores[store].store, path);
+      this.#writeFile(this.stores[store].store, dest);
+    }
+
+    // finally debug and reset
+    this.debug('removed %o from %o', path, dest);
+    this.reset();
   }
 
   // overriden save method

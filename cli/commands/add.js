@@ -1,7 +1,7 @@
 const {PluginCommand} = require('../lib/plugin-command');
 
 class PluginAdd extends PluginCommand {
-  static description = 'installs a plugin';
+  static description = 'adds a plugin';
   static examples = [
     'hyperdrive add @lando/apache',
     'hyperdrive add @lando/apache@^0.5.0',

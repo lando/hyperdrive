@@ -14,4 +14,4 @@ plugins:
   "@lando/apache": git://github.com/lando/apache.git#main
 config:
   core:
-    release-channel: edge
+    bob: thing
