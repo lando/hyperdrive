@@ -5,7 +5,7 @@ const {CliUx, Flags} = require('@oclif/core');
 const {sort, filter} = CliUx.ux.table.flags();
 
 class PluginList extends BaseCommand {
-  static description = 'lists installed plugins for given context';
+  static description = 'lists valid plugins for given context';
   static examples = [
     'hyperdrive list',
     'hyperdrive list --global',

@@ -53,6 +53,7 @@ class Bootstrapper {
     });
     // reset the plugin cache
     this.#plugins = undefined;
+    this.#invalidPlugins = undefined;
     // return the plugin
     return plugin;
   }
@@ -98,60 +99,27 @@ class Bootstrapper {
   }
 
   // helper to return resolved and instantiated plugins eg this should be the list a given context needs
-  // @TODO: what other options do we need here?
-  // @TODO: do we care if this does not set the installer?
-  // @TODO: should we just allow ANY constructor options to be passed in?
-  getPlugins() {
+  // @TODO: we probably will also need dirs for core plugins for lando
+  // @TODO: we probably will also need a section for "team" plugins
+  getPlugins(options = {}) {
     // if we've already done this then return the result
     if (this.#plugins) return this.#plugins;
-
     // if we get here then we need to do plugin discovery
     this.debug('running %o plugin discovery...', this.id);
 
-    // build some instantiation options
-    const options = {channel: this.config.get('core.release-channel')};
+    // do the discovery
+    const {plugins, invalids} = require('./../utils/get-plugins')(
+      [
+        {store: 'global', dirs: this.config.get('plugin.global-plugin-dirs')},
+        {store: 'core', plugins: this.#corePlugins},
+      ],
+      this.Plugin,
+      {channel: this.config.get('core.release-channel'), ...options, type: 'global'},
+    );
 
-    // add the installer to the opts if that is requested
-    // @NOTE: is installer false the correct default? seems like it should be since
-    // usually we wont need the installer?
-    // if (installer) options.installer = await this.getComponent('core.plugin-installer');
-
-    // start by getting and instantiating global plugins
-    const globalPlugins = this.config.get('plugin.global-plugin-dirs')
-    .map(dir => this.findPlugins(dir.dir, dir.depth))
-    .flat(Number.POSITIVE_INFINITY)
-    .map(dir => new this.Plugin(dir, {...options, type: 'global'}));
-
-    // debug results of discovery
-    this.debug('%o plugin discovery over, results:', this.id);
-    this.debug('found %o global plugin(s)', globalPlugins.length);
-    this.debug('found %o core plugin(s)', this.#corePlugins.length);
-
-    // separate valid and invalid plugins
-    const validGlobalPlugins = globalPlugins.filter(plugin => plugin.isValid);
-    this.#invalidPlugins = globalPlugins.filter(plugin => !plugin.isValid);
-
-    // also debug about invalid plugins if we need to
-    if (this.#invalidPlugins.length > 0) {
-      this.debug('found invalid plugin(s) %o, ignoring', this.#invalidPlugins.map(plugin => plugin.name));
-    }
-
-    // construct the plugin store,
-    // @NOTE: the order here is important
-    const stores = {
-      global: this.normalizePlugins(validGlobalPlugins),
-      core: this.normalizePlugins(this.#corePlugins),
-    };
-
-    // add our new plugins here
-    const plugins = new Config({env: false});
-    // do the priority resolution
-    for (const [store, items] of Object.entries(stores)) {
-      plugins.add(store, {type: 'literal', store: items});
-    }
-
-    // set the internal plugins prop
-    this.#plugins = plugins.getUncoded();
+    // set things
+    this.#plugins = plugins;
+    this.#invalidPlugins = invalids;
     // return
     return this.#plugins;
   }
@@ -170,6 +138,7 @@ class Bootstrapper {
     plugin.remove();
     // reset cache
     this.#plugins = undefined;
+    this.#invalidPlugins = undefined;
     // return the plugin
     return plugin;
   }

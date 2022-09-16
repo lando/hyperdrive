@@ -31,6 +31,7 @@ class Plugin {
     const pkg = parsePkgName(plugin, {defaultTag: channel});
     // get the info so we can determine whether this is a lando package or not
     const {_id, name} = await Plugin.info(pkg.raw, {channel});
+
     // update dest with info
     dest = path.join(dest, name);
 
