@@ -227,8 +227,8 @@ class MinApp {
 
     // if we get here then remove the plugin
     plugin.remove();
-
     // and remove it from the landofile
+    this.appConfig.remove(`plugins.${plugin.name}`);
 
     // reset cache
     this.#plugins = undefined;

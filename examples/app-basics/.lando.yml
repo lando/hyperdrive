@@ -9,7 +9,6 @@ includes:
 # THIS IS A COMMENT 4
 plugins:
   # THIS IS A COMMENT
-  "@pirog/test-plugin": file:plugins/test-plugin
   "@lando/drupal": "^0.6.0"
   "@lando/apache": git://github.com/lando/apache.git#main
 config:
