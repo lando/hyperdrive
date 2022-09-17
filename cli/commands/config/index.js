@@ -4,7 +4,7 @@ const {BaseCommand} = require('../../lib/base-command');
 class Config extends BaseCommand {
   static description = 'manages configuration';
   static flags = {...BaseCommand.globalFlags};
-  static usage = 'config [CMD] [-c <value>] [--debug] [--help] [--json]';
+  static usage = 'config [CMD] [ARGS] [OPTIONS]';
 
   async run() {
     const Help = await loadHelpClass(this.config);

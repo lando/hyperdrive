@@ -5,10 +5,7 @@ class VersionCommand extends BaseCommand {
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Return the version of Hyperdrive. CHECK IF OCLIF HAS DEFAULT?
-
-  Extra documentation goes here
-  `;
+  static description = 'shows version';
   // static hidden - false;
 
   static usage = 'stuff';
