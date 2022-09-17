@@ -58,7 +58,9 @@ class MinApp {
     const mainfile = yaml.parse(fs.readFileSync(landofile, 'utf8'));
     this.name = slugify(mainfile.name, {lower: true, strict: true});
     this.root = path.dirname(landofile);
+    Config.id = this.name;
     Plugin.id = this.name;
+    this.Config = Config;
     this.Plugin = Plugin;
 
     // set other props that are name-dependent

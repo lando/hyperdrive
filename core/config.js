@@ -18,6 +18,8 @@ nconf.formats.yaml = {
  * Creates a new Config instance.
  */
 class Config extends nconf.Provider {
+  static id = 'lando';
+
   static keys(data, {prefix = '', expandArrays = true} = {}) {
     return require('../utils/get-object-keys')(data, {prefix, expandArrays});
   }
@@ -26,7 +28,7 @@ class Config extends nconf.Provider {
     // get parent stuff
     super();
     // get the id first since we need this for downstream things
-    this.id = options.id || options.product || path.basename(process.argv[1]);
+    this.id = options.id || options.product || path.basename(process.argv[1]) || Config.id;
     // properties
     this.managed = options.managed || 'managed';
     // namespaces utils

@@ -1,5 +1,5 @@
+const {CliUx, Flags} = require('@oclif/core');
 const {BaseCommand} = require('../../lib/base-command');
-const {Flags} = require('@oclif/core');
 
 class PluginInfo extends BaseCommand {
   static description = 'shows plugin information';
@@ -19,37 +19,71 @@ class PluginInfo extends BaseCommand {
 
   // @TODO: some sort of full flag?
   static flags = {
+    all: Flags.boolean({
+      description: 'show all information',
+      default: false,
+    }),
     ...BaseCommand.globalFlags,
   };
 
   async run() {
-    const _ = require('lodash');
-    const sortBy = require('lodash/sortBy');
+    /*
+      // MVP plugin.yml
+      name: name,
+      description: info.description,
+      releaseNotesUrl: 'https://URL/to/CHANGELOG.yml',
+      // @todo: should we query for this?
+      // installedVersion: this.isInstalled ? this.version : 'Not Installed',
+      version: info.version,
+      repositoryUrl: info.repository,
+      author: info.author,
+      contributors: info.maintainers,
+      keywords: info.keywords,
+    };
+    */
+    // mods
+    const get = require('lodash/get');
     const prettify = require('../../../utils/prettify');
-    const {CliUx} = require('@oclif/core');
+    // get args and flags
+    const {argv, flags} = await this.parse(PluginInfo);
+    // get needed helpers things
+    const {hyperdrive, app, context} = this.config;
+    // get the correct classes
+    const Plugin = context.app ? app.Plugin : hyperdrive.Plugin;
 
-    // get hyperdrive stuff
-    const {hyperdrive} = this.config;
-    const Plugin = hyperdrive.Plugin;
+    // try to get the info
+    try {
+      const result = await Plugin.info(argv[0]);
 
-    const {args, flags} = await this.parse(PluginInfo);
-    const data = await Plugin.info(args.plugin);
-    if (flags.json) return data;
+      // if this isnt all then truncate the info to the bare essentials
+      const info = flags.all ? result : {
+        name: result.name,
+        description: result.description,
+        version: result.version,
+        author: result.author,
+        contributors: result.maintainers,
+        lando: result.lando,
+        repository: result.repository,
+      };
 
-    // Format data for table display.
-    const tableKeys = hyperdrive.Config.keys(data, {expandArrays: false});
+      // if we have JSON then just return what we have
+      if (flags.json) return info;
 
-    const rows = _(tableKeys)
-    .filter(path => _.includes(tableKeys, path))
-    .map(path => ({key: path, value: _.get(data, path)}))
-    .value();
+      // otherwise construct some rows for tabular display
+      const Config = context.app ? app.Config : hyperdrive.Config;
+      const rows = Config.keys(info, {expandArrays: false}).map(key => ({key, value: get(info, key)}));
+      // construct the column options
+      const columns = {key: {}, value: {get: row => prettify(row.value)}};
 
-    this.log();
-    CliUx.ux.table(sortBy(rows, 'key'), {
-      key: {},
-      value: {get: row => prettify(row.value)},
-    });
-    this.log();
+      // print table
+      this.log();
+      CliUx.ux.table(rows, columns, {extended: flags.extended});
+      this.log();
+
+    // if we cannot get info then throw an error here
+    } catch (error) {
+      this.error(error);
+    }
   }
 }
 

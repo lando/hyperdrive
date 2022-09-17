@@ -36,10 +36,11 @@ class Bootstrapper {
     this.registry = options.registry || {};
 
     // add some helper classes
+    Config.id = this.id;
     Plugin.id = this.id;
-    this.Plugin = Plugin;
     this.Bootstrapper = Bootstrapper;
     this.Config = Config;
+    this.Plugin = Plugin;
   }
 
   // @TODO: the point of this is to have a high level way to "fetch" a certain kind of plugin eg global and
