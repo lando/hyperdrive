@@ -5,10 +5,7 @@ class UpdateCommand extends BaseCommand {
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Update dependencies to their latest versions.
-
-  Would be nice to have Lando check install status and, if updates are available, return a prompt that could trigger hyperdrive update.
-  `;
+  static description = 'updates all plugins';
   // static hidden - false;
 
   static usage = 'stuff';
