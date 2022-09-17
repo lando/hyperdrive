@@ -27,11 +27,11 @@ class PluginAdd extends PluginCommand {
     // @TODO: check plugin-installer status and ask to install if needed
     // @TODO: add --non-interactive
 
-    // run the fetch tasks first
+    // construct listr tasks
     const tasks = new Listr([], {concurrent: true, exitOnError: false, renderer: flags.json ? 'silent' : 'default'});
     for (const name of argv) {
       tasks.add({
-        title: `Fetching ${name}`,
+        title: `Adding ${name}`,
         task: async(ctx, task) => {
           try {
             // add the plugin

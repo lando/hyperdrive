@@ -27,20 +27,6 @@ class PluginInfo extends BaseCommand {
   };
 
   async run() {
-    /*
-      // MVP plugin.yml
-      name: name,
-      description: info.description,
-      releaseNotesUrl: 'https://URL/to/CHANGELOG.yml',
-      // @todo: should we query for this?
-      // installedVersion: this.isInstalled ? this.version : 'Not Installed',
-      version: info.version,
-      repositoryUrl: info.repository,
-      author: info.author,
-      contributors: info.maintainers,
-      keywords: info.keywords,
-    };
-    */
     // mods
     const get = require('lodash/get');
     const prettify = require('../../../utils/prettify');
@@ -53,6 +39,7 @@ class PluginInfo extends BaseCommand {
 
     // try to get the info
     try {
+      // get the info
       const result = await Plugin.info(argv[0]);
 
       // if this isnt all then truncate the info to the bare essentials
