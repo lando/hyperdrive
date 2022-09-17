@@ -19,7 +19,7 @@ nconf.formats.yaml = {
  */
 class Config extends nconf.Provider {
   static keys(data, {prefix = '', expandArrays = true} = {}) {
-    return require('./../utils/get-object-keys')(data, {prefix, expandArrays});
+    return require('../utils/get-object-keys')(data, {prefix, expandArrays});
   }
 
   constructor(options = {}) {

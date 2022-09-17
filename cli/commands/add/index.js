@@ -1,11 +1,12 @@
-const {PluginCommand} = require('../lib/plugin-command');
+const {PluginCommand} = require('../../lib/plugin-command');
 
-class PluginRemove extends PluginCommand {
-  static description = 'removes a plugin';
+class PluginAdd extends PluginCommand {
+  static description = 'adds a plugin';
   static examples = [
-    'hyperdrive remove @lando/apache',
-    'hyperdrive remove @lando/apache@^0.5.0',
-    'hyperdrive remove @lando/php @lando/apache --global',
+    'hyperdrive add @lando/apache',
+    'hyperdrive add @lando/apache@^0.5.0',
+    'hyperdrive add @lando/apache lando/php git://github.com/lando/drupal#main',
+    'hyperdrive add @lando/apache --global',
   ];
 
   static args = [...PluginCommand.args];
@@ -17,27 +18,38 @@ class PluginRemove extends PluginCommand {
     // mods
     const Listr = require('listr');
     // args and flags
-    const {argv, flags} = await this.parse(PluginRemove);
+    const {argv, flags} = await this.parse(PluginAdd);
     // get hyperdrive and app objects
     const {hyperdrive, app, context} = this.config;
     // pass this in to the listr context to collect plugin/error information
-    const status = {plugins: [], errors: [], removed: 0};
+    const status = {plugins: [], errors: [], added: 0};
+
+    // @TODO: check plugin-installer status and ask to install if needed
+    // @TODO: add --non-interactive
 
     // run the fetch tasks first
     const tasks = new Listr([], {concurrent: true, exitOnError: false, renderer: flags.json ? 'silent' : 'default'});
     for (const name of argv) {
       tasks.add({
-        title: `Removing ${name}`,
+        title: `Fetching ${name}`,
         task: async(ctx, task) => {
           try {
-            // remove the plugin
-            task.plugin = context.app ? await app.removePlugin(name) : await hyperdrive.removePlugin(name);
+            // add the plugin
+            task.plugin = context.app ? await app.addPlugin(name) : await hyperdrive.addPlugin(name);
+
+            // if the plugin is not installed then run additional installation command
+            if (!task.plugin.isInstalled) {
+              task.title = `Installing ${task.plugin.name} deps`;
+              await task.plugin.install();
+            }
+
             // update and and return
-            task.title = `Removed ${task.plugin.name}`;
-            ctx.status.removed++;
+            task.title = `Installed ${task.plugin.name}@${task.plugin.version}`;
+            ctx.status.added++;
             return task.plugin;
 
           // if we have an error then add it to the status object and throw
+          // @TODO: make sure we force remove any errered plugins?
           } catch (error) {
             ctx.status.errors.push(error);
             throw error;
@@ -60,14 +72,14 @@ class PluginRemove extends PluginCommand {
     } finally {
       // otherwise
       this.log();
-      this.log('removed %s of %s plugins with %s errors', status.removed, status.plugins.length, status.errors.length);
+      this.log('added %s of %s plugins with %s errors', status.added, status.plugins.length, status.errors.length);
       this.log();
 
       // handle errors here
       if (status.errors.length > 0) {
         // log the full error
         for (const error of status.errors) this.debug(error);
-        this.error('Some plugins could not be removed correctly.', {
+        this.error('Some plugins could not be installed correctly.', {
           suggestions: ['Run command again with --debug flag'],
           ref: 'https://docs.lando.dev/hyperdrive/cli/config.html#get',
           exit: 1,
@@ -77,4 +89,4 @@ class PluginRemove extends PluginCommand {
   }
 }
 
-module.exports = PluginRemove;
+module.exports = PluginAdd;

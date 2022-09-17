@@ -1,8 +1,8 @@
 const findPlugins = require('./find-plugins');
 const normalizePlugins = require('./normalize-plugins');
 
-const Config = require('./../core/config');
-const DefaultPlugin = require('./../core/plugin');
+const Config = require('../core/config');
+const DefaultPlugin = require('../core/plugin');
 
 /*
  * TBD

@@ -2,7 +2,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const which = require('which');
-const getContext = require('./../utils/get-context');
+const getContext = require('../utils/get-context');
 
 module.exports = ({options}) => {
   // get oclicf things we need

@@ -34,7 +34,7 @@ class ConfigGet extends BaseCommand {
   async run() {
     // mods and deps
     const chalk = require('chalk');
-    const prettify = require('./../../../utils/prettify');
+    const prettify = require('../../../utils/prettify');
     const sortBy = require('lodash/sortBy');
 
     // args and flags
