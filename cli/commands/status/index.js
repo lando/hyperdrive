@@ -1,4 +1,4 @@
-const {BaseCommand} = require('../lib/base-command');
+const {BaseCommand} = require('../../lib/base-command');
 
 class Status extends BaseCommand {
   // static _base = 'thing';

@@ -1,5 +1,5 @@
 
-const {BaseCommand} = require('../lib/base-command');
+const {BaseCommand} = require('../../lib/base-command');
 const {CliUx, Flags} = require('@oclif/core');
 
 const {sort, filter} = CliUx.ux.table.flags();

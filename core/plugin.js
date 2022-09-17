@@ -2,10 +2,10 @@ const chalk = require('chalk');
 const debug = require('debug')('static@lando/core:plugin');
 const fs = require('fs-extra');
 const has = require('lodash/has');
-const makeError = require('./../utils/make-error');
+const makeError = require('../utils/make-error');
 const os = require('os');
 const path = require('path');
-const parsePkgName = require('./../utils/parse-package-name');
+const parsePkgName = require('../utils/parse-package-name');
 const yaml = require('yaml');
 
 /**

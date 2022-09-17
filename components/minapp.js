@@ -5,10 +5,10 @@ const path = require('path');
 const slugify = require('slugify');
 const yaml = require('yaml');
 
-const parsePkgName = require('./../utils/parse-package-name');
+const parsePkgName = require('../utils/parse-package-name');
 
-const Config = require('./../core/config');
-const Plugin = require('./../core/plugin');
+const Config = require('../core/config');
+const Plugin = require('../core/plugin');
 
 /**
  * @NOTE: the purpose of the minapp is something we can just new MinApp() without a helper async load/init function
@@ -127,7 +127,7 @@ class MinApp {
 
   // helper to get a class
   getClass(component, {cache = true, defaults} = {}) {
-    return require('./../utils/get-class')(
+    return require('../utils/get-class')(
       component,
       this.config,
       this.registry,
@@ -137,7 +137,7 @@ class MinApp {
 
   // helper to get a component (and config?) from the registry
   async getComponent(component, constructor = {}, opts = {}) {
-    return require('./../utils/get-component')(
+    return require('../utils/get-component')(
       component,
       constructor,
       this.config,
@@ -194,7 +194,7 @@ class MinApp {
     .map(plugin => new this.Plugin(path.join(this.root, plugin[1]), {type: 'app', ...options}));
 
     // do the discovery
-    const {plugins, invalids} = require('./../utils/get-plugins')(
+    const {plugins, invalids} = require('../utils/get-plugins')(
       [
         {store: 'app', plugins: localAppPlugins, dirs: [{dir: this.pluginsDir, depth: 2}]},
         {store: 'global', dirs: this.config.get('plugin.global-plugin-dirs')},

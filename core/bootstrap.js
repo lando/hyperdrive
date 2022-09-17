@@ -4,15 +4,15 @@ const Plugin = require('./plugin');
 
 class Bootstrapper {
   static findApp(files, startFrom) {
-    return require('./../utils/find-app')(files, startFrom);
+    return require('../utils/find-app')(files, startFrom);
   }
 
   static findPlugins(dir, depth = 1) {
-    return require('./../utils/find-plugins')(dir, depth);
+    return require('../utils/find-plugins')(dir, depth);
   }
 
   static normalizePlugins(plugins, by = 'name') {
-    return require('./../utils/normalize-plugins')(plugins, by);
+    return require('../utils/normalize-plugins')(plugins, by);
   }
 
   #corePlugins;
@@ -64,7 +64,7 @@ class Bootstrapper {
 
   // @TODO: does it make sense to also make this an instance method?
   findPlugins(dir, depth = 1) {
-    return require('./../utils/find-plugins')(dir, depth);
+    return require('../utils/find-plugins')(dir, depth);
   }
 
   normalizePlugins(plugins, by = 'name') {
@@ -73,7 +73,7 @@ class Bootstrapper {
 
   // helper to get a class
   getClass(component, {cache = true, defaults} = {}) {
-    return require('./../utils/get-class')(
+    return require('../utils/get-class')(
       component,
       this.config,
       this.registry,
@@ -83,7 +83,7 @@ class Bootstrapper {
 
   // helper to get a component (and config?) from the registry
   async getComponent(component, constructor = {}, opts = {}) {
-    return require('./../utils/get-component')(
+    return require('../utils/get-component')(
       component,
       constructor,
       this.config,
@@ -93,7 +93,7 @@ class Bootstrapper {
 
   getPlugin(name) {
     // strip any additional metadata and return just the plugin name
-    const data = require('./../utils/parse-package-name')(name);
+    const data = require('../utils/parse-package-name')(name);
     // @TODO: do we want to throw an error if not found?
     return this.getPlugins()[data.name];
   }
@@ -108,7 +108,7 @@ class Bootstrapper {
     this.debug('running %o plugin discovery...', this.id);
 
     // do the discovery
-    const {plugins, invalids} = require('./../utils/get-plugins')(
+    const {plugins, invalids} = require('../utils/get-plugins')(
       [
         {store: 'global', dirs: this.config.get('plugin.global-plugin-dirs')},
         {store: 'core', plugins: this.#corePlugins},

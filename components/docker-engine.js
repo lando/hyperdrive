@@ -1,9 +1,9 @@
 const fs = require('fs-extra');
 const path = require('path');
 const merge = require('lodash/merge');
-const makeError = require('./../utils/make-error');
-const makeSuccess = require('./../utils/make-success');
-const mergePromise = require('./../utils/merge-promise');
+const makeError = require('../utils/make-error');
+const makeSuccess = require('../utils/make-success');
+const mergePromise = require('../utils/merge-promise');
 const slugify = require('slugify');
 const stringArgv = require('string-argv').default;
 

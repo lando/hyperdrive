@@ -1,13 +1,13 @@
-const {BaseCommand} = require('../lib/base-command');
+const {BaseCommand} = require('../../lib/base-command');
 
-class VersionCommand extends BaseCommand {
+class UpdateCommand extends BaseCommand {
   // static _base = 'thing';
   // static id = 'thing';
   // static title = 'title';
 
-  static description = `Return the version of Hyperdrive. CHECK IF OCLIF HAS DEFAULT?
+  static description = `Update dependencies to their latest versions.
 
-  Extra documentation goes here
+  Would be nice to have Lando check install status and, if updates are available, return a prompt that could trigger hyperdrive update.
   `;
   // static hidden - false;
 
@@ -19,7 +19,7 @@ class VersionCommand extends BaseCommand {
 
   // static strict = false;
   // static parse = true;
-  static flags = {}
+  static flags = {};
 
   // static args
   // static plugin
@@ -28,10 +28,10 @@ class VersionCommand extends BaseCommand {
   // static
 
   async run() {
-    const {flags} = this.parse(VersionCommand);
+    const {flags} = this.parse(UpdateCommand);
     const name = flags.name || 'world';
     this.log(`hello ${name} from ./src/commands/hello.js`);
   }
 }
 
-module.exports = VersionCommand;
+module.exports = UpdateCommand;

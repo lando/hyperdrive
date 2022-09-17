@@ -2,8 +2,8 @@ const debug = require('debug')('hyperdrive:@lando/hyperdrive:hooks:init');
 const fs = require('fs');
 const path = require('path');
 
-const {BaseCommand} = require('./../lib/base-command');
-const hookHandler = require('./../../utils/hook-handler');
+const {BaseCommand} = require('../lib/base-command');
+const hookHandler = require('../../utils/hook-handler');
 const {Parser} = require('@oclif/core');
 
 module.exports = async({id, argv, config}) => {
