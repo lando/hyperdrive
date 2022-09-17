@@ -11,6 +11,10 @@ plugins:
   # THIS IS A COMMENT
   "@lando/drupal": "^0.6.0"
   "@lando/apache": git://github.com/lando/apache.git#main
+  "@lando/phpmyadmin": "0.6.0"
+  "@lando/php": github:lando/php#main
+  "@pirog/test-plugin": file:plugins/test-plugin
+
 config:
   core:
     bob: thing

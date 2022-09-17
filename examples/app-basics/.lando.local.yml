@@ -2,4 +2,4 @@ env-file:
   - environment/local.env
 thing-guy: 'stuff'
 plugins:
-  "@lando/php": pirog/php#main
+  "@lando/php": lando/php#main
