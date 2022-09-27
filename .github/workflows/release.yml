@@ -133,11 +133,12 @@ jobs:
           chmod +x releases/*
           ls -lsa releases
       - name: Make Compressed Versions
-        uses: bash
+        shell: bash
         run: |
-          foreach filename ( releases/* )
-            tar -czvf "releases/$filename.tar.gz" "releases/$filename"
-          end
+          for filename in $( ls releases/* )
+          do
+            tar -czvf "$filename.tar.gz" "releases/$filename"
+          done
           ls -lsa releases
       - name: Configure S3 Credentials
         uses: aws-actions/configure-aws-credentials@v1
