@@ -57,12 +57,14 @@ jobs:
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
             result: hyperdrive-win-x64-${{ github.ref_name }}.exe
+            compressed: hyperdrive-win-x64-${{ github.ref_name }}.tar.gz
           - os: windows-2022
             key: hyperdrive-node16-win-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
             result: hyperdrive-win-arm64-${{ github.ref_name }}.exe
+            compressed: hyperdrive-win-arm64-${{ github.ref_name }}.tar.gz
           - os: macos-11
             key: hyperdrive-node16-macos-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
@@ -74,6 +76,7 @@ jobs:
             apple-notary-password: APPLE_NOTARY_PASSWORD
             options: --options runtime --entitlements entitlements.xml
             result: hyperdrive-macos-x64-${{ github.ref_name }}
+            compressed: hyperdrive-macos-x64-${{ github.ref_name }}.tar.gz
           - os: macos-11
             key: hyperdrive-node16-macos-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
@@ -85,14 +88,17 @@ jobs:
             apple-notary-password: APPLE_NOTARY_PASSWORD
             options: --options runtime --entitlements entitlements.xml
             result: hyperdrive-macos-arm64-${{ github.ref_name }}
+            compressed: hyperdrive-macos-arm64-${{ github.ref_name }}.tar.gz
           - os: ubuntu-20.04
             key: hyperdrive-node16-linux-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             result: hyperdrive-linux-x64-${{ github.ref_name }}
+            compressed: hyperdrive-linux-x64-${{ github.ref_name }}.tar.gz
           - os: ubuntu-20.04
             key: hyperdrive-node16-linux-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             result: hyperdrive-linux-arm64-${{ github.ref_name }}
+            compressed: hyperdrive-linux-arm64-${{ github.ref_name }}.tar.gz
 
     steps:
       - name: Checkout code
@@ -126,6 +132,13 @@ jobs:
           fi
           chmod +x releases/*
           ls -lsa releases
+      - name: Make Compressed Versions
+        uses: bash
+        run: |
+          foreach filename ( releases/* )
+            tar -czvf "releases/$filename.tar.gz" "releases/$filename"
+          end
+          ls -lsa releases
       - name: Configure S3 Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -141,4 +154,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: releases/${{ matrix.result }}
+            releases/${{ matrix.compressed }}
           fail_on_unmatched_files: true
