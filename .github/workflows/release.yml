@@ -154,6 +154,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: releases/${{ matrix.result }}
+          files: |
+            releases/${{ matrix.result }}
             releases/${{ matrix.compressed }}
           fail_on_unmatched_files: true
