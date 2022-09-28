@@ -137,7 +137,7 @@ jobs:
         run: |
           for filename in $( ls releases/* )
           do
-            tar -czvf "$filename.tar.gz" "releases/$filename"
+            tar -czvf "$filename.tar.gz" "$filename"
           done
           ls -lsa releases
       - name: Configure S3 Credentials
