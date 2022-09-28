@@ -5,6 +5,7 @@ on:
     types:
       - published
       - edited
+  pull_request:
 
 jobs:
   package:
