@@ -1,6 +1,7 @@
 #!/bin/sh
 SCRIPT_COMMIT_SHA="SET_THIS_IN_GH_ACTIONS"
 
+# @todo: consolidate the version/tag handling
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--tag|--tag=*|-t)
@@ -120,11 +121,13 @@ pre_flight_requirements() {
 }
 
 install_hyperdrive() {
+  # @todo: identify our main tags (stable/latest, edge)
   tag="stable"
 
   # Get version/tag
   SPECIFIED="stable"
 
+  # @todo: for version detection can assume a numeric value should have a `v` prefix
   if [[ "${VERSION:0:1}" != "v" ]] && [[ ! -z "$VERSION" ]] ; then
     VERSION="v${VERSION}"
     printf $VERSION
@@ -137,7 +140,12 @@ install_hyperdrive() {
   if [ ! -z "$TAG" ]; then
     SPECIFIED=$TAG
   fi
+
+  # @todo: if we have a version (not tag), pull from GitHub releases.
   curl --create-dirs -O --output-dir /usr/local/bin "https://files.lando.dev/hyperdrive/hyperdrive-$OS-$ARCH--$SPECIFIED"
+
+  # @todo: add error handling on non-2xx status code print some error message (bash conditional statement)
+
   printf "hyperdrive-$OS-$ARCH--$SPECIFIED"
   # mv "/usr/local/bin/hyperdrive-$OS-$ARCH--$SPECIFIED" /usr/local/bin/hyperdrive
 }
