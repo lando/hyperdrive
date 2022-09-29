@@ -132,14 +132,6 @@ jobs:
           fi
           chmod +x releases/*
           ls -lsa releases
-      - name: Make Compressed Versions
-        shell: bash
-        run: |
-          for filename in $( ls releases/* )
-          do
-            tar -czvf "$filename.tar.gz" "$filename"
-          done
-          ls -lsa releases
       - name: Configure S3 Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -149,6 +141,11 @@ jobs:
       - name: Upload releases to S3
         shell: bash
         run: aws s3 sync releases s3://files.lando.dev/hyperdrive --acl public-read
+      - name: Make Compressed Versions
+        shell: bash
+        run: |
+          tar -czvf ${{ matrix.compressed }} ${{ matrix.result }}
+          ls -lsa releases
       - name: Upload releases to GitHub Releases
         uses: softprops/action-gh-release@v1
         env:
