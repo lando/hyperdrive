@@ -144,7 +144,7 @@ jobs:
       - name: Make Compressed Versions
         shell: bash
         run: |
-          tar -czvf ${{ matrix.compressed }} ${{ matrix.result }}
+          tar -czvf releases/${{ matrix.compressed }} releases/${{ matrix.result }}
           ls -lsa releases
       - name: Upload releases to GitHub Releases
         uses: softprops/action-gh-release@v1

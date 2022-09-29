@@ -1,7 +1,7 @@
 {
   "name": "@lando/hyperdrive",
   "description": "A library and cli for Lando dependency and package management.",
-  "version": "0.7.0-alpha.9",
+  "version": "0.7.0-alpha.10",
   "author": "Mike Pirog @pirog",
   "license": "GPL-3.0",
   "repository": "lando/hyperdrive",
