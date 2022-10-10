@@ -202,7 +202,7 @@ jobs:
           # Darwin AMD: https://github.com/justintime50/myrepo/releases/download/v1.2.0/myrepo-1.2.0-darwin-amd64.tar.gz
           # Linux ARM: https://github.com/justintime50/myrepo/releases/download/v1.2.0/myrepo-1.2.0-linux-arm64.tar.gz
           # Optional.
-          target_darwin_amd64: https://github.com/lando/hyperdrive/releases/download/${{ github.ref_name }}/hyperdrive-macos-amd64-${{ github.ref_name }}.tar.gz
+          target_darwin_amd64: https://github.com/lando/hyperdrive/releases/download/${{ github.ref_name }}/hyperdrive-macos-x64-${{ github.ref_name }}.tar.gz
           target_darwin_arm64: https://github.com/lando/hyperdrive/releases/download/${{ github.ref_name }}/hyperdrive-macos-arm64-${{ github.ref_name }}.tar.gz
           target_linux_amd64: false
           target_linux_arm64: false
