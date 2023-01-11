@@ -140,7 +140,7 @@ jobs:
           aws-region: us-east-1
       - name: Upload releases to S3
         shell: bash
-        run: aws s3 sync releases s3://files.lando.dev/hyperdrive --acl public-read
+        run: aws s3 sync releases s3://files.lando.dev/hyperdrive
       - name: Make Compressed Versions
         shell: bash
         run: |
