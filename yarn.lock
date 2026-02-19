@@ -335,10 +335,10 @@
     log-symbols "^4.0.0"
     semver "^7.3.2"
 
-"@lando/argv@^1.0.6", "@lando/argv@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@lando/argv/-/argv-1.1.0.tgz#96ba39e6a0498995c7abbbaff1794d71f827cd78"
-  integrity sha512-nBM6Rk1XorQdxad0CJTxDaNKrj+ITUg3u9rZYrOiF1KI5oImBJRBKjwf1EhnktJ63HmLGTq+sZQsR8veJmf1GQ==
+"@lando/argv@^1.0.6", "@lando/argv@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@lando/argv/-/argv-1.2.0.tgz#ed42354664c02d75aed9df7e9e779f1ad50fbc1c"
+  integrity sha512-Usr0FuXfzDezQG7ZSuaaMNoF9v/YsavgnclQqTBzV48oku/vi9fiKttlaSoXOQ1UPrC1KPC/ean1ZrDnZqcosw==
 
 "@lando/leia@^0.6.4":
   version "0.6.4"
