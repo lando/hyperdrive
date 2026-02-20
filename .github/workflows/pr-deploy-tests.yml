@@ -21,11 +21,11 @@ jobs:
           - win
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: yarn
@@ -36,7 +36,7 @@ jobs:
           git describe --tags --abbrev=1 && yarn bump "$(git describe --tags --abbrev=1 | cut -c2-)" package.json || echo "No tags yet. Skipping..."
           node ./bin/hyperdrive
       - name: Package into node binary
-        uses: lando/pkg-action@v2
+        uses: lando/pkg-action@v6
         with:
           entrypoint: bin/hyperdrive
           arch: ${{ matrix.arch }}
@@ -97,14 +97,14 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Download ${{ matrix.key }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v7
         with:
           name: ${{ matrix.key }}
           path: hyperdrive
       - name: Sign and Notarize
-        uses: lando/code-sign-action@v2
+        uses: lando/code-sign-action@v3
         id: code-sign-action
         with:
           file: ${{ matrix.file }}
@@ -121,7 +121,7 @@ jobs:
           chmod +x ${{ steps.code-sign-action.outputs.file }}
           mv ${{ steps.code-sign-action.outputs.file }} ${{ matrix.result }}
       - name: Upload snapshot release ${{ matrix.result }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.result }}
           path: ${{ matrix.result }}
