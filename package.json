@@ -12,7 +12,7 @@
     "oclif"
   ],
   "engines": {
-    "node": ">=16.15.0"
+    "node": ">=20.0.0"
   },
   "main": "lib/hyperdrive.js",
   "bin": {
@@ -76,7 +76,7 @@
   },
   "babel": {},
   "scripts": {
-    "build": "shx rm -rf dist && pkg -c package.json -t node16 bin/hyperdrive",
+    "build": "shx rm -rf dist && pkg -c package.json -t node20 bin/hyperdrive",
     "lint": "eslint bin/hyperdrive . --ext .js --config .eslintrc",
     "test": "mocha --forbid-only \"test/**/*.test.js\"",
     "release": "bump --tag --all --push"
