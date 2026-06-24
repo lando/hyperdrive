@@ -40,7 +40,7 @@ jobs:
         with:
           entrypoint: bin/hyperdrive
           arch: ${{ matrix.arch }}
-          node-version: node${{ matrix.node-version }}
+          node-version: ${{ matrix.node-version }}
           os: ${{ matrix.os }}
 
   sign-n-deploy:
