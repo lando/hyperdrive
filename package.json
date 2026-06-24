@@ -62,7 +62,7 @@
   "devDependencies": {
     "@babel/core": "^7.15.5",
     "@babel/eslint-parser": "^7.15.7",
-    "@lando/leia": "^0.6.4",
+    "@lando/leia": "^0.6.7",
     "@oclif/test": "^2",
     "chai": "^4",
     "eslint": "^7.32.0",
