@@ -14,7 +14,7 @@ jobs:
           - x64
           - arm64
         node-version:
-          - '16'
+          - '20'
         os:
           - linux
           - macos
@@ -25,7 +25,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: yarn
@@ -36,11 +36,11 @@ jobs:
           git describe --tags --abbrev=1 && yarn bump "$(git describe --tags --abbrev=1 | cut -c2-)" package.json || echo "No tags yet. Skipping..."
           node ./bin/hyperdrive
       - name: Package into node binary
-        uses: lando/pkg-action@v2
+        uses: lando/pkg-action@v6
         with:
           entrypoint: bin/hyperdrive
           arch: ${{ matrix.arch }}
-          node-version: node${{ matrix.node-version }}
+          node-version: ${{ matrix.node-version }}
           os: ${{ matrix.os }}
 
   sign-n-deploy:
@@ -53,19 +53,19 @@ jobs:
       matrix:
         include:
           - os: windows-2022
-            key: hyperdrive-node16-win-x64-${{ github.sha }}
+            key: hyperdrive-node20-win-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
             result: hyperdrive-win-x64-snapshot-${{ github.sha }}.exe
           - os: windows-2022
-            key: hyperdrive-node16-win-arm64-${{ github.sha }}
+            key: hyperdrive-node20-win-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive.exe
             certificate-data: WINDOZE_CERT_DATA
             certificate-password: WINDOZE_CERT_PASSWORD
             result: hyperdrive-win-arm64-snapshot-${{ github.sha }}.exe
           - os: macos-12
-            key: hyperdrive-node16-macos-x64-${{ github.sha }}
+            key: hyperdrive-node20-macos-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             certificate-data: APPLE_CERT_DATA
             certificate-password: APPLE_CERT_PASSWORD
@@ -76,7 +76,7 @@ jobs:
             options: --options runtime --entitlements entitlements.xml
             result: hyperdrive-macos-x64-snapshot-${{ github.sha }}
           - os: macos-12
-            key: hyperdrive-node16-macos-arm64-${{ github.sha }}
+            key: hyperdrive-node20-macos-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             certificate-data: APPLE_CERT_DATA
             certificate-password: APPLE_CERT_PASSWORD
@@ -87,11 +87,11 @@ jobs:
             options: --options runtime --entitlements entitlements.xml
             result: hyperdrive-macos-arm64-snapshot-${{ github.sha }}
           - os: ubuntu-22.04
-            key: hyperdrive-node16-linux-x64-${{ github.sha }}
+            key: hyperdrive-node20-linux-x64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             result: hyperdrive-linux-x64-snapshot-${{ github.sha }}
           - os: ubuntu-22.04
-            key: hyperdrive-node16-linux-arm64-${{ github.sha }}
+            key: hyperdrive-node20-linux-arm64-${{ github.sha }}
             file: hyperdrive/hyperdrive
             result: hyperdrive-linux-arm64-snapshot-${{ github.sha }}
 
@@ -99,7 +99,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Download ${{ matrix.key }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.key }}
           path: hyperdrive
@@ -121,7 +121,7 @@ jobs:
           chmod +x ${{ steps.code-sign-action.outputs.file }}
           mv ${{ steps.code-sign-action.outputs.file }} ${{ matrix.result }}
       - name: Upload snapshot release ${{ matrix.result }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.result }}
           path: ${{ matrix.result }}
