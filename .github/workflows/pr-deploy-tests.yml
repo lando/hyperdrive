@@ -40,7 +40,7 @@ jobs:
         with:
           entrypoint: bin/hyperdrive
           arch: ${{ matrix.arch }}
-          node-version: node${{ matrix.node-version }}
+          node-version: ${{ matrix.node-version }}
           os: ${{ matrix.os }}
 
   sign-n-deploy:
@@ -99,7 +99,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Download ${{ matrix.key }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.key }}
           path: hyperdrive
@@ -121,7 +121,7 @@ jobs:
           chmod +x ${{ steps.code-sign-action.outputs.file }}
           mv ${{ steps.code-sign-action.outputs.file }} ${{ matrix.result }}
       - name: Upload snapshot release ${{ matrix.result }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.result }}
           path: ${{ matrix.result }}
